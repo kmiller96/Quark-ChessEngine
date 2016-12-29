@@ -1,0 +1,188 @@
+====================
+| PROJECT TEMPLATE |
+====================
+Welcome! This is a chess engine built completely in python as an exercise in
+building fully fledged programs. I'll try my very best to make my work clear,
+concise and bug-free but bare with me: I'm a complete amateur at this stuff.
+
+PLEASE NOTE: Lots of this text file is written in present tense for things that
+currently don't exist. This is for me to read and follow, so treat these sections
+as an insight into what is planned.
+
+"You can use an eraser on the drafting table or a sledgehammer on the
+construction site" - Frank Lloyd Wright
+"Beauty of style and harmony and grace and good rhythm depends on simplicity."
+- Plato
+
+
+TABLE OF CONTENTS
+===================
+1. Scope
+    i.   Introduction
+    ii.  Front-end
+    iii. Back-end
+    iv.  Schedule
+    v.   Relationship to other projects
+2. Features: Now and Future
+3. Abstraction: How does it work?
+4. Testing/Requirements
+5. Performance
+
+
+SCOPE
+=========
+The engine has two main parts: the front-end and the back-end. The front-end
+handles all of the GUI and user inputs. It is what is 'visible' to the users.
+The back-end is the heavy lifting of the program. It handles all of the search-
+and-evaluation of the board along with storing all of the information. We will
+look into these two sections separately.
+
+FRONT-END
+----------
+The most obvious part of the front end is the GUI. It is a simple ASCII graphic
+that shows where the pieces are on a chess board. If desired, the engine can be
+read in a chess notation style instead.
+
+The front end also handles user inputs. The user specifies his/her moves using
+algebraic style chess notation into the terminal. It handles everything you
+would expect in a chess engine: castling, en passant, pawn push, checks, pins,
+illegal moves and much more.
+
+BACK-END
+---------
+The back end is currently under heavy development and is hard to discuss in any
+significant detail. Please come back later.
+
+SCHEDULE
+---------
+
++==========+=======================+================+============+============+
+| ######## |        Tasks to       | Estimated Time | Time Spent | Completed? |
+| ######## |        Complete       |    Required    |   so far   |            |
++==========+=======================+================+============+============+
+|          | - Framework for       | - 1 week (so   | - unknown  | - Yes!     |
+|          | chess board and       | until week 2)  |            |            |
+|          | backline pieces.      |                |            |            |
+|          |                       |                |            |            |
+|          | - Basic movement      | - 4 hours for  | - 5hours   | - Basic    |
+|          | for each of the       | the very basic |            | movement   |
+|          | backline pieces.      | and 4 hours for|            |            |
+|          |                       | the more adv.  |            |            |
+|          |                       |                |            |            |
+|          | - Start on front-end  | - 10 hours for | - 0 hours  |            |
+|  Week 1  | of the engine.        | complete model |            |            |
+|          | Specifically, create  | but 4 hours to |            |            |
+|          | a model in which I    | get a working  |            |            |
+|          | can run games in for  | debugger going |            |            |
+|          | testing purposes.     |                |            |            |
+|          |                       |                |            |            |
+|          | - Add more movement   | - 10 hours     | - 0 hours  |            |
+|          | rules, such as checks,|                |            |            |
+|          | pins, castling.       |                |            |            |
+|          |                       |                |            |            |
+|          | - Add pawn class with | - 10 hours     | - 0 hours  |            |
+|          | the more advanced mo- |                |            |            |
+|          | vement rules.         |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
++----------+-----------------------+----------------+------------+------------+
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+| Week 2   |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
++----------+-----------------------+----------------+------------+------------+
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+| Week 3   |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
++----------+-----------------------+----------------+------------+------------+
+|          |                       |                |            |            |
+|          |                       |                |            |            |
+| Week 4   |                       |                |            |            |
+|          |                       |                |            |            |
+|          |                       |                |            |            |
++----------+-----------------------+----------------+------------+------------+
+
+DEPENDANCY
+-----------
+On a most basic level there is little dependancy on other modules. The testing
+suite only relies on importing default modules while the core library currently
+has no dependancy.
+
+
+FEATURES
+==========
+Here are the current features along with the future features I wish to
+implement in the engine.
+
+CURRENT FEATURES
+    - A semi-working chess board.
+    - Framework on backline pieces
+
+FUTURE FEATURES (CURRENT WORKS IN PROGRESS)
+    - A working user interface.
+    - Castling rules.
+    - Check and checkmate rules.
+
+POSSIBLE FEATURES
+    - A real GUI using packages like pygame.
+
+ABSTRACTION
+===============
+The chess program works like so:
+
+Start the program;
+Set up the chess board;
+Repeat until win/loss/quit:
+    Prompt the user for move;
+    Process user input and alter the board state;
+    Search for possible moves and evaluate positions;
+    Pick the best move after X amount of time;
+    Alter the board, show new state to the user;
+    Loop to first indentented line.
+
+Other things to include here would be ideas about classes and their methods. In
+effect you are creating a mind-map of how the program works together.
+
+
+TESTING/REQUIREMENTS
+======================
+This is where checklist-like requirements should be noted and fulfilled. These
+can be anywhere from f(x)-> y unit tests up to more complex integrated tests or
+anything between. Again, an example of this would be like follows:
+
+BANK ACCOUNT CLASS
+    [ ] Withdrawing more then the account holds exits the method and prints a
+    message.
+    [ ] Depositing amounts into the bank account always returns the correct
+    value.
+    [ ] The user should be able to print their bank balance.
+    [ ] Loans should be automatically approved if the user has a sufficiently
+    high credit score.
+
+BANKER CLASS
+    [ ] Set up 4 new bank accounts and randomise inputs to see how the class
+    handles the result.
+
+
+PERFORMANCE
+============
+Other than bug testing there should also be performance testing to see where the
+software chokes. This section is probably more optional since most programs
+created wont be worrying about speed. Anyway, here is an example:
+
+- Compounding interest 1000 times:
+    - Via old method  ->  2.113s
+    - Via new method  ->  1.566s
+    - Using lists     ->  2.778s
+    - Using tuples    ->  2.619s

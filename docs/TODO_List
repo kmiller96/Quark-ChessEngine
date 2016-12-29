@@ -1,0 +1,16 @@
+TO DO LIST
+============
+Here is a centralised to do list that I can add to as I see/think of things.
+Note that this file isn't for ideas or features but instead for more real,
+pressing problems.
+
+- Fix the BasePiece isvalidmove method. Currently it is super hackish and goes
+against Python Koans. I would like it if all of the chess pieces inherited from
+it without any overwritting of the base class. Perhaps make a public "call" that
+decides what private call to use?
+
+- Clean up the isvalidmove methods that overwrite the BasePiece class to make
+them cleaner, assuming the previous point is abandoned.
+
+- Clean up RookPiece in piece_tests.py so that it follows the same style as the
+other piece's unittests.
