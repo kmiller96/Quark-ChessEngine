@@ -22,6 +22,11 @@
 # base piece class. Added a method to call the postion of the piece, such it is
 # a private attribute. Added a method to move the pieces. Added special methods
 # to handle if the move is valid in the rook and king classes.
+#    28/12/16: Fixed RookPiece class's identification of the current rank.
+#    29/12/16: Fixed QueenPiece class's isvalidmove method, which was allowing
+# certain moves that were illegal. Added PawnPiece class. Did some refactoring
+# on pieces to remove repeat code. Added special PawnPiece move method to handle
+# pawn pushing.
 
 # NOTES:
 # The board should have its internal structure (i.e. the locations) completely
@@ -140,16 +145,26 @@ class ChessBoard:
 class BasePiece:
     """The class all chess pieces inherit from."""
 
-    def __init__(self, startpositionindex):
+    def __init__(self, startpositionindex, validmoves, multiplemoves=True):
+        # Sanity checks.
+        msg = "'multiplemoves' parameter must be true or false."
+        assert isinstance(multiplemoves, bool), msg
+
+        # Assignment of attributes.
         self._postion = startpositionindex
-        self._validmovelist = (1,)
+        self._validmoves = validmoves
+        self._movecanbemultiple = multiplemoves  # HACK: Used in isvalidmove method.
         return None
+
+    def distanceto(self, moveto):
+        """Find the difference between the next move and current position."""
+        return moveto - self._postion
 
     @staticmethod
     def isvalidindex(i):
         """Makes sure index specified is within 0 to 63."""
         try:
-            assert isinstance(int, i)
+            assert isinstance(i, int)
         except AssertionError:
             raise TypeError('The value passed must be an integer.')
         finally:
@@ -157,11 +172,18 @@ class BasePiece:
 
     def isvalidmove(self, movetopos):
         """Checks that the move specified is valid."""
-        movediff = abs(movetopos - self._postion)
-        if any([movediff % x == 0 for x in self._validmovelist]):
-            return True
-        else:
-            return False
+        # HACK: Using movecanbemultiple attribute. See method for useage.
+        movediff = abs(self.distanceto(movetopos))
+        if self._movecanbemultiple:
+            if any([movediff % x == 0 for x in self._validmoves]):
+                return True
+            else:
+                return False
+        elif not self._movecanbemultiple:
+            if movediff in self._validmoves:
+                return True
+            else:
+                return False
 
     def postion(self):
         """Returns the position of the piece. Used for encapsulation purposes."""
@@ -182,7 +204,7 @@ class RookPiece(BasePiece):
     """The class for the Rook."""
 
     def __init__(self, startpositionindex):
-        BasePiece.__init__(self, startpositionindex)
+        BasePiece.__init__(self, startpositionindex, validmoves=None)
         return None
 
     def isvalidmove(self, movetopos):
@@ -198,12 +220,12 @@ class RookPiece(BasePiece):
 
         Note that this test doesn't check if the destination is on the board!
         """
-        movediff = abs(movetopos - self._postion)
+        movediff = abs(self.distanceto(movetopos))
         if movediff % 8 == 0:  # If moving up or down:
             return True  # This is always true.
         elif movediff % 8 != 0:  # If moving side-to-side:
-            rank = movetopos/8
-            if movediff < 8 and rank*8 <= movetopos < (rank+1)*8:
+            currentrank = self._postion/8
+            if movediff < 8 and currentrank*8 <= movetopos < (currentrank+1)*8:
                 return True
             else:
                 return False
@@ -215,8 +237,9 @@ class KnightPiece(BasePiece):
     """The class for the knight."""
 
     def __init__(self, startpositionindex):
-        BasePiece.__init__(self, startpositionindex)
-        self._validmovelist = (6, 10, 15, 17)
+        BasePiece.__init__(self,
+            startpositionindex, validmoves=(6, 10, 15, 17), multiplemoves=False
+        )
         return None
 
 
@@ -224,33 +247,70 @@ class BishopPiece(BasePiece):
     """The class for the bishop."""
 
     def __init__(self, startpositionindex):
-        BasePiece.__init__(self, startpositionindex)
-        self._validmovelist = (7, 9)
+        BasePiece.__init__(
+            self, startpositionindex, validmoves=(7, 9), multiplemoves=True
+        )
         return None
 
 class QueenPiece(BasePiece):
     """The class for the queen."""
 
     def __init__(self, startpositionindex):
-        BasePiece.__init__(self, startpositionindex)
-        self._validmovelist = (1, 7, 8, 9)
+        BasePiece.__init__(
+            self, startpositionindex, validmoves=(7, 8, 9), multiplemoves=True
+        )  # BUG: Including 1 in validmoves makes all possible moves valid.
         return None
+
+    def isvalidmove(self, movetopos):
+        """This special method is required for the queen's movement.'"""
+        # TODO: Repair this method to make it less hackish.
+        movediff = abs(self.distanceto(movetopos))
+        currentrank = self._postion/8
+        if currentrank*8 <= movetopos <= (currentrank+1)*8:
+            return True  # HACK: Allows for left/right motion.
+        elif any([movediff % x == 0 for x in self._validmoves]):
+            # If moves any way other then left/right, then ok if integer multiple.
+            return True
+        else:
+            return False
 
 
 class KingPiece(BasePiece):
     """The class for the King"""
 
     def __init__(self, startpositionindex):
-        BasePiece.__init__(self, startpositionindex)
-        self._validmovelist = (1, 7, 8, 9)
+        BasePiece.__init__(self,
+            startpositionindex, validmoves=(1, 7, 8, 9), multiplemoves=False
+        )
         return None
 
-    def isvalidmove(self, movetopos):
-        """A special method of movement checking for the king."""
-        movediff = abs(movetopos - self._postion)
-        if movediff in self._validmovelist:
+
+class PawnPiece(BasePiece):
+    """The very special class for the pawn."""
+
+    def __init__(self, startpositionindex):
+        BasePiece.__init__(
+            self, startpositionindex, validmoves=(8, 16), multiplemoves=False
+        )
+        self._validcapturemoves = (7, 9)
+        return None
+
+    def isvalidcapture(self, movetopos):
+        """Pawns capture in a strange fashion. This method controls that."""
+        movediff = self.distanceto(movetopos)
+        if movediff in self._validcapturemoves:
             return True
         else:
             return False
 
+    def move(self, index):
+        """Pawns move in a strange fashion, and are controlled here."""
+        if not self.isvalidindex(index):
+            raise IndexError
+        elif not self.isvalidmove(index):
+            raise IllegalMoveError
+        else:
+            self._validmoves = (8,) # If pawn moves, it can't push (again).
+            self._postion = index
+        return None
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
