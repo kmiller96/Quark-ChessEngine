@@ -8,6 +8,8 @@
 # board. Initialised a semi-integrated testing suite for a short game.
 #    26/12/16: Fixed script to obey 80 character limit. Abstracted the tests
 # in order to randomly certain squares.
+#    30/12/16: Removed the short game testing suite and moved it to the testing
+# suite tests_chessboardadvanced.py.
 
 # TESTING REQUIREMENTS:
 # This is the description of what needs to be tested in order to deem the
@@ -106,23 +108,6 @@ class TestBoard(unittest.TestCase):
             self.board._ChessBoard__board[(self.startpos+1) % 63], self.piece,
             "The piece should have moved, but it didn't."
         )
-
-
-class TestBasicGame(unittest.TestCase):
-    """A slightly more involved test, involving some dependancy on the already
-    tested methods. Plays through a simple, short game and checks to see if all
-    the results are completed."""
-    # TODO: This test suite.
-
-    def setUp(self):
-        """Initialise the board."""
-        self.board = core.ChessBoard()
-        return None
-
-    def tearDown(self):
-        """Destroy the tainted board."""
-        self.board = None
-        return None
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

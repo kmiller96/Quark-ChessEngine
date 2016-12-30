@@ -26,6 +26,17 @@ from lib import core
 class TestBasePiece(unittest.TestCase):
     """Tests the behaviour of the basic piece."""
 
+    def setUp(self):
+        self.piece = core.BasePiece(
+            playerpiece=True, startpositionindex=choice(self.innersquares()),
+            validmoves=(1,)
+        )
+        return None
+
+    def tearDown(self):
+        self.piece = None
+        return None
+
     @staticmethod
     def _flatten(l):
         """A hack used to flatten lists."""
@@ -63,17 +74,6 @@ class TestBasePiece(unittest.TestCase):
             raise TypeError("The first arguement must be True or False.")
         return None
 
-    def setUp(self):
-        self.piece = core.BasePiece(
-            startpositionindex=choice(self.innersquares()),
-            validmoves=(1,)
-        )
-        return None
-
-    def tearDown(self):
-        self.piece = None
-        return None
-
     def test_isvalidindex(self):
         func = self.piece.isvalidindex
 
@@ -106,7 +106,9 @@ class TestKingPiece(TestBasePiece):
     """Conduct basic unittests on the King."""
 
     def setUp(self):
-        self.piece = core.KingPiece(choice(self.innersquares()))
+        self.piece = core.KingPiece(
+            playerpiece=True, startpositionindex=choice(self.innersquares())
+        )
         return None
 
     def test_kinggoodmove(self):
@@ -127,7 +129,9 @@ class TestQueenPiece(TestBasePiece):
     """Conducts basic unittests on the Queen."""
 
     def setUp(self):
-        self.piece = core.QueenPiece(choice(self.innersquares()))
+        self.piece = core.QueenPiece(
+            playerpiece=True, startpositionindex=choice(self.innersquares())
+        )
         return None
 
     def test_queengoodmove(self):
@@ -155,7 +159,9 @@ class TestBishopPiece(TestBasePiece):
     """What do these tests pertain to?"""
 
     def setUp(self):
-        self.piece = core.BishopPiece(choice(self.innersquares()))
+        self.piece = core.BishopPiece(
+            playerpiece=True, startpositionindex=choice(self.innersquares())
+        )
         return None
 
     def test_bishopgoodmove(self):
@@ -177,7 +183,9 @@ class TestKnightPiece(TestBasePiece):
     """What do these tests pertain to?"""
 
     def setUp(self):
-        self.piece = core.KnightPiece(choice(self.innersquares()))
+        self.piece = core.KnightPiece(
+            playerpiece=True, startpositionindex=choice(self.innersquares())
+        )
         return None
 
     def test_knightgoodmove(self):
@@ -197,7 +205,9 @@ class TestRookPiece(TestBasePiece):
     """Tests the behaviour of the rook piece."""
 
     def setUp(self):
-        self.piece = core.RookPiece(choice(self.innersquares()))
+        self.piece = core.RookPiece(
+            playerpiece=True, startpositionindex=choice(self.innersquares())
+        )
         return None
 
     def test_isvalidmove(self):
@@ -223,7 +233,9 @@ class TestPawnPiece(TestBasePiece):
     pieces to code these tests are much tougher to pass."""
 
     def setUp(self):
-        self.piece = core.PawnPiece(randint(8, 15))  # Only on second rank.
+        self.piece = core.PawnPiece(
+            playerpiece=True, startpositionindex=randint(8, 15)  # Only on second rank.
+        )
         return None
 
     def test_basicmove(self):
