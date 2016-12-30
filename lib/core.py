@@ -27,6 +27,10 @@
 # certain moves that were illegal. Added PawnPiece class. Did some refactoring
 # on pieces to remove repeat code. Added special PawnPiece move method to handle
 # pawn pushing.
+#    30/12/16: Added an extra parameter to the chess pieces to determine if it
+# is a player's piece or the computer's piece. Added assertion test in ChessBoard
+# class and a isplayerpiece check in BasePiece. Created two brand new classes
+# of ChessBoard: one for a default game and one for debugging/user created.
 
 # NOTES:
 # The board should have its internal structure (i.e. the locations) completely
@@ -51,7 +55,7 @@ from lib.exceptions import *
 
 
 class ChessBoard:
-    """Creates a chess board."""
+    """Creates an empty, plain chess board."""
 
     def __init__(self):
         """Initialises the board."""
@@ -79,6 +83,15 @@ class ChessBoard:
         else:
             raise TypeError, "The board is read either as a index from 0 to " \
             "63 or a tuple that specifies the row and column index."
+
+    def assertIsChessPiece(self, piece, msg=None):
+        """A sanity check to make sure that the piece passed is actually one of
+        my piece classes."""
+        if msg is None:
+            msg = "The piece passed did not inherit from BasePiece (is it even \
+            a chess piece?)."
+        assert isinstance(piece, BasePiece), msg
+        return None
 
     @staticmethod
     def assertIndexOnBoard(indices):
@@ -120,17 +133,78 @@ class ChessBoard:
         self.__board[startindex] = None
         return None
 
-    def addpiece(self, piece, index):
+    def addpiece(self, piece, index, playerpiece=True):
         """Add a new piece to the board."""
+        # Sanity checks.
         self.assertIndexOnBoard(index)
         self.assertIsUnoccupied(index)
-        self.__board[index] = piece
+        self.assertIsChessPiece(piece)
+
+        # Now add the piece.
+        self.__board[index] = piece(playerpiece, startpositionindex=index)
         return None
 
     def removepiece(self, index):
         """Removes a piece from the board."""
         self.assertIndexOnBoard(index)
         self.__board[index] = None
+
+
+class DefaultChessBoard(ChessBoard):
+    """The board that is created for a normal game of chess."""
+
+    def __init__(self):
+        ChessBoard.__init__(self, args)
+        self._setupboard()
+        return None
+
+    def _setupboard(self, playeriswhite):
+        """Set up the chess board by placing the pieces at the correct spots."""
+        # Initalise variables & sanity checks.
+        assert isinstance(playeriswhite, bool), "Please pass a bool."
+        x = playeriswhite  # Shorthand notation.
+        backline = [RookPiece, KnightPiece, BishopPiece, QueenPiece, KingPiece,
+                    BishopPiece, KnightPiece, RookPiece]  # Backline order.
+
+        # Add the white pieces.
+        for index in range(0, 7+1):
+            self.addpiece(backline[index], index, playerpiece=x)
+        for index in range(8,15+1):
+            self.addpiece(PawnPiece, index, playerpiece=x)
+
+        # Add the black pieces.
+        for index in range(48,55+1):
+            self.addpiece(PawnPiece, index, playerpiece=(not x))
+        for index in range(56, 63+1):
+            self.addpiece(backline[index], index, playerpiece=(not x))
+        return None
+
+
+class UserDefinedChessBoard(ChessBoard):
+    """The board that prompts the user to set up the board how he/she likes."""
+
+    def __init__(self, piecelist):
+        ChessBoard.__init__(self, args)
+        self.defineboard(piecelist)
+        return None
+
+    def defineboard(self, piecelist):
+        """Allows the user to pass in a list to setup the chess board.
+
+        The user can pass in a list of ready-made chess pieces in order to
+        define the starting layout of the board. The method takes the intialised
+        pieces and extracts the information it needs to generate a fresh copy on
+        the board, thus maintaining some resemblance of encapsulation.
+        """
+        def callableversionof(cls):  # A hack that gets a callable version of a class.
+            lambda cls: cls.__class__.__name__
+
+        for piece in piecelist:
+            self.addpiece(
+                callableversionof(piece),
+                piece.position(),
+                playerpiece=piece.isplayerpiece()
+            )
 
 
  ######  ### #######  #####  #######  #####
@@ -145,15 +219,20 @@ class ChessBoard:
 class BasePiece:
     """The class all chess pieces inherit from."""
 
-    def __init__(self, startpositionindex, validmoves, multiplemoves=True):
+    def __init__(self, playerpiece, startpositionindex, validmoves,
+                 multiplemoves=True):
         # Sanity checks.
-        msg = "'multiplemoves' parameter must be true or false."
-        assert isinstance(multiplemoves, bool), msg
+        multiplemovesmsg = "'multiplemoves' parameter must be true or false."
+        playerpiecemsg = "The piece either belongs to the user (True) or does \
+        not (False). Please pass a boolean arguement."
+        assert isinstance(multiplemoves, bool), multiplemovesmsg
+        assert isinstance(playerpiece, bool), playerpiecemsg
 
         # Assignment of attributes.
         self._postion = startpositionindex
         self._validmoves = validmoves
         self._movecanbemultiple = multiplemoves  # HACK: Used in isvalidmove method.
+        self._playerpiece = playerpiece
         return None
 
     def distanceto(self, moveto):
@@ -185,6 +264,10 @@ class BasePiece:
             else:
                 return False
 
+    def isplayerpiece(self):
+        """Returns true if player piece, false if not."""
+        return self._playerpiece
+
     def postion(self):
         """Returns the position of the piece. Used for encapsulation purposes."""
         return self._postion
@@ -203,8 +286,10 @@ class BasePiece:
 class RookPiece(BasePiece):
     """The class for the Rook."""
 
-    def __init__(self, startpositionindex):
-        BasePiece.__init__(self, startpositionindex, validmoves=None)
+    def __init__(self, playerpiece, startpositionindex):
+        BasePiece.__init__(self,
+            playerpiece, startpositionindex, validmoves=None
+        )
         return None
 
     def isvalidmove(self, movetopos):
@@ -236,9 +321,10 @@ class RookPiece(BasePiece):
 class KnightPiece(BasePiece):
     """The class for the knight."""
 
-    def __init__(self, startpositionindex):
+    def __init__(self, playerpiece, startpositionindex):
         BasePiece.__init__(self,
-            startpositionindex, validmoves=(6, 10, 15, 17), multiplemoves=False
+            playerpiece, startpositionindex,
+            validmoves=(6, 10, 15, 17), multiplemoves=False
         )
         return None
 
@@ -247,17 +333,19 @@ class BishopPiece(BasePiece):
     """The class for the bishop."""
 
     def __init__(self, startpositionindex):
-        BasePiece.__init__(
-            self, startpositionindex, validmoves=(7, 9), multiplemoves=True
+        BasePiece.__init__(self,
+            playerpiece, startpositionindex,
+            validmoves=(7, 9), multiplemoves=True
         )
         return None
 
 class QueenPiece(BasePiece):
     """The class for the queen."""
 
-    def __init__(self, startpositionindex):
-        BasePiece.__init__(
-            self, startpositionindex, validmoves=(7, 8, 9), multiplemoves=True
+    def __init__(self, playerpiece, startpositionindex):
+        BasePiece.__init__(self,
+            playerpiece, startpositionindex,
+            validmoves=(7, 8, 9), multiplemoves=True
         )  # BUG: Including 1 in validmoves makes all possible moves valid.
         return None
 
@@ -278,9 +366,10 @@ class QueenPiece(BasePiece):
 class KingPiece(BasePiece):
     """The class for the King"""
 
-    def __init__(self, startpositionindex):
+    def __init__(self, playerpiece, startpositionindex):
         BasePiece.__init__(self,
-            startpositionindex, validmoves=(1, 7, 8, 9), multiplemoves=False
+            playerpiece, startpositionindex,
+            validmoves=(1, 7, 8, 9), multiplemoves=False
         )
         return None
 
@@ -288,9 +377,10 @@ class KingPiece(BasePiece):
 class PawnPiece(BasePiece):
     """The very special class for the pawn."""
 
-    def __init__(self, startpositionindex):
-        BasePiece.__init__(
-            self, startpositionindex, validmoves=(8, 16), multiplemoves=False
+    def __init__(self, playerpiece, startpositionindex):
+        BasePiece.__init__(self,
+            playerpiece, startpositionindex,
+            validmoves=(8, 16), multiplemoves=False
         )
         self._validcapturemoves = (7, 9)
         return None
