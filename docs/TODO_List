@@ -14,3 +14,6 @@ them cleaner, assuming the previous point is abandoned.
 
 - Clean up RookPiece in piece_tests.py so that it follows the same style as the
 other piece's unittests.
+
+- Change the parameter name 'multiplemoves' into something more descriptive.
+The name doesn't really make sense, as it is only one move but multiple squares.
