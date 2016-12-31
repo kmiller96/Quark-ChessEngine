@@ -31,6 +31,12 @@
 # is a player's piece or the computer's piece. Added assertion test in ChessBoard
 # class and a isplayerpiece check in BasePiece. Created two brand new classes
 # of ChessBoard: one for a default game and one for debugging/user created.
+#    31/12/16: Overhauled (what seems like) entire progress so far. As a result
+# bugs in finding legal moves, now the entire engine runs on coordinate
+# notation but stores and calculates on index notation. Did some major
+# refactoring of the entire core file to remove redunant functions, rename other
+# functions and remove hackish code. Added vector class, which was reused from
+# a previous project.
 
 # NOTES:
 # The board should have its internal structure (i.e. the locations) completely
@@ -42,8 +48,157 @@
 # - Check to see if pieces between start and final destination when moving.
 
 from lib.exceptions import *
+from lib.vectors import Vector
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ #     # #######  #####  ####### ####### ######   #####
+ #     # #       #     #    #    #     # #     # #     #
+ #     # #       #          #    #     # #     # #
+ #     # #####   #          #    #     # ######   #####
+  #   #  #       #          #    #     # #   #         #
+   # #   #       #     #    #    #     # #    #  #     #
+    #    #######  #####     #    ####### #     #  #####
+
+class Vector:
+    """Creates a 2D vector for the chess engine.
+
+    This class contains all of the necessary backbone to do vector calculations.
+    It has the ability to add/subtract vectors, scalar multiply and do both the
+    dot product and the cross product. All of these abilities have native use
+    with the various operators.
+
+    Public Methods
+    ================
+    The public methods are using the various operation symbols.
+
+    Private Methods
+    ================
+    :isvector: Returns true or false depending if the object passed is an
+               instance of the Vector class.
+    :eq: Determines if two vectors are equal.
+    :ne: Determines if the two vectors are unequal.
+    :add: Adds vectors together. Use the +/- characters.
+    :scalar_multiply: Scale a vector. Use the * character.
+    :dot: Dots vectors together. Use the * character.
+
+    Notes
+    ================
+    Currently no notes.
+    """
+    # TODO: Fix class to "Beg for Forgiveness" mentality.
+
+    def __init__(self, x, y):
+        """Initialise the Vector class."""
+        self.vector = (x, y)
+
+    def tupleform(self):
+        """A more obvious way of getting the vector as a tuple."""
+        return self.vector
+
+    def intmultipleof(self, other):
+        """See if self is an integer multiple of other."""
+        # FIXME: This is a clusterfuck.
+        try:
+            intdivide = map(lambda x, y: x / y, self.vector, other.vector)
+            projected_selfvector = map(lambda i: intdivide[0]*i, other.vector)
+            if intdivide[0] != intdivide[1]:
+                return False
+            elif projected_selfvector != self.vector:
+                return False
+            else:
+                return True
+        except AttributeError:
+            raise AttributeError("Other must be a vector.")
+
+    @staticmethod
+    def _assertIsVector(obj):
+        """Assert that the object passed is a vector."""
+        assert isinstance(obj, Vector), "The object passed is not a vector."
+        return None
+
+    def _scalar_multiply(self, intscalar):
+        """Core for the scalar multiplication."""
+        return map(lambda i: intscalar*i, self.vector)
+
+    def _add(self, other):
+        """Core for the vector addition."""
+        return map(lambda i, j: i+j, self.vector, other.vector)
+
+    def _dot(self, other):
+        """Core for the dot product operation."""
+        return reduce(lambda x, y: x+y,
+            map(lambda k, l: k*l, self.vector, other.vector)
+        )
+
+    def __eq__(self, other):
+        """Implement equality operations."""
+        try:
+            return self.vector == other.vector
+        except AttributeError:
+            raise AttributeError(
+                "Equality can only be determined against another vector.")
+
+    def __ne__(self, other):
+        """Implement unequality operations."""
+        try:
+            return self.vector != other.vector
+        except AttributeError:
+            raise AttributeError(
+                "Equality can only be determined against another vector.")
+
+    def __add__(self, other):
+        """Allows for vector addition with the use of the + character."""
+        try:
+            return Vector(*self._add(other))
+        except AttributeError:
+            raise AttributeError("Other must be a vector.")
+
+    def __radd__(self, other):
+        """Reversed __add__ method."""
+        try:
+            return Vector(*self._add(other))
+        except AttributeError:
+            raise AttributeError("Other must be a vector.")
+
+    def __sub__(self, other):
+        """Allows for vector subtraction with the use of the - character."""
+        try:
+            return Vector(*self._add(-1*other))
+        except AttributeError:
+            raise AttributeError("Other must be a vector.")
+
+    def __rsub__(self, other):
+        """Reversed __sub__ method."""
+        try:
+            return Vector(*self._add(-1*other))
+        except AttributeError:
+            raise AttributeError("Other must be a vector.")
+
+    def __mul__(self, other):
+        """Allows for dot product and scalar multiplication."""
+        try:
+            if isinstance(other, int):
+                return Vector(*self._scalar_multiply(other))
+            else:
+                return Vector(*self._dot(other))
+        except AttributeError:
+            raise AttributeError("Other must be a vector.")
+
+    def __rmul__(self, other):
+        """Reversed __mul__ method."""
+        try:
+            if isinstance(other, int):
+                return Vector(*self._scalar_multiply(other))
+            else:
+                return Vector(*self._dot(other))
+        except AttributeError:
+            raise AttributeError("Other must be a vector.")
+
+    def __abs__(self):
+        """Magnitude of the vector"""
+        return reduce(lambda x, y: x+y, map(lambda ii: ii**2, self.vector))**0.5
+
 
   #####  #     # #######  #####   #####     ######  #######    #    ######  ######
  #     # #     # #       #     # #     #    #     # #     #   # #   #     # #     #
@@ -55,7 +210,35 @@ from lib.exceptions import *
 
 
 class ChessBoard:
-    """Creates an empty, plain chess board."""
+    """The parent class that controls the behaviour of the chess board.
+
+    The reason for using a parent class on the chess board is simple: it will
+    contain most of the methods and attributes but allows for flexability if
+    different types of boards are to be initalised, such as setting up the board
+    for puzzles or special game modes.
+
+    Public methods
+    ===============
+    - __getitem__: This is using [] on the class to fetch the piece at that
+      postion. Can be either a integer from 0 to 63 or a list/tuple of length
+      two that specifies the row index and column index.
+    - convert: ***TO BE COMPLETED***
+    - addpiece: Adds a piece to the board.
+    - makesquareempty: Removes a piece from the board (if one is there).
+    - move: Moves a piece around the board.
+    - capture: Captures a piece on the board.
+
+
+    Private methods
+    ================
+    - assertIsChessPiece: Makes sure that the arguement is one of the chess
+      pieces defined in this program. In reality, it checks to see if the class
+      inherits from BasePiece.
+    - assertPositionOnBoard: Asserts that the index passed is valid (i.e. is
+      between 0 to 63).
+    - assertIsUnoccupied: Asserts that the square passed is, in fact, unoccupied.
+
+    """
 
     def __init__(self):
         """Initialises the board."""
@@ -63,105 +246,158 @@ class ChessBoard:
         self.playerturn = True
 
     def __getitem__(self, pos):
-        """Controls calling the piece at a position on the board.
+        """Controls calling the piece at a position on the board like a list."""
 
-        The structure in doing this is two fold. One way is to simply call an
-        index of 0 to 63 corresponding to that square. The second way is to call
-        a row then a column with the bottom right positon being 0 and increasing
-        as you go right. E.g. a call of (1,3) will give the second row (b rank)
-        and the fourth column (4th file) and as a result if effectively the same
-        as calling 11.
-        """
-        # TO-DO: It is better to beg for forgiveness then to ask for permission;
-        # Add a try-exception statement here.
-
-        self.assertIndexOnBoard(pos)
-        if isinstance(pos, int):
+        errormsg = "The board is read either as a index from 0 to 63 or a " \
+        "tuple/list that specifies the row and column index."
+        try:
             return self.__board[pos]
-        elif isinstance(pos, (list, tuple)) and len(pos) == 2:
-            return self.__board[8*pos[0] + pos[1]]
-        else:
-            raise TypeError, "The board is read either as a index from 0 to " \
-            "63 or a tuple that specifies the row and column index."
+        except TypeError:
+            try:  # If it wasn't an integer see if it is a coordinate:
+                assert len(pos) == 2, errormsg
+                return self.__board[self.coordinate2index(pos)]
+            except TypeError:
+                raise TypeError(errormsg)  # If that still doesn't work it's fucked.
 
-    def assertIsChessPiece(self, piece, msg=None):
-        """A sanity check to make sure that the piece passed is actually one of
-        my piece classes."""
-        if msg is None:
-            msg = "The piece passed did not inherit from BasePiece (is it even \
-            a chess piece?)."
-        assert isinstance(piece, BasePiece), msg
+    @staticmethod
+    def _assertIsChessPiece(piece):
+        """Assert that the piece passed inherits from the BasePiece class."""
+        assert isinstance(piece, BasePiece), \
+               "The piece passed did not inherit from BasePiece."
         return None
 
     @staticmethod
-    def assertIndexOnBoard(indices):
+    def _assertPositionOnBoard(indices):
         """Assert that the indices called are on the board as a sanity check."""
-        if isinstance(indices, (list, tuple)):
+        # TODO: Rewrite this method to use try-chains instead of if-chains.
+        if isinstance(indices, Vector):
+            assert all([0 <= x <= 7 for x in indices])
+        elif isinstance(indices, (list, tuple)):
             for ii in indices:
-                assert isinstance(ii, int), "The value(s) passed are not integers"
-                assert 0 <= ii <= 63, "Index is out the the board range."
+                assert isinstance(ii, int), "The value(s) passed are not integers."
+                assert 0 <= ii <= 7, "Row/Column index is out the the board range."
         elif isinstance(indices, int):
-            assert 0 <= indices <= 63, "The value(s) passed are not integers"
+            assert 0 <= indices <= 63, "The integer passed must be between 0 to 63."
         return None
 
-    def isoccupied(self, index):
-        """Checks to see if the square is occupied."""
-        self.assertIndexOnBoard(index)
-        if self.__board[index] != None:
-            return True
-        else:
-            return False
-
-    def assertIsUnoccupied(self, index, message=None):
-        """Asserts that the square is free and unoccupied.
-
-        Note that this is different to the method 'isoccupied' since it is
-        purely an assertion and doesn't return a True or False.
-        """
-        self.assertIndexOnBoard(index)
-        if message is None:
-            message = "The target square is occupied."
-        assert self.__board[index] == None, message
+    def _assertIsUnoccupied(self, index):
+        """Asserts that the square is free and unoccupied."""
+        try:
+            assert self.__board[index] == None, "The target square is occupied."
+        except IndexError:
+            raise IndexError("The index used is off the board!")
         return None
 
+    def convert(self, indexorcoordinateorvector,
+                tocoordinate=False, toindex=False, tovector=False):
+        """Makes the input into a coordinate, vector or index, regardless of form.
 
-    def move(self, startindex, endindex):
-        """Move a piece around on the board."""
-        self.assertIndexOnBoard((startindex, endindex))
-        self.assertIsUnoccupied(endindex, 'The end square is occupied.')
-        self.__board[endindex] = self.__board[startindex]
-        self.__board[startindex] = None
-        return None
-
-    def addpiece(self, piece, index, playerpiece=True):
-        """Add a new piece to the board."""
+        This monolithic function basically forces either an index or a
+        coordinate into the specified form. This is the translator required to
+        calculate possible moves using vector attacks. See docs for more
+        information into the algoithims used and why this method is required."""
+        # TODO: Write notes on why this method is required.
         # Sanity checks.
-        self.assertIndexOnBoard(index)
-        self.assertIsUnoccupied(index)
-        self.assertIsChessPiece(piece)
+        assert any([tocoordinate, toindex, tovector]), \
+            "Specify the output using the optional arguments."
+        assert [tocoordinate, toindex, tovector].count() == 1, \
+            "The output is only a coordinate, vector or an index, not multiple."
+
+        # Define functions
+        def isindex(x):
+            return isinstance(x, int)
+        def iscoordinate(x):
+            return (isinstance(x, (tuple, list)) and len(x) == 2)
+        def isvector(x):
+            return isinstance(x, Vector)
+
+        # Convert to desired form:
+        x = indexorcoordinateorvector  # Shorthand notation.
+        self._assertPositionOnBoard(x)
+        if tocoordinate:  # Convert to coordinate.
+            if isindex(x):
+                return (x/8, x % 8)
+            elif isvector(x):
+                return x.tupleform()
+            elif iscoordinate(x):
+                return x
+        elif toindex:  # Convert to index.
+            if isindex(x):
+                return x
+            elif isvector(x):
+                x = x.tupleform()
+                return x[0]*8 + x[1]
+            elif iscoordinate(x):
+                return x[0]*8 + x[1]
+        elif tovector:  # Convert to vector.
+            if isindex(x):
+                return Vector((x/8, x % 8))
+            elif iscoordinate(x):
+                return Vector(*x)
+            elif isvector(x):
+                return x
+        else:
+            raise RuntimeError("Passed item is none of the allowed options.")
+
+    def addpiece(self, piece, indexcoordinate, playerpiece=True, force=False):
+        """Add a new piece to the board."""
+        # Converting into index.
+        index = self.convert(indexcoordinate, toindex=True)
+
+        # Sanity checks.
+        if not force: self._assertIsUnoccupied(index)  # Allow forced overwriting.
+        self._assertPositionOnBoard(index)
+        self._assertIsChessPiece(piece)
 
         # Now add the piece.
         self.__board[index] = piece(playerpiece, startpositionindex=index)
         return None
 
-    def removepiece(self, index):
+    def makesquareempty(self, indexcoordinate):
         """Removes a piece from the board."""
-        self.assertIndexOnBoard(index)
+        # Converting into index.
+        index = self.convert(indexcoordinate, toindex=True)
+
+        self._assertPositionOnBoard(index)
         self.__board[index] = None
+
+    def move(self, startindexcoordinate, endindexcoordinate):
+        """Move a piece around on the board."""
+        # Converting into index.
+        startindex = self.convert(startindexcoordinate, toindex=True)
+        endindex = self.convert(endindexcoordinate, toindex=True)
+
+        self._assertPositionOnBoard((startindex, endindex))
+        self._assertIsUnoccupied(endindex, 'The end square is occupied.')
+        self.__board[endindex] = self.__board[startindex]
+        self.__board[startindex] = None
+        return None
+
+    def capture(self, startindexcoordinate, endindexcoordinate):
+        """Captures a piece on the board. A shorter call then remove then move."""
+        # Converting into index.
+        startindex = self.convert(startindexcoordinate, toindex=True)
+        endindex = self.convert(endindexcoordinate, toindex=True)
+
+        self.makesquareempty(endindex)
+        self.move(startindex, endindex)
+        return None
 
 
 class DefaultChessBoard(ChessBoard):
     """The board that is created for a normal game of chess."""
 
     def __init__(self):
-        ChessBoard.__init__(self, args)
+        """Initialise a basic chess board."""
+        ChessBoard.__init__(self)
         self._setupboard()
         return None
 
     def _setupboard(self, playeriswhite):
         """Set up the chess board by placing the pieces at the correct spots."""
         # Initalise variables & sanity checks.
-        assert isinstance(playeriswhite, bool), "Please pass a bool."
+        assert isinstance(playeriswhite, bool), \
+            "Specify if the player is white (true) or black (false)."
         x = playeriswhite  # Shorthand notation.
         backline = [RookPiece, KnightPiece, BishopPiece, QueenPiece, KingPiece,
                     BishopPiece, KnightPiece, RookPiece]  # Backline order.
@@ -184,22 +420,24 @@ class UserDefinedChessBoard(ChessBoard):
     """The board that prompts the user to set up the board how he/she likes."""
 
     def __init__(self, piecelist):
-        ChessBoard.__init__(self, args)
+        """Initalise the chess board."""
+        ChessBoard.__init__(self)
         self.defineboard(piecelist)
         return None
 
     def defineboard(self, piecelist):
-        """Allows the user to pass in a list to setup the chess board.
+        """Allows the user to pass in a list of pieces to setup the chess board.
 
-        The user can pass in a list of ready-made chess pieces in order to
-        define the starting layout of the board. The method takes the intialised
-        pieces and extracts the information it needs to generate a fresh copy on
-        the board, thus maintaining some resemblance of encapsulation.
+        By passing in a list of ready-made chess pieces, one is able to generate
+        a different board then that of a normal chess game. The method takes the
+        intialised pieces and extracts the information it needs to generate a
+        fresh copy on each, thus maintaining some resemblance of encapsulation.
         """
-        def callableversionof(cls):  # A hack that gets a callable version of a class.
-            lambda cls: cls.__class__.__name__
+        def callableversionof(thisclass):
+            return thisclass.__class__.__name__
 
         for piece in piecelist:
+            self._assertIsChessPiece(piece)
             self.addpiece(
                 callableversionof(piece),
                 piece.position(),
@@ -219,58 +457,56 @@ class UserDefinedChessBoard(ChessBoard):
 class BasePiece:
     """The class all chess pieces inherit from."""
 
-    def __init__(self, playerpiece, startpositionindex, validmoves,
-                 multiplemoves=True):
+    def __init__(self, playerpiece, startpositionindex, validmovevectors,
+                 onlyunitvectors=False):
         # Sanity checks.
-        multiplemovesmsg = "'multiplemoves' parameter must be true or false."
-        playerpiecemsg = "The piece either belongs to the user (True) or does \
-        not (False). Please pass a boolean arguement."
-        assert isinstance(multiplemoves, bool), multiplemovesmsg
-        assert isinstance(playerpiece, bool), playerpiecemsg
+        assert isinstance(onlyunitvectors, bool), \
+            "'onlyunitvectors' parameter must be true or false."
+        assert isinstance(playerpiece, bool), \
+            "The piece either belongs to the user (True) or does not (False). " \
+            "Please pass a boolean arguement."
 
         # Assignment of attributes.
         self._postion = startpositionindex
-        self._validmoves = validmoves
-        self._movecanbemultiple = multiplemoves  # HACK: Used in isvalidmove method.
+        self._validmovevectors = self._checkAllAreVectors(validmovevectors)
+        self._onlyunitvectors = onlyunitvectors
         self._playerpiece = playerpiece
         return None
 
-    def distanceto(self, moveto):
-        """Find the difference between the next move and current position."""
-        return moveto - self._postion
+    def _checkAllAreVectors(self, vectorlist):
+        """A sanity check to make sure all items in vectorlist are vectors."""
+        for item in vectorlist:
+            assert isinstance(item, Vector), "There are non-vectors in the list."
+        return vectorlist
 
     @staticmethod
-    def isvalidindex(i):
-        """Makes sure index specified is within 0 to 63."""
-        try:
-            assert isinstance(i, int)
-        except AssertionError:
-            raise TypeError('The value passed must be an integer.')
-        finally:
-            return 0 <= i <= 63
+    def _tovector(index):
+        """Converts an index on the board into a vector."""
+        return Vector((index/8, index % 8))
+
+    def distanceto(self, moveto):
+        """Find the relative vector between board index and current position."""
+        return self._tovector(movetopos) - self._tovector(self._postion)
 
     def isvalidmove(self, movetopos):
         """Checks that the move specified is valid."""
-        # HACK: Using movecanbemultiple attribute. See method for useage.
-        movediff = abs(self.distanceto(movetopos))
-        if self._movecanbemultiple:
-            if any([movediff % x == 0 for x in self._validmoves]):
+        diffvec = self.distanceto(movetopos))
+        if not self._onlyunitvectors:
+            if any([diffvec.intmultipleof(x) for x in self._validmovevectors]):
                 return True
             else:
                 return False
-        elif not self._movecanbemultiple:
-            if movediff in self._validmoves:
-                return True
-            else:
-                return False
+        elif self._onlyunitvectors:
+            return (diffvec in self._validmovevectors)
 
     def isplayerpiece(self):
         """Returns true if player piece, false if not."""
         return self._playerpiece
 
-    def postion(self):
+    def postion(self, index=True, vector=False):
         """Returns the position of the piece. Used for encapsulation purposes."""
-        return self._postion
+        if index: return self._postion
+    elif vector: return self._tovector(self._postion)
 
     def move(self, index):
         """Moves the piece to new index."""
@@ -287,44 +523,22 @@ class RookPiece(BasePiece):
     """The class for the Rook."""
 
     def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self,
-            playerpiece, startpositionindex, validmoves=None
+        BasePiece.__init__(self, playerpiece, startpositionindex,
+            validmovevectors=(
+                Vector(1,0), Vector(0,1), Vector(-1, 0), Vector(0, -1))
         )
         return None
-
-    def isvalidmove(self, movetopos):
-        """Checks that the move specified is valid.
-
-        This is currently a special method because I am unsure as to how to
-        implement it otherwise. It relies on two key logic checks. First see if
-        the piece is moving up or down (i.e. diff % 8 = 0). If:
-            1. true then it is impossible for the piece to also be
-            moving left or right. True.
-            2. false then check to make sure that the final destination remains
-            along the same rank.
-
-        Note that this test doesn't check if the destination is on the board!
-        """
-        movediff = abs(self.distanceto(movetopos))
-        if movediff % 8 == 0:  # If moving up or down:
-            return True  # This is always true.
-        elif movediff % 8 != 0:  # If moving side-to-side:
-            currentrank = self._postion/8
-            if movediff < 8 and currentrank*8 <= movetopos < (currentrank+1)*8:
-                return True
-            else:
-                return False
-        else:
-            return False
 
 
 class KnightPiece(BasePiece):
     """The class for the knight."""
 
     def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self,
-            playerpiece, startpositionindex,
-            validmoves=(6, 10, 15, 17), multiplemoves=False
+        BasePiece.__init__(self, playerpiece, startpositionindex,
+            validmovevectors=(
+                Vector(2, 1), Vector(1, 2), Vector(2, -1), Vector (1, -2),
+                Vector(-2, -1), Vector(-1, -2), Vector(-2, 1), Vector (-1, 2)),
+            onlyunitvectors=True
         )
         return None
 
@@ -335,7 +549,8 @@ class BishopPiece(BasePiece):
     def __init__(self, startpositionindex):
         BasePiece.__init__(self,
             playerpiece, startpositionindex,
-            validmoves=(7, 9), multiplemoves=True
+            validmovevectors=(
+                Vector(1, 1), Vector(1, -1), Vector(-1, -1), Vector(-1, 1))
         )
         return None
 
@@ -345,22 +560,11 @@ class QueenPiece(BasePiece):
     def __init__(self, playerpiece, startpositionindex):
         BasePiece.__init__(self,
             playerpiece, startpositionindex,
-            validmoves=(7, 8, 9), multiplemoves=True
-        )  # BUG: Including 1 in validmoves makes all possible moves valid.
+            validmovevectors=(
+                Vector(1, 0), Vector(0, 1), Vector(1, 1), Vector(1, -1),
+                Vector(-1, 0), Vector(0, -1), Vector(-1, -1), Vector(-1, 1))
+        )
         return None
-
-    def isvalidmove(self, movetopos):
-        """This special method is required for the queen's movement.'"""
-        # TODO: Repair this method to make it less hackish.
-        movediff = abs(self.distanceto(movetopos))
-        currentrank = self._postion/8
-        if currentrank*8 <= movetopos <= (currentrank+1)*8:
-            return True  # HACK: Allows for left/right motion.
-        elif any([movediff % x == 0 for x in self._validmoves]):
-            # If moves any way other then left/right, then ok if integer multiple.
-            return True
-        else:
-            return False
 
 
 class KingPiece(BasePiece):
@@ -369,7 +573,10 @@ class KingPiece(BasePiece):
     def __init__(self, playerpiece, startpositionindex):
         BasePiece.__init__(self,
             playerpiece, startpositionindex,
-            validmoves=(1, 7, 8, 9), multiplemoves=False
+            validmovevectors=(
+                Vector(1, 0), Vector(0, 1), Vector(1, 1), Vector(1, -1),
+                Vector(-1, 0), Vector(0, -1), Vector(-1, -1), Vector(-1, 1)),
+            onlyunitvectors=True
         )
         return None
 
@@ -380,18 +587,15 @@ class PawnPiece(BasePiece):
     def __init__(self, playerpiece, startpositionindex):
         BasePiece.__init__(self,
             playerpiece, startpositionindex,
-            validmoves=(8, 16), multiplemoves=False
+            validmovevectors=(Vector(1, 0), Vector(2, 0)), onlyunitvectors=True
         )
-        self._validcapturemoves = (7, 9)
+        self._validcapturemoves = (Vector(1, 1), Vector(1, -1))
         return None
 
     def isvalidcapture(self, movetopos):
         """Pawns capture in a strange fashion. This method controls that."""
-        movediff = self.distanceto(movetopos)
-        if movediff in self._validcapturemoves:
-            return True
-        else:
-            return False
+        diffvec = self.distanceto(movetopos)
+        return (diffvec in self._validcapturemoves)
 
     def move(self, index):
         """Pawns move in a strange fashion, and are controlled here."""
@@ -400,7 +604,8 @@ class PawnPiece(BasePiece):
         elif not self.isvalidmove(index):
             raise IllegalMoveError
         else:
-            self._validmoves = (8,) # If pawn moves, it can't push (again).
+            # If pawn moves, it can't push (again) so overwrite validmovevectors.
+            self._validmovevectors = (Vector(1, 0),)
             self._postion = index
         return None
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
