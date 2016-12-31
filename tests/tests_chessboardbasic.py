@@ -32,7 +32,7 @@ class TestBoard(unittest.TestCase):
         self.board = core.ChessBoard()
         self.startpos = randint(0, 63)  # Pick a position on the board to test.
         self.startcoord = (self.startpos / 8, self.startpos % 8)
-        self.piece = 'X'
+        self.piece = core.QueenPiece(playerpiece=True, startpositionindex=27)
         self.board._ChessBoard__board[self.startpos] = self.piece  # Insert piece manually.
 
         self.errormessage = " PIECE INDEX: %i" % self.startpos
@@ -63,12 +63,34 @@ class TestBoard(unittest.TestCase):
         )
         return None
 
-    def test_checkoccupacy(self):
+    def test_assertIsChessPiece(self):
+        self.assertRaises(
+            AssertionError, self.piece.assertIsChessPiece, self.piece
+        )
+        return None
+
+    def test_assertPositionOnBoard(self):
+        # TODO: Create this test once the method in the core file is improved.
+        return None
+
+    def test_isoccupied(self):
         self.assertTrue(
             self.board.isoccupied(self.startpos),
             'The square should be occupied.' + self.errormessage
         )
         return None
+
+    def test_assertIsUnoccupied(self):
+        # First check a good input.
+        try:
+            self.board.assertIsUnoccupied((self.startpos+1) % 63)
+        except AssertionError:
+            self.fail("An AssertionError was raised when the input was good!")
+
+        # Now check bad input.
+        self.assertRaises(
+            AssertionError, self.board.assertIsUnoccupied, self.startpos
+        )
 
     def test_addpiece(self):
         pos2 = randint(0, 63)
@@ -108,6 +130,33 @@ class TestBoard(unittest.TestCase):
             self.board._ChessBoard__board[(self.startpos+1) % 63], self.piece,
             "The piece should have moved, but it didn't."
         )
+
+
+class TestDefaultChessBoard(unittest.TestCase):
+    """Tests on a regular chess board."""
+
+    def setUp(self):
+        self.board = core.DefaultChessBoard()
+        return None
+
+    def tearDown(self):
+        self.board = None
+        return None
+
+    def test_boardSetUpCorrectly(self):
+        backline = [core.RookPiece, core.KnightPiece, core.BishopPiece,
+                    core.QueenPiece, core.KingPiece, core.BishopPiece,
+                    core.KnightPiece, core.RookPiece]  # Backline order.
+
+        for ii in range(0, 7+1):  # Test white backline.
+            self.assertIs(type(self._ChessBoard__board[ii]), backline[ii])
+        for ii in range(8, 15+1):  # Test white frontline.
+            self.assertIs(type(self._ChessBoard__board[ii]), core.PawnPiece)
+        for ii in range(48, 55+1):  # Test black frontline.
+            self.assertIs(type(self._ChessBoard__board[ii]), core.PawnPiece)
+        for ii in range(56, 63+1):  # Test black backline.
+            self.assertIs(type(self._ChessBoard__board[ii]), backline[ii])
+        return None
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
