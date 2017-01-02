@@ -14,6 +14,9 @@
 #    29/12/16: Added tests for good moves and bad moves on each piece. Did some
 # refactoring to clean up testing suites.
 
+# TODO:
+# Rewrite these tests from scratch :(
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~IMPORTS/GLOBALS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from time import time
@@ -29,7 +32,7 @@ class TestBasePiece(unittest.TestCase):
     def setUp(self):
         self.piece = core.BasePiece(
             playerpiece=True, startpositionindex=choice(self.innersquares()),
-            validmoves=(1,)
+            validmovevectors=(core.Vector(1, 0),)
         )
         return None
 
@@ -71,7 +74,7 @@ class TestBasePiece(unittest.TestCase):
             for move in movelist:
                 self.assertFalse(isvalidmove(originalpos + move), message(move))
         else:
-            raise TypeError("The first arguement must be True or False.")
+            raise TypeError("The first argument must be True or False.")
         return None
 
     def test_isvalidindex(self):

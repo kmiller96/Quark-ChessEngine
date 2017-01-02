@@ -10,17 +10,27 @@
 # in order to randomly certain squares.
 #    30/12/16: Removed the short game testing suite and moved it to the testing
 # suite tests_chessboardadvanced.py.
+#    01/01/17: Fixed the file to work with the refactored code. Separated some
+# of the tests into good input or bad input methods to increase readabilty and
+# help identify bugs.
+#    03/01/17: Fixed errors/fails raised when calling tests, some of which were
+# in this script and some of which were an actual bug.
 
 # TESTING REQUIREMENTS:
-# This is the description of what needs to be tested in order to deem the
-# program robust.
+# The chess board, for basic tests, should be very strict on what inputs it can
+# accept. It should instantly fail if there is a bad input by a string, for
+# example.
 
+# TODO:
+# - Change testing suite so that each component of the engine (i.e the parent
+#   classes) is tested in its own suite.
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~IMPORTS/GLOBALS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from time import time
 import unittest
 from random import randint
-from lib import core
+from lib import exceptions, core
+from lib import chessboard
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TESTING~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -29,11 +39,17 @@ class TestBoard(unittest.TestCase):
 
     def setUp(self):
         """Initialise the board."""
-        self.board = core.ChessBoard()
-        self.startpos = randint(0, 63)  # Pick a position on the board to test.
+        self.board = chessboard.ChessBoard()
+
+        # Pick a position on the board to test.
+        self.startpos = randint(0, 63)
         self.startcoord = (self.startpos / 8, self.startpos % 8)
-        self.piece = core.QueenPiece(playerpiece=True, startpositionindex=27)
-        self.board._ChessBoard__board[self.startpos] = self.piece  # Insert piece manually.
+        self.startvector = core.Vector(*self.startcoord)
+
+        # Put a piece on the board.
+        self.piece = 'X'
+        self.realpiece = core.QueenPiece(playerpiece=True, startpositionindex=27)  # NOTE: Move into tests that care about the piece being real.
+        self.board._board[self.startpos] = self.piece  # Insert piece manually.
 
         self.errormessage = " PIECE INDEX: %i" % self.startpos
         return None
@@ -63,80 +79,172 @@ class TestBoard(unittest.TestCase):
         )
         return None
 
-    def test_assertIsChessPiece(self):
+    def test_convert_goodinput(self):
+        def testequalityfor(totestagainst, toconvert, **kwargs):
+            """Simplified testing call."""
+            self.assertEqual(totestagainst,
+                self.board.convert(toconvert,**kwargs))
+            return None
+
+        # First test index conversion.
+        testequalityfor(self.startpos, self.startpos, toindex=True)
+        testequalityfor(self.startcoord, self.startpos, tocoordinate=True)
+        testequalityfor(self.startvector, self.startpos, tovector=True)
+        # Next test coordinate conversion.
+        testequalityfor(self.startpos, self.startcoord, toindex=True)
+        testequalityfor(self.startcoord, self.startcoord, tocoordinate=True)
+        testequalityfor(self.startvector, self.startcoord, tovector=True)
+        # Finally test vector conversion.
+        testequalityfor(self.startpos, self.startvector, toindex=True)
+        testequalityfor(self.startcoord, self.startvector, tocoordinate=True)
+        testequalityfor(self.startvector, self.startvector, tovector=True)
+        return None
+
+    def test_convert_badinput(self):
+        # Dont specify what to convert to.
+        self.assertRaises(AssertionError,
+            self.board.convert, self.startpos)
+        # Want two conversions at once.
+        self.assertRaises(AssertionError,
+            self.board.convert, self.startcoord, toindex=True, tocoordinate=True)
+        # Pass in something other then index/coordinate/vector.
+        self.assertRaises(TypeError,
+            self.board.convert, 'bad string', toindex=True)
+        return None
+
+    def test_assertPositionOnBoard_goodinput(self):
+        testfunc = self.board._assertPositionOnBoard
+        try:
+            testfunc(core.Vector(3, 4))  # Vector.
+            testfunc((2, 6))  # Tuple.
+            testfunc([5, 1])  # List.
+            testfunc(16)  # Index
+        except AssertionError:
+            self.fail("AssertionError was raised when it should have passed.")
+        return None
+
+    def test_assertPositionOnBoard_badinput(self):
+        testfunc = self.board._assertPositionOnBoard
         self.assertRaises(
-            AssertionError, self.piece.assertIsChessPiece, self.piece
-        )
+            TypeError, testfunc, 'string')  # String
+        self.assertRaises(
+            TypeError, testfunc, 13.11)  # Float.
+        self.assertRaises(
+            AssertionError, testfunc, (8, 4))  # Tuple off board.
+        self.assertRaises(
+            AssertionError, testfunc, core.Vector(-3, 5))  # Vector off board.
         return None
 
-    def test_assertPositionOnBoard(self):
-        # TODO: Create this test once the method in the core file is improved.
-        return None
-
-    def test_isoccupied(self):
+    def test_isoccupied_goodinput(self):
         self.assertTrue(
-            self.board.isoccupied(self.startpos),
+            self.board._isoccupied(self.startpos),
             'The square should be occupied.' + self.errormessage
         )
+        self.assertFalse(
+            self.board._isoccupied((self.startpos+1) % 63),
+            'The square should be unoccupied.' + self.errormessage
+        )
         return None
 
-    def test_assertIsUnoccupied(self):
-        # First check a good input.
+    def test_assertIsUnoccupied_goodinput(self):
         try:
-            self.board.assertIsUnoccupied((self.startpos+1) % 63)
+            self.board._assertIsUnoccupied((self.startpos+1) % 63)
         except AssertionError:
             self.fail("An AssertionError was raised when the input was good!")
 
-        # Now check bad input.
+    def test_assertIsUnoccupied_badinput(self):
         self.assertRaises(
-            AssertionError, self.board.assertIsUnoccupied, self.startpos
-        )
+            AssertionError, self.board._assertIsUnoccupied, self.startpos)
 
-    def test_addpiece(self):
-        pos2 = randint(0, 63)
-        if pos2 == self.startpos:  # Fix the ineviatble clash of indicies.
-            pos2 = (pos2 + 1) % 63
-        self.board.addpiece('Y', pos2)
+    def test_assertIsOccupied_goodinput(self):
+        try:
+            self.board._assertIsOccupied(self.startpos)
+        except AssertionError:
+            self.fail("An AssertionError was raised when the input was good!")
 
-        self.assertEqual(
-            self.board._ChessBoard__board[pos2], 'Y',  # Don't use __getitem__ method.
-            "The piece wasn't added correctly."
-        )
+    def test_assertIsOccupied_badinput(self):
+        self.assertRaises(AssertionError,
+            self.board._assertIsOccupied, (self.startpos+1) % 63)
+
+    def test_piecesbetween(self):
+        self.board._board[self.startpos] = None  # Get a clean board.
+        self.board._board[27] = self.piece  # Move to center for testing.
+
+        piecesbetween = self.board.piecesbetween
+        errormsg = "The method coudn't find the piece."
+        self.assertTrue(len(piecesbetween(26, 28)) == 1, errormsg)  # Left to right
+        self.assertTrue(len(piecesbetween(31, 24)) == 1, errormsg)  # Right to left
+        self.assertTrue(len(piecesbetween(19, 35)) == 1, errormsg)  # Below to above
+        self.assertTrue(len(piecesbetween(18, 36)) == 1, errormsg)  # SW to NE
+        self.assertTrue(len(piecesbetween(20, 34)) == 1, errormsg)  # SE to NW
         return None
 
-    def test_removepiece(self):
-        pos2 = 22
-        if pos2 == self.startpos:  # Fix the ineviatble clash of indicies.
-            pos2 += 1
-
-        self.board._ChessBoard__board[pos2] = 'Z'  # Manually insert.
-        self.board.removepiece(pos2)  # Remove using method under test.
-        self.assertIs(
-            self.board._ChessBoard__board[pos2], None,
-            'The piece was not removed correctly.' + self.errormessage
+    def test_addpiece_badinput(self):
+        self.assertRaises(AssertionError,
+            self.board.addpiece, self.piece, self.startpos
         )
 
-    def test_movepiece(self):
-        self.board.move(
-            self.startpos, (self.startpos + 1) % 63  # Avoid index>63
+    def test_addpiece_goodinput(self):
+        pos2 = (self.startpos + 1) % 63
+        try:
+            piecetype = core.KnightPiece
+            self.board.addpiece(piecetype, pos2)
+            self.board.addpiece(piecetype, self.startpos, force=True)
+            self.assertTrue(
+                isinstance(self.board._board[pos2], piecetype),
+                "The piece wasn't added correctly.")
+        except Exception as error:
+            self.fail("%s" % error)
+        return None
+
+    def test_emptysquare(self):
+        try:
+            self.board.emptysquare((self.startpos+1) % 63)  # Empty already empty square.
+            self.board.emptysquare(self.startpos)  # Empty full square.
+        except:
+            self.fail("An unexpected error was raised!")
+
+    def test_move(self):
+        # Bad move.
+        self.assertRaises(AssertionError,
+            self.board.move, self.startpos, self.startpos
         )
-        # Check piece isn't in old positon.
-        self.assertEqual(
-            self.board._ChessBoard__board[self.startpos], None,
-            "The piece remains in its old spot." + self.errormessage
+        self.assertRaises(AssertionError,
+            self.board.move, self.startpos, 99
         )
-        # Check piece is in new postion.
-        self.assertEqual(
-            self.board._ChessBoard__board[(self.startpos+1) % 63], self.piece,
-            "The piece should have moved, but it didn't."
-        )
+        # Good inputs.
+        try:
+            self.board.move(self.startpos, (self.startpos+1) % 63)
+            self.assertEqual(  # Check piece isn't in old positon.
+                self.board._board[self.startpos], None,
+                "The piece remains in its old spot." + self.errormessage)
+            self.assertEqual(  # Check piece is in new postion.
+                self.board._board[(self.startpos+1) % 63], self.piece,
+                "The piece should have moved, but it didn't.")
+        except AssertionError:
+            raise
+        except:
+            self.fail("An error was raised for some reason.")
+
+    def test_capture(self):
+        self.board._board[(self.startpos+1) % 63] = self.realpiece
+        # Bad inputs
+        self.assertRaises(AssertionError,  # Index off board.
+            self.board.capture, self.startpos, 99)
+        self.assertRaises(AssertionError,  # No piece at end index.
+            self.board.capture, self.startpos, (self.startpos+2) % 63)
+        # Good input.
+        try:
+            self.board.capture(self.startpos, (self.startpos+1) % 63)
+        except Exception as error:
+            self.fail("%s" % error)
 
 
 class TestDefaultChessBoard(unittest.TestCase):
     """Tests on a regular chess board."""
 
     def setUp(self):
-        self.board = core.DefaultChessBoard()
+        self.board = chessboard.DefaultChessBoard()
         return None
 
     def tearDown(self):
@@ -149,13 +257,13 @@ class TestDefaultChessBoard(unittest.TestCase):
                     core.KnightPiece, core.RookPiece]  # Backline order.
 
         for ii in range(0, 7+1):  # Test white backline.
-            self.assertIs(type(self._ChessBoard__board[ii]), backline[ii])
+            self.assertTrue(isinstance(self.board._board[ii], backline[ii]))
         for ii in range(8, 15+1):  # Test white frontline.
-            self.assertIs(type(self._ChessBoard__board[ii]), core.PawnPiece)
+            self.assertTrue(isinstance(self.board._board[ii], core.PawnPiece))
         for ii in range(48, 55+1):  # Test black frontline.
-            self.assertIs(type(self._ChessBoard__board[ii]), core.PawnPiece)
+            self.assertTrue(isinstance(self.board._board[ii], core.PawnPiece))
         for ii in range(56, 63+1):  # Test black backline.
-            self.assertIs(type(self._ChessBoard__board[ii]), backline[ii])
+            self.assertTrue(isinstance(self.board._board[ii], backline[ii-56]))
         return None
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

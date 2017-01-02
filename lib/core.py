@@ -34,6 +34,7 @@
 #    01/01/17: Moved the ChessBoard class to new script. Made the chess pieces
 # now only use vectors in all methods, but allows use of indices for backwards
 # compatability.
+#    02/01/17:
 
 # NOTES:
 # The board should have its internal structure (i.e. the locations) completely
@@ -409,6 +410,7 @@ class KingPiece(BasePiece):
 
 class PawnPiece(BasePiece):
     """The very special class for the pawn."""
+    # WIP: Still be fixed.
 
     def __init__(self, playerpiece, startpositionindex):
         BasePiece.__init__(self,
