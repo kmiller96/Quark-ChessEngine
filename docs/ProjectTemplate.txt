@@ -53,6 +53,12 @@ BACK-END
 The back end is currently under heavy development and is hard to discuss in any
 significant detail. Please come back later.
 
+Most of the control of the engine is done by the chessboard. It controls when
+the pieces move and if they are allowed to move as well as when to call the
+engine to calculate a move. The chess pieces each are an individual type of
+class, but have very little control. They mainly store information more then do
+any of the heavy lifting of the program.
+
 SCHEDULE
 ---------
 

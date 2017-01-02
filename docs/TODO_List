@@ -10,3 +10,12 @@ other piece's unittests.
 - Write extensive tests for the chess board classes.
 They will be the ones being used non-stop and copping the worst of the program.
 I want to make them robust as possible before I try to expose them to an engine.
+
+- Make meaningful errors in core.py and chessboard.py.
+Lots of errors are raised as assertion errors, which means nothing. These need
+to be altered so that the errors have some meaning attached to them, even if that
+means to create new exceptions.
+
+- Finish writing up testing suites.
+Before writing any more code I need to finish writing up the tests on the code
+developed so far.
