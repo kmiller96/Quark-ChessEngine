@@ -11,11 +11,26 @@
 # and made the core.py script too large. Changed the ChessBoard class from being
 # a monolithic class by breaking it apart into components and used the OOP
 # composition to rebuild it.
+#    03/01/17: Lots of small changes/aesthetics fixes. ASCII headings were added
+# to help organise the script better. Added some more private attributes to the
+# chessboard that control move history and notation generation. Refactord some
+# code to make it more readable. Initalised the UI and GUI classes for the
+# chessboard.
 
 from lib.exceptions import *
 from lib.core import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  #####  ####### #     # ######  ####### #     # ####### #     # #######  #####
+ #     # #     # ##   ## #     # #     # ##    # #       ##    #    #    #     #
+ #       #     # # # # # #     # #     # # #   # #       # #   #    #    #
+ #       #     # #  #  # ######  #     # #  #  # #####   #  #  #    #     #####
+ #       #     # #     # #       #     # #   # # #       #   # #    #          #
+ #     # #     # #     # #       #     # #    ## #       #    ##    #    #     #
+  #####  ####### #     # #       ####### #     # ####### #     #    #     #####
+
+
 class _ChessBoardCore:
     """The grandfather class to all of the components of the chessboard.
 
@@ -25,8 +40,14 @@ class _ChessBoardCore:
 
     def __init__(self):
         """Initialises the board."""
+        # Needed for the core operations:
         self._board = [None] * 64
         self.playerturn = True
+
+        # Needed for UI:
+        self._movehistory = list()
+        self._ranksymbols = tuple(map(lambda x: str(x), range(1, 8+1)))
+        self._filesymbols = tuple('abcdefgh')
 
     def __getitem__(self, pos):
         """Controls calling the piece at a position on the board like a list."""
@@ -42,6 +63,15 @@ class _ChessBoardCore:
             except TypeError:
                 raise TypeError(errormsg)  # If that still doesn't work it's fucked.
 
+    def _onlyone(self, iterable):
+        """Returns true if only one of the items in iterable is true."""
+        # REVIEW: I know there is a better way to write this.
+        count = 0
+        for ii in iterable:
+            if ii:
+                count += 1
+        return count == 1
+
     def convert(self, indexorcoordinateorvector,
                 tocoordinate=False, toindex=False, tovector=False):
         """Makes the input into a coordinate, vector or index, regardless of form.
@@ -54,7 +84,7 @@ class _ChessBoardCore:
         # Sanity checks.
         assert any([tocoordinate, toindex, tovector]), \
             "Specify the output using the optional arguments."
-        assert [tocoordinate, toindex, tovector].count(True) == 1, \
+        assert self._onlyone([tocoordinate, toindex, tovector]), \
             "The output is only a coordinate, vector or an index, not multiple."
 
         # Define functions
@@ -195,12 +225,113 @@ class _ChessBoardPieces(_ChessBoardCore):
         return None
 
 
-class _ChessBoardEngine(_ChessBoardCore):
-    """The component that handles all of the engine behind the board."""
+class _ChessBoardUI(_ChessBoardCore):
+    """Controls interacting with the user as well as algebraic notation."""
+
+    def displayboard(self):
+        """Prints the board using ASCII graphics"""
+        return
+
+    def movehistory(self):
+        """Fetches the list with the move history."""
+        return self._movehistory
+
+    def _positiontonotation(self, indexorcoordinateorvector):
+        posvector = self.convert(indexorcoordinateorvector, tovector=True)
+        (rank_, file_) = posvector.tupleform()
+        return self._filesymbols[file_] + self._ranksymbols[rank_]
+
+    def _notationtoposition(self, notationstring,
+                            indexform=False, vectorform=False):
+        try:
+            assert any([indexform, vectorform]), \
+                "Specify the output using the optional arguments."
+            assert self._onlyone([indexform, vectorform]), \
+                "The output is only a vector or an index, not both."
+            (file_, rank_) = tuple(notationstring)
+            iFile = self._filesymbols.index(file_)
+            iRank = self._ranksymbols.index(rank_)
+            if indexform:
+                return iRank*8 + iFile
+            elif vectorform:
+                return Vector(iRank, iFile)
+            else:
+                raise RuntimeError
+        except ValueError as e:
+            raise
+        except AssertionError as e:
+            raise
+        except RuntimeError as e:
+            raise RuntimeError("This shouldn't be raised! Something went wrong.")
+
+    def addmovetohistory(self, piece, endposition, movewascapture=False):
+        """Writes a move into the game history."""
+        # BUG: Sometimes in a game you need to specify which piece moved/took
+        # a piece. This method currently doesn't account for that.
+        # BUG: Doesn't work with pawn captures.
+        try:
+            piecesymbol = piece._notationsymbol
+            if movewascapture:
+                capturesymbol = 'x'
+                if isinstance(piece, PawnPiece):  # HACK: Fix captures for pawns.
+                    pos = piece.position(vectorform=True)
+                    filestring = self._filesymbols[pos.vector[1]]
+                    capturesymbol = filestring + capturesymbol
+            else:
+                capturesymbol = ''
+            movesymbol = self._positiontonotation(endposition)
+
+            notationstring = piecesymbol + capturesymbol + movesymbol
+            self._movehistory.append(notationstring)
+        except AttributeError as err1:
+            raise
+        except TypeError as err2:
+            raise
+
+    def processplayersmove(self, userstring):
+        """Figure out what the hell the user is trying to say.
+
+        Currently this method only has the ability to read in algebraic notation
+        to specify where a piece goes. Eventually this method will become
+        redundant when the GUI is developed.
+
+        The method returns the piece that is to move, along with the position
+        the piece will move to."""
+        # WIP: UI is really hard to make.
+        if len(userstring) == 2:  # If just moving a pawn. e.g. e4
+            piecetomove = PawnPiece
+            endindex = self._notationtoposition(userstring, indexform=True)
+
+        whichpiece = userstring[0]  # The first character is the chess piece.
+        return None
+
+
+
+class _ChessBoardGUI(_ChessBoardCore):
+    """The component that handles drawing up the board on the screen."""
+    # WIP: First get UI working, test to make sure the engine works then try to
+    # make GUI.
     pass
 
 
-class ChessBoard(_ChessBoardCore, _ChessBoardPieces, _ChessBoardEngine):
+class _ChessBoardEngine(_ChessBoardCore):
+    """The component that handles all of the engine behind the board."""
+    # WIP: This is not even close to being started, but is placeholder for when
+    # it will begin to be developed.
+    pass
+
+
+  #####  #     # #######  #####   #####  ######  #######    #    ######  ######
+ #     # #     # #       #     # #     # #     # #     #   # #   #     # #     #
+ #       #     # #       #       #       #     # #     #  #   #  #     # #     #
+ #       ####### #####    #####   #####  ######  #     # #     # ######  #     #
+ #       #     # #             #       # #     # #     # ####### #   #   #     #
+ #     # #     # #       #     # #     # #     # #     # #     # #    #  #     #
+  #####  #     # #######  #####   #####  ######  ####### #     # #     # ######
+
+
+class ChessBoard(_ChessBoardCore, _ChessBoardPieces, _ChessBoardEngine,
+                 _ChessBoardUI, _ChessBoardGUI):
     """The parent of all public classes for the chessboard.
 
     Since the board embraces composition OOP mentality, this class is where the
@@ -212,7 +343,7 @@ class ChessBoard(_ChessBoardCore, _ChessBoardPieces, _ChessBoardEngine):
     Public methods
     ===============
     - __getitem__: This is using [] on the class to fetch the piece at that
-      postion. Can be either a integer from 0 to 63 or a list/tuple of length
+      position. Can be either a integer from 0 to 63 or a list/tuple of length
       two that specifies the row index and column index.
     - convert: ***TO BE COMPLETED***
     - addpiece: Adds a piece to the board.
@@ -233,6 +364,7 @@ class ChessBoard(_ChessBoardCore, _ChessBoardPieces, _ChessBoardEngine):
 
     def __init__(self):
         """Initalise the chessboard."""
+        # Call the __init__ of all the parents.
         _ChessBoardCore.__init__(self)
 
 

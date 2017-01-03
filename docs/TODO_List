@@ -4,9 +4,6 @@ Here is a centralised to do list that I can add to as I see/think of things.
 Note that this file isn't for ideas or features but instead for more real,
 pressing problems.
 
-- Clean up RookPiece in piece_tests.py so that it follows the same style as the
-other piece's unittests.
-
 - Write extensive tests for the chess board classes.
 They will be the ones being used non-stop and copping the worst of the program.
 I want to make them robust as possible before I try to expose them to an engine.
@@ -16,6 +13,12 @@ Lots of errors are raised as assertion errors, which means nothing. These need
 to be altered so that the errors have some meaning attached to them, even if that
 means to create new exceptions.
 
-- Finish writing up testing suites.
-Before writing any more code I need to finish writing up the tests on the code
-developed so far.
+- Improve the testing suites.
+At the moment the suites are a bit lacking. They barely test bad inputs and
+pretty much just confirm best case senarios. Add more tests with things like
+string inputs, lists where lists aren't allowed etc.
+
+- Once complete, refactor UI code.
+UI is something I've never really attempted. This code will need to be
+refactored massively in order to fall in line with the current standard of work
+in this program.

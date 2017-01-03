@@ -14,7 +14,8 @@
 # of the tests into good input or bad input methods to increase readabilty and
 # help identify bugs.
 #    03/01/17: Fixed errors/fails raised when calling tests, some of which were
-# in this script and some of which were an actual bug.
+# in this script and some of which were an actual bug. Added tests for new
+# methods created in UI and GUI classes.
 
 # TESTING REQUIREMENTS:
 # The chess board, for basic tests, should be very strict on what inputs it can
@@ -218,7 +219,7 @@ class TestBoard(unittest.TestCase):
             self.assertEqual(  # Check piece isn't in old positon.
                 self.board._board[self.startpos], None,
                 "The piece remains in its old spot." + self.errormessage)
-            self.assertEqual(  # Check piece is in new postion.
+            self.assertEqual(  # Check piece is in new position.
                 self.board._board[(self.startpos+1) % 63], self.piece,
                 "The piece should have moved, but it didn't.")
         except AssertionError:
@@ -238,6 +239,56 @@ class TestBoard(unittest.TestCase):
             self.board.capture(self.startpos, (self.startpos+1) % 63)
         except Exception as error:
             self.fail("%s" % error)
+
+    def test_positiontonotation(self):
+        func = self.board._positiontonotation
+        # First position.
+        self.assertEqual('e1', func(4))
+        self.assertEqual('e1', func((0, 4)))
+        self.assertEqual('e1', func(core.Vector(*(0, 4))))
+
+        # Second position.
+        self.assertEqual('f7', func(53))
+        self.assertEqual('f7', func((6, 5)))
+        self.assertEqual('f7', func(core.Vector(*(6, 5))))
+
+    def test_notationtoposition(self):
+        notation1 = 'e7'; notation2 = 'h5'; notation3 = 'c1'; notation4 = 'a2'
+        self.assertEqual(52,
+            self.board._notationtoposition(notation1, indexform=True))
+        self.assertEqual(core.Vector(4, 7),
+            self.board._notationtoposition(notation2, vectorform=True))
+        self.assertEqual(2,
+            self.board._notationtoposition(notation3, indexform=True))
+        self.assertEqual(core.Vector(1, 0),
+            self.board._notationtoposition(notation4, vectorform=True))
+        return None
+
+    def test_addmovetohistory(self):
+        piece = self.realpiece
+        endpos = 19
+
+        # A simple move.
+        self.board.addmovetohistory(piece, endpos)
+        self.assertEqual(self.board.movehistory()[-1], 'Qd3')
+
+        # A move with capture.
+        self.board.addmovetohistory(piece, endpos, movewascapture=True)
+        self.assertEqual(self.board.movehistory()[-1], 'Qxd3')
+
+    def test_addmovetohistory_pawnpiece(self):
+        piece = core.PawnPiece(playerpiece=True, startpositionindex=10)
+        print piece.position(vectorform=True)
+        movepos = 18  # Move forward once.
+        capturepos = 19  # Capture to your right.
+
+        # A simple move.
+        self.board.addmovetohistory(piece, movepos)
+        self.assertEqual(self.board.movehistory()[-1], 'c3')
+
+        # A move with capture.
+        self.board.addmovetohistory(piece, capturepos, movewascapture=True)
+        self.assertEqual(self.board.movehistory()[-1], 'cxd3')
 
 
 class TestDefaultChessBoard(unittest.TestCase):

@@ -23,6 +23,7 @@ TABLE OF CONTENTS
     iii. Back-end
     iv.  Schedule
     v.   Relationship to other projects
+    vi.  An example of ASCII board.
 2. Features: Now and Future
 3. Abstraction: How does it work?
 4. Testing/Requirements
@@ -124,6 +125,13 @@ DEPENDANCY
 On a most basic level there is little dependancy on other modules. The testing
 suite only relies on importing default modules while the core library currently
 has no dependancy.
+
+ASCII BOARD LAYOUT
+-------------------
+Until a true GUI is developed, the board is rendered as a ASCII picture. An
+example of a board mid-game is shown below.
+
+[[[ TODO: Show an example of the board. ]]]
 
 
 FEATURES

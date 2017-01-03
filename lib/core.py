@@ -13,7 +13,7 @@
 # Revisited the project, conducting some cleaning while I was in.
 #    27/12/16: Added setion titles for easy viewing (Chess Board and Pieces).
 # Creaed methods to check if the index is valid and if the move is legal in the
-# base piece class. Added a method to call the postion of the piece, such it is
+# base piece class. Added a method to call the position of the piece, such it is
 # a private attribute. Added a method to move the pieces. Added special methods
 # to handle if the move is valid in the rook and king classes.
 #    28/12/16: Fixed RookPiece class's identification of the current rank.
@@ -34,7 +34,9 @@
 #    01/01/17: Moved the ChessBoard class to new script. Made the chess pieces
 # now only use vectors in all methods, but allows use of indices for backwards
 # compatability.
-#    02/01/17:
+#    03/01/17: Made _toindex and _tovector work for both index and vector
+# arguments. Refactored the multiplication methods in vectors. Lots of small
+# fixes.
 
 # NOTES:
 # The board should have its internal structure (i.e. the locations) completely
@@ -73,7 +75,7 @@ class Vector:
     Private Methods
     ================
     :isvector: Returns true or false depending if the object passed is an
-               instance of the Vector class.
+        instance of the Vector class.
     :eq: Determines if two vectors are equal.
     :ne: Determines if the two vectors are unequal.
     :add: Adds vectors together. Use the +/- characters.
@@ -106,7 +108,7 @@ class Vector:
             projected_selfvector = map(lambda i: intdivide[0]*i, other.vector)
             if intdivide[0] != intdivide[1]:
                 return False
-            elif projected_selfvector != self.vector:
+            elif tuple(projected_selfvector) != self.vector:
                 return False
             else:
                 return True
@@ -122,12 +124,6 @@ class Vector:
             return Vector(*tuple(map(lambda i: int(i/abs(i)), self.vector)))
         else:
             raise NotImplementedError("This call doesn't work for this vector.")
-
-    @staticmethod
-    def _assertIsVector(obj):
-        """Assert that the object passed is a vector."""
-        assert isinstance(obj, Vector), "The object passed is not a vector."
-        return None
 
     def _scalar_multiply(self, intscalar):
         """Core for the scalar multiplication."""
@@ -146,6 +142,16 @@ class Vector:
     def _mag(self):
         """Core for the magnitude of the vector."""
         return reduce(lambda x, y: x+y, map(lambda ii: ii**2, self.vector))**0.5
+
+    def _multiply(self, other):
+        """Core for the multiplication."""
+        try:
+            if isinstance(other, int):
+                return Vector(*self._scalar_multiply(other))
+            else:
+                return self._dot(other)
+        except AttributeError:
+            raise AttributeError("Other must be a vector.")
 
     def __eq__(self, other):
         """Implement equality operations."""
@@ -207,33 +213,11 @@ class Vector:
 
     def __mul__(self, other):
         """Allows for dot product and scalar multiplication."""
-        try:
-            if isinstance(other, int):
-                return Vector(*self._scalar_multiply(other))
-            else:
-                return Vector(*self._dot(other))
-        except AttributeError:
-            raise AttributeError("Other must be a vector.")
+        return self._multiply(other)
 
     def __rmul__(self, other):
         """Reversed __mul__ method."""
-        try:
-            if isinstance(other, int):
-                return Vector(*self._scalar_multiply(other))
-            else:
-                return Vector(*self._dot(other))
-        except AttributeError:
-            raise AttributeError("Other must be a vector.")
-
-    def __imul__(self, other):
-        """The *= operation."""
-        try:
-            if isinstance(other, int):
-                return Vector(*self._scalar_multiply(other))
-            else:
-                return Vector(*self._dot(other))
-        except AttributeError:
-            raise AttributeError("Other must be a vector.")
+        return self._multiply(other)
 
     def __abs__(self):
         """Magnitude of the vector"""
@@ -252,8 +236,8 @@ class Vector:
 class BasePiece:
     """The class all chess pieces inherit from."""
 
-    def __init__(self, playerpiece, startpositionindex, validmovevectors,
-                 onlyunitvectors=False):
+    def __init__(self, playerpiece, startpositionindex, notationsymbol,
+                 validmovevectors, onlyunitvectors=False):
         # Sanity checks.
         assert isinstance(onlyunitvectors, bool), \
             "'onlyunitvectors' parameter must be true or false."
@@ -263,6 +247,7 @@ class BasePiece:
 
         # Assignment of attributes.
         self._positionvector = self._tovector(startpositionindex)
+        self._notationsymbol = notationsymbol
         self._validmovevectors = self._checkAllAreVectors(validmovevectors)
         self._onlyunitvectors = onlyunitvectors
         self.isplayerpiece = playerpiece
@@ -271,23 +256,51 @@ class BasePiece:
     @staticmethod
     def _checkAllAreVectors(vectorlist):
         """A sanity check to make sure all items in vectorlist are vectors."""
-        for item in vectorlist:
-            assert isinstance(item, Vector), "There are non-vectors in the list."
-        return vectorlist
+        try:
+            for item in vectorlist:
+                assert isinstance(item, Vector)
+            return vectorlist
+        except TypeError as error1:
+            raise TypeError("Arg1 must be an iterable.")
+        except AssertionError as error2:
+            raise AssertionError("There are non-vectors in the list.")
 
     @staticmethod
-    def _tovector(index):
+    def _tovector(indexorvector):
         """Converts an index on the board into a vector."""
-        return Vector(index/8, index % 8)
+        try:
+            if isinstance(indexorvector, Vector):
+                vector = indexorvector
+                return vector
+            else:
+                index = indexorvector
+                assert isinstance(index, int)
+                assert 0 <= index <= 63
+        except AssertionError as error:
+            raise TypeError("The argument must be an index from 0 to 63.")
+        else:
+            return Vector(index/8, index % 8)
 
     @staticmethod
-    def _toindex(vector):
+    def _toindex(indexorvector):
         """Converts a vector on the board to an index."""
-        return vector.vector[0]*8 + vector.vector[1]
+        try:
+            if isinstance(indexorvector, int):
+                index = indexorvector
+                return index
+            else:
+                vector = indexorvector
+                return vector.vector[0]*8 + vector.vector[1]
+        except AttributeError as error:
+            raise TypeError("The argument must be a vector.")
+
+    def piecetype(self):
+        """Returns the class of which this piece inherits from."""
+        return eval(self.__class__.__name__)
 
     def distancefromselfto(self, moveto):
         """Find the relative vector between board index and current position."""
-        return self._tovector(movetopos) - self._positionvector
+        return self._tovector(moveto) - self._positionvector
 
     def possiblemoves(self):
         """Gets possibles moves for piece if board was empty.
@@ -312,27 +325,15 @@ class BasePiece:
                 posvector += unitvector
         return possiblemoveslist
 
-    def isvalidmove(self, movetopos):
-        """Checks that the move specified is valid."""
-        # REVIEW: Is this function needed now there is possiblemoves method?
-        diffvec = self.distancefromselfto(movetopos)
-        if not self._onlyunitvectors:
-            if any([diffvec.intmultipleof(x) for x in self._validmovevectors]):
-                return True
-            else:
-                return False
-        elif self._onlyunitvectors:
-            return (diffvec in self._validmovevectors)
-
-    def postion(self, indexform=False, vectorform=False):
+    def position(self, indexform=False, vectorform=False):
         """Returns the position of the piece. Used for encapsulation purposes."""
         assert (indexform or vectorform), \
             "Specify either index-form or vector-form of returned position."
         assert not (indexform and vectorform), \
             "Can only return either index-form or vector-form."
 
-        if index: return self._toindex(self._positionvector)
-        elif vector: return self._positionvector
+        if indexform: return self._toindex(self._positionvector)
+        elif vectorform: return self._positionvector
         else: raise RuntimeError("Something went wrong.")
 
     def movetoindex(self, index):
@@ -350,7 +351,7 @@ class RookPiece(BasePiece):
     """The class for the Rook."""
 
     def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self, playerpiece, startpositionindex,
+        BasePiece.__init__(self, playerpiece, startpositionindex, 'R',
             validmovevectors=(
                 Vector(1,0), Vector(0,1), Vector(-1, 0), Vector(0, -1))
         )
@@ -361,7 +362,7 @@ class KnightPiece(BasePiece):
     """The class for the knight."""
 
     def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self, playerpiece, startpositionindex,
+        BasePiece.__init__(self, playerpiece, startpositionindex, 'N',
             validmovevectors=(
                 Vector(2, 1), Vector(1, 2), Vector(2, -1), Vector (1, -2),
                 Vector(-2, -1), Vector(-1, -2), Vector(-2, 1), Vector (-1, 2)),
@@ -374,8 +375,7 @@ class BishopPiece(BasePiece):
     """The class for the bishop."""
 
     def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self,
-            playerpiece, startpositionindex,
+        BasePiece.__init__(self, playerpiece, startpositionindex, 'B',
             validmovevectors=(
                 Vector(1, 1), Vector(1, -1), Vector(-1, -1), Vector(-1, 1))
         )
@@ -385,8 +385,7 @@ class QueenPiece(BasePiece):
     """The class for the queen."""
 
     def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self,
-            playerpiece, startpositionindex,
+        BasePiece.__init__(self, playerpiece, startpositionindex, 'Q',
             validmovevectors=(
                 Vector(1, 0), Vector(0, 1), Vector(1, 1), Vector(1, -1),
                 Vector(-1, 0), Vector(0, -1), Vector(-1, -1), Vector(-1, 1))
@@ -398,8 +397,7 @@ class KingPiece(BasePiece):
     """The class for the King"""
 
     def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self,
-            playerpiece, startpositionindex,
+        BasePiece.__init__(self, playerpiece, startpositionindex, 'K',
             validmovevectors=(
                 Vector(1, 0), Vector(0, 1), Vector(1, 1), Vector(1, -1),
                 Vector(-1, 0), Vector(0, -1), Vector(-1, -1), Vector(-1, 1)),
@@ -413,8 +411,7 @@ class PawnPiece(BasePiece):
     # WIP: Still be fixed.
 
     def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self,
-            playerpiece, startpositionindex,
+        BasePiece.__init__(self, playerpiece, startpositionindex, "",
             validmovevectors=(Vector(1, 0), Vector(2, 0)), onlyunitvectors=True
         )
         self._validcapturemoves = (Vector(1, 1), Vector(1, -1))

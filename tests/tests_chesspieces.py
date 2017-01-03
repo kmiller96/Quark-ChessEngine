@@ -13,6 +13,9 @@
 # on.
 #    29/12/16: Added tests for good moves and bad moves on each piece. Did some
 # refactoring to clean up testing suites.
+#    03/01/17: Wrote more tests/made broken tests work. This file is a major
+# item on the list of things to do. There are lots of unfinished methods to
+# complete.
 
 # TODO:
 # Rewrite these tests from scratch :(
@@ -31,8 +34,11 @@ class TestBasePiece(unittest.TestCase):
 
     def setUp(self):
         self.piece = core.BasePiece(
-            playerpiece=True, startpositionindex=choice(self.innersquares()),
-            validmovevectors=(core.Vector(1, 0),)
+            playerpiece=True,
+            startpositionindex=choice(self.innersquares()),
+            notationsymbol='?',
+            validmovevectors=(core.Vector(1, 0),),
+            onlyunitvectors=True
         )
         return None
 
@@ -40,13 +46,14 @@ class TestBasePiece(unittest.TestCase):
         self.piece = None
         return None
 
-    @staticmethod
-    def _flatten(l):
-        """A hack used to flatten lists."""
-        return [item for sublist in l for item in sublist]
-
     def innersquares(self):
-        """Gives only the squares at least one square away from the edge."""
+        """Gives only the squares at least one square away from the edge.
+
+        The tests for movement all check one square away in every direction.
+        So to still randomly pick positions on the board while maintaining that
+        certain tests will always pass/fail this method is used."""
+        flatten = lambda l: [item for sublist in l for item in sublist]
+
         possible_positions = [
             range(9, 14+1),
             range(17, 22+1),
@@ -55,54 +62,112 @@ class TestBasePiece(unittest.TestCase):
             range(41, 46+1),
             range(49, 54+1)
         ]  # All squares that aren't on the edge.
-        # Now turn list of lists into 1D array of possible positions:
-        return self._flatten(possible_positions)
+        return flatten(possible_positions)
 
-    def assertthatmoveis(self, TrueorFalse, movelist):
-        """A shorthand for assertTrue(ismovevalid(..)) check for a list of
-        moves."""
-        originalpos = self.piece._postion
-        isvalidmove = self.piece.isvalidmove
+    def test_checkAllAreVectors_goodinput(self):
+        vectorlist = [core.Vector(1,3), core.Vector(5,1), core.Vector(0,6)]
+        try:
+            self.piece._checkAllAreVectors(vectorlist)
+        except Exception as error:
+            self.fail("%s" % error)
+        return
 
-        message = lambda x: "Moving %i squares from %i should yield %s" % \
-        (x, originalpos, str(TrueorFalse))
+    def test_checkAllAreVectors_badinput(self):
+        badlist1 = [(2,5), (6, 0), (7, 7)]  # Coordinates instead of vectors.
+        badlist2 = ['strings', 'are', 'not', 'good']  # Strings instead of.
+        badlist3 = ['some are strings', core.Vector(1, 2), (6, 5)]  # Mixed.
+        badlist4 = core.Vector(7, 1)  # Not a list.
 
-        if TrueorFalse is True:
-            for move in movelist:
-                self.assertTrue(isvalidmove(originalpos + move), message(move))
-        elif TrueorFalse is False:
-            for move in movelist:
-                self.assertFalse(isvalidmove(originalpos + move), message(move))
-        else:
-            raise TypeError("The first argument must be True or False.")
-        return None
+        self.assertRaises(AssertionError,
+            self.piece._checkAllAreVectors, badlist1)
+        self.assertRaises(AssertionError,
+            self.piece._checkAllAreVectors, badlist2)
+        self.assertRaises(AssertionError,
+            self.piece._checkAllAreVectors, badlist3)
+        self.assertRaises(TypeError,
+            self.piece._checkAllAreVectors, badlist4)
+        return
 
-    def test_isvalidindex(self):
-        func = self.piece.isvalidindex
+    def test_tovector_goodinput(self):
+        index = 44  # Magic number to be certain the output is right.
+        expectedvector = core.Vector(5, 4)
+        self.assertEqual(expectedvector, self.piece._tovector(index),
+            "The vector calculated doesn't match that as expected.")
+        return
 
-        self.assertTrue(func(randint(0, 63)), "False under correct index.")
-        self.assertFalse(func(-12), "True when negative value.")
-        self.assertFalse(func(67), "True when index >63.")
-        self.assertRaises(TypeError, func, 'string', "A string passed through.")
-        self.assertRaises(TypeError, func, 23.1, "A float passed through.")
+    def test_tovector_badinput(self):
+        badinput1 = 'string'
+        badinput2 = 14.09
+        badinput3 = [1, 6, 12, 34]  # No lists.
+        badinput4 = (2, 5)  # Doesn't accept coordinates.
 
-    def test_positionmethod(self):
-        self.assertEqual(
-            self.piece.postion(), self.piece._postion,
-            "The method 'postion' does not return expected values."
-        )
-        self.assertNotEqual(
-            self.piece.postion(), self.piece._postion + 1,
-            "The method returned true when it should have been false."
-        )
-        return None
+        self.assertRaises(TypeError,
+            self.piece._tovector, badinput1)
+        self.assertRaises(TypeError,
+            self.piece._tovector, badinput2)
+        self.assertRaises(TypeError,
+            self.piece._tovector, badinput3)
+        self.assertRaises(TypeError,
+            self.piece._tovector, badinput3)
+        return
 
-    def test_moveoffboard(self):
-        self.assertRaises(
-            IndexError,
-            self.piece.move, 65
-        )
-        return None
+    def test_toindex_goodinput(self):
+        vector = core.Vector(2, 2)
+        expectedindex = 18  # Magic numbers to be certain of correct answer.
+
+        self.assertEqual(expectedindex, self.piece._toindex(vector),
+            "The output of _toindex didn't match expected result.")
+        return
+
+    def test_toindex_badinput(self):
+        badinput1 = 'string'
+        badinput2 = 14.09
+        badinput3 = [core.Vector(1,3), core.Vector(5, 3)]  # No lists.
+        badinput4 = (2, 5)  # Doesn't accept coordinates.
+
+        self.assertRaises(TypeError,
+            self.piece._toindex, badinput1)
+        self.assertRaises(TypeError,
+            self.piece._toindex, badinput2)
+        self.assertRaises(TypeError,
+            self.piece._toindex, badinput3)
+        self.assertRaises(TypeError,
+            self.piece._toindex, badinput3)
+        return
+
+    def test_piecetype(self):
+        self.assertTrue(core.BasePiece, self.piece.piecetype)
+
+    def test_distancefromselfto(self):
+        self.piece.movetovector(core.Vector(3, 3))  # I have to call this method :(
+        vec1 = core.Vector(4, 4); relvec1 = core.Vector(1, 1)
+        vec2 = core.Vector(1, 4); relvec2 = core.Vector(-2, 1)
+        vec3 = core.Vector(7, 1); relvec3 = core.Vector(4, -2)
+
+        try:
+            self.assertEqual(relvec1, self.piece.distancefromselfto(vec1))
+            self.assertEqual(relvec2, self.piece.distancefromselfto(vec2))
+            self.assertEqual(relvec3, self.piece.distancefromselfto(vec3))
+        except AssertionError as error:
+            self.fail("The relative vector calculated didn't match that expected.")
+        return
+
+    def test_position(self):
+        # TODO: Goood and bad input checks.
+        self.piece.movetoindex(33)
+        self.assertEqual(33, self.piece.position(indexform=True))
+
+        self.piece.movetovector(core.Vector(4,5))
+        self.assertEqual(core.Vector(4,5), self.piece.position(vectorform=True))
+        return
+
+    def test_movetoindex(self):
+        # TODO: This method.
+        return
+
+    def test_movetovector(self):
+        # TODO: This method.
+        return
 
 
 class TestKingPiece(TestBasePiece):
@@ -114,18 +179,9 @@ class TestKingPiece(TestBasePiece):
         )
         return None
 
-    def test_kinggoodmove(self):
-        self.assertthatmoveis(True,
-            (8, -8, 1, -1,  # Move forward, backward, left, right.
-             9, -9, 7, -7)  # Move NE, SW, NW, SE.
-        )
-        return None
-
-    def test_kingbadmove(self):
-        self.assertthatmoveis(False,
-            (22, -32, -10, 19)  # Bad moves.
-        )
-        return None
+    def test_piecetype(self):
+        self.assertTrue(core.KingPiece, self.piece.piecetype)
+        return
 
 
 class TestQueenPiece(TestBasePiece):
@@ -135,27 +191,11 @@ class TestQueenPiece(TestBasePiece):
         self.piece = core.QueenPiece(
             playerpiece=True, startpositionindex=choice(self.innersquares())
         )
-        return None
+        return
 
-    def test_queengoodmove(self):
-        self.assertthatmoveis(True,
-            (8, -8, 1, -1, 9, -9, 7, -7)  # Move like King.
-        )
-        self.piece._postion = 27  # Dump the queen in the middle of the board.
-        self.assertthatmoveis(True,
-            (8*2, -8*3, 1*4, -1*2, 9*3, -9*2, 7*2, -7*3)  # Move multiple squares.
-        )
-        return None
-
-    def test_queenbadmove(self):
-        self.assertthatmoveis(False,
-            (10, -15, -22, 12)  # Check moves that should never work.
-        )
-        self.piece._postion = 27  # Move queen to check knight-like moves.
-        self.assertthatmoveis(False,
-            (6, -6)  # Knight-like moves that might be valid in certain positions.
-        )
-        return None
+    def test_piecetype(self):
+        self.assertTrue(core.QueenPiece, self.piece.piecetype)
+        return
 
 
 class TestBishopPiece(TestBasePiece):
@@ -165,21 +205,11 @@ class TestBishopPiece(TestBasePiece):
         self.piece = core.BishopPiece(
             playerpiece=True, startpositionindex=choice(self.innersquares())
         )
-        return None
+        return
 
-    def test_bishopgoodmove(self):
-        self.assertthatmoveis(True,
-            (7, -7, 9, -9,  # 1-square bishop moves.
-             14, -14, 18, -18,  # 2-square bishop moves.
-             21, -21, 27, -27)  # 3-square bishop moves.
-        )
-        return None
-
-    def test_bishopbadmove(self):
-        self.assertthatmoveis(False,
-            (8, 1, 10, -23)  # Bad bishop moves.
-        )
-        return None
+    def test_piecetype(self):
+        self.assertTrue(core.BishopPiece, self.piece.piecetype)
+        return
 
 
 class TestKnightPiece(TestBasePiece):
@@ -189,19 +219,11 @@ class TestKnightPiece(TestBasePiece):
         self.piece = core.KnightPiece(
             playerpiece=True, startpositionindex=choice(self.innersquares())
         )
-        return None
+        return
 
-    def test_knightgoodmove(self):
-        self.assertthatmoveis(True,
-            (6, -6, 10, -10, 15, -15, 17, -17)
-        )
-        return None
-
-    def test_knightbadmove(self):
-        self.assertthatmoveis(False,
-            (8, 12, -3, 9, -7)
-        )
-        return None
+    def test_piecetype(self):
+        self.assertTrue(core.KnightPiece, self.piece.piecetype)
+        return
 
 
 class TestRookPiece(TestBasePiece):
@@ -211,24 +233,11 @@ class TestRookPiece(TestBasePiece):
         self.piece = core.RookPiece(
             playerpiece=True, startpositionindex=choice(self.innersquares())
         )
-        return None
+        return
 
-    def test_isvalidmove(self):
-        # TODO: Fix this method so that it is using the same style as the others.
-        originalpos = self.piece._postion
-        func = self.piece.isvalidmove
-        self.assertTrue(func(originalpos + 8))  # Move up.
-        self.assertTrue(func(originalpos - 8))  # Move down.
-        self.assertTrue(func(originalpos - 1))  # Move left.
-        self.assertTrue(func(originalpos + 1))  # Move right.
-
-        self.assertFalse(func(originalpos + 9))
-        self.assertFalse(func(originalpos - 20))
-
-        # Move out of rank but less then 8 indicies.
-        self.piece._postion = 15  # Rank 2, file H.
-        self.assertFalse(func(self.piece._postion + 3))  # Rank 3, file C
-        return None
+    def test_piecetype(self):
+        self.assertTrue(core.RookPiece, self.piece.piecetype)
+        return
 
 
 class TestPawnPiece(TestBasePiece):
@@ -237,33 +246,13 @@ class TestPawnPiece(TestBasePiece):
 
     def setUp(self):
         self.piece = core.PawnPiece(
-            playerpiece=True, startpositionindex=randint(8, 15)  # Only on second rank.
+            playerpiece=True, startpositionindex=choice(range(8, 15+1))
         )
-        return None
+        return
 
-    def test_basicmove(self):
-        self.assertthatmoveis(True,
-            (8,)  # Move forward one square.
-        )
-        return None
-
-    def test_pawnpush(self):
-        self.assertthatmoveis(True,
-            (16,)  # Pawn push.
-        )
-        self.piece.move(self.piece._postion + choice((8, 16)))
-        self.assertthatmoveis(False,
-            (16,)  # Make sure pawn can't push again.
-        )
-        return None
-
-    def test_promotion(self):
-
-        return None
-
-    def test_capture(self):
-
-        return None
+    def test_piecetype(self):
+        self.assertTrue(core.PawnPiece, self.piece.piecetype)
+        return
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
