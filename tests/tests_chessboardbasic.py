@@ -16,6 +16,8 @@
 #    03/01/17: Fixed errors/fails raised when calling tests, some of which were
 # in this script and some of which were an actual bug. Added tests for new
 # methods created in UI and GUI classes.
+#    04/01/17: Separated testing suites into the components they are designed in.
+# Added some more tests for the newly developed UI and GUI.
 
 # TESTING REQUIREMENTS:
 # The chess board, for basic tests, should be very strict on what inputs it can
@@ -35,8 +37,8 @@ from lib import chessboard
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TESTING~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class TestBoard(unittest.TestCase):
-    """A basic testing suite the pertains to only the most basic of calls."""
+class CoreTestBoard(unittest.TestCase):
+    """Contains the core methods for all of the other testing suites."""
 
     def setUp(self):
         """Initialise the board."""
@@ -48,8 +50,8 @@ class TestBoard(unittest.TestCase):
         self.startvector = core.Vector(*self.startcoord)
 
         # Put a piece on the board.
-        self.piece = 'X'
-        self.realpiece = core.QueenPiece(playerpiece=True, startpositionindex=27)  # NOTE: Move into tests that care about the piece being real.
+        self.piece = core.KingPiece(playerpiece=True, startpositionindex=44)
+        self.realpiece = core.QueenPiece(playerpiece=True, startpositionindex=27)
         self.board._board[self.startpos] = self.piece  # Insert piece manually.
 
         self.errormessage = " PIECE INDEX: %i" % self.startpos
@@ -59,6 +61,19 @@ class TestBoard(unittest.TestCase):
         """Destroy the tainted board. An extra procaution."""
         self.board = None
         return None
+
+
+  #####  ####### ######  #######
+ #     # #     # #     # #
+ #       #     # #     # #
+ #       #     # ######  #####
+ #       #     # #   #   #
+ #     # #     # #    #  #
+  #####  ####### #     # #######
+
+
+class TestChessBoardCore(CoreTestBoard):
+    """Tests all of the methods in the core class."""
 
     def test_read_position_singleindex(self):
         self.assertEqual(
@@ -167,11 +182,25 @@ class TestBoard(unittest.TestCase):
         self.assertRaises(AssertionError,
             self.board._assertIsOccupied, (self.startpos+1) % 63)
 
+
+ ######  ### #######  #####  #######  #####
+ #     #  #  #       #     # #       #     #
+ #     #  #  #       #       #       #
+ ######   #  #####   #       #####    #####
+ #        #  #       #       #             #
+ #        #  #       #     # #       #     #
+ #       ### #######  #####  #######  #####
+
+
+
+class TestChessBoardPieces(CoreTestBoard):
+    """Testing suite for all of the methods in _ChessBoardPieces."""
+
     def test_piecesbetween(self):
         self.board._board[self.startpos] = None  # Get a clean board.
         self.board._board[27] = self.piece  # Move to center for testing.
 
-        piecesbetween = self.board.piecesbetween
+        piecesbetween = self.board._piecesbetween
         errormsg = "The method coudn't find the piece."
         self.assertTrue(len(piecesbetween(26, 28)) == 1, errormsg)  # Left to right
         self.assertTrue(len(piecesbetween(31, 24)) == 1, errormsg)  # Right to left
@@ -179,6 +208,12 @@ class TestBoard(unittest.TestCase):
         self.assertTrue(len(piecesbetween(18, 36)) == 1, errormsg)  # SW to NE
         self.assertTrue(len(piecesbetween(20, 34)) == 1, errormsg)  # SE to NW
         return None
+
+    def test_allpossiblemoves(self):
+        self.board.addpiece(self.realpiece.piecetype(), 27)
+        print "\n"
+        self.board.allpossiblemoves()
+        print ""
 
     def test_addpiece_badinput(self):
         self.assertRaises(AssertionError,
@@ -240,55 +275,173 @@ class TestBoard(unittest.TestCase):
         except Exception as error:
             self.fail("%s" % error)
 
+
+ #     #  #####  ####### ######
+ #     # #     # #       #     #
+ #     # #       #       #     #
+ #     #  #####  #####   ######
+ #     #       # #       #   #
+ #     # #     # #       #    #
+  #####   #####  ####### #     #
+
+ ### #     # ####### ####### ######  #######    #     #####  #######
+  #  ##    #    #    #       #     # #         # #   #     # #
+  #  # #   #    #    #       #     # #        #   #  #       #
+  #  #  #  #    #    #####   ######  #####   #     # #       #####
+  #  #   # #    #    #       #   #   #       ####### #       #
+  #  #    ##    #    #       #    #  #       #     # #     # #
+ ### #     #    #    ####### #     # #       #     #  #####  #######
+
+
+
+class TestChessBoardUI(CoreTestBoard):
+    """Tests the UI component of the chess board."""
+
+    def test_determinepiece(self):
+        self.assertTrue(isinstance(
+                self.realpiece,
+                self.board._determinepiece(self.realpiece.symbol())))
+        return
+
     def test_positiontonotation(self):
         func = self.board._positiontonotation
         # First position.
-        self.assertEqual('e1', func(4))
-        self.assertEqual('e1', func((0, 4)))
-        self.assertEqual('e1', func(core.Vector(*(0, 4))))
+        self.assertEqual('e1->e2', func(4, 12))
+        self.assertEqual('e1->e2', func((0, 4), (1, 4)))
+        self.assertEqual('e1->e2', func(core.Vector(0, 4), core.Vector(1, 4)))
 
         # Second position.
-        self.assertEqual('f7', func(53))
-        self.assertEqual('f7', func((6, 5)))
-        self.assertEqual('f7', func(core.Vector(*(6, 5))))
+        self.assertEqual('f7xg7', func(53, 54, capture=True))
+        self.assertEqual('f7xg7', func((6, 5), (6, 6), capture=True))
+        self.assertEqual('f7xg7', func(core.Vector(6, 5), core.Vector(6, 6), capture=True))
+        return
 
-    def test_notationtoposition(self):
-        notation1 = 'e7'; notation2 = 'h5'; notation3 = 'c1'; notation4 = 'a2'
-        self.assertEqual(52,
-            self.board._notationtoposition(notation1, indexform=True))
-        self.assertEqual(core.Vector(4, 7),
-            self.board._notationtoposition(notation2, vectorform=True))
-        self.assertEqual(2,
-            self.board._notationtoposition(notation3, indexform=True))
-        self.assertEqual(core.Vector(1, 0),
-            self.board._notationtoposition(notation4, vectorform=True))
+    def test_notationtopositions(self):
+        notation1 = 'e7->e8'; notation2 = 'c1->a2'
+        func = self.board._notationtopositions
+        self.assertEqual(
+            (core.Vector(6, 4), core.Vector(7, 4)),
+            func(notation1)
+        )
+        self.assertEqual(
+            (core.Vector(0, 2), core.Vector(1, 0)),
+            func(notation2)
+        )
         return None
 
     def test_addmovetohistory(self):
         piece = self.realpiece
+        startpos = 10
         endpos = 19
 
         # A simple move.
-        self.board.addmovetohistory(piece, endpos)
-        self.assertEqual(self.board.movehistory()[-1], 'Qd3')
+        self.board.addmovetohistory(piece, startpos, endpos)
+        self.assertEqual(self.board.fetchmovehistory()[-1], 'Qc2->d3')
 
         # A move with capture.
-        self.board.addmovetohistory(piece, endpos, movewascapture=True)
-        self.assertEqual(self.board.movehistory()[-1], 'Qxd3')
+        self.board.addmovetohistory(piece, startpos, endpos, movewascapture=True)
+        self.assertEqual(self.board.fetchmovehistory()[-1], 'Qc2xd3')
+        return
 
     def test_addmovetohistory_pawnpiece(self):
         piece = core.PawnPiece(playerpiece=True, startpositionindex=10)
-        print piece.position(vectorform=True)
+        startpos = 10
         movepos = 18  # Move forward once.
         capturepos = 19  # Capture to your right.
 
         # A simple move.
-        self.board.addmovetohistory(piece, movepos)
-        self.assertEqual(self.board.movehistory()[-1], 'c3')
+        self.board.addmovetohistory(piece, startpos, movepos)
+        self.assertEqual(self.board.fetchmovehistory()[-1], 'c2->c3')
 
         # A move with capture.
-        self.board.addmovetohistory(piece, capturepos, movewascapture=True)
-        self.assertEqual(self.board.movehistory()[-1], 'cxd3')
+        self.board.addmovetohistory(piece, startpos, capturepos, movewascapture=True)
+        self.assertEqual(self.board.fetchmovehistory()[-1], 'c2xd3')
+
+    def test_processplayermove(self):
+        move1 = 'd2->d4'
+        move2 = 'c2->c4'
+        move3 = 'Qd1->a4'
+
+        func = self.board.processplayermove
+        self.assertEqual(
+            (core.PawnPiece, (core.Vector(1,3), core.Vector(3,3))),
+            func(move1),
+            "The move wasn't processed correctly."
+        )
+        self.assertEqual(
+            (core.PawnPiece, (core.Vector(1,2), core.Vector(3,2))),
+            func(move2),
+            "The move wasn't processed correctly."
+        )
+        self.assertEqual(
+            (core.QueenPiece, (core.Vector(0,3), core.Vector(3,0))),
+            func(move3),
+            "The move wasn't processed correctly."
+        )
+
+
+  #####  ######     #    ######  #     # ###  #####     #    #
+ #     # #     #   # #   #     # #     #  #  #     #   # #   #
+ #       #     #  #   #  #     # #     #  #  #        #   #  #
+ #  #### ######  #     # ######  #######  #  #       #     # #
+ #     # #   #   ####### #       #     #  #  #       ####### #
+ #     # #    #  #     # #       #     #  #  #     # #     # #
+  #####  #     # #     # #       #     # ###  #####  #     # #######
+
+ #     #  #####  ####### ######
+ #     # #     # #       #     #
+ #     # #       #       #     #
+ #     #  #####  #####   ######
+ #     #       # #       #   #
+ #     # #     # #       #    #
+  #####   #####  ####### #     #
+
+ ### #     # ####### ####### ######  #######    #     #####  #######
+  #  ##    #    #    #       #     # #         # #   #     # #
+  #  # #   #    #    #       #     # #        #   #  #       #
+  #  #  #  #    #    #####   ######  #####   #     # #       #####
+  #  #   # #    #    #       #   #   #       ####### #       #
+  #  #    ##    #    #       #    #  #       #     # #     # #
+ ### #     #    #    ####### #     # #       #     #  #####  #######
+
+
+
+class TestGUI(CoreTestBoard):
+    """Test the GUI."""
+
+    def test_uppercaseif(self):
+        return
+
+    def test_asciiemptysquare(self):
+        return
+
+    def test_asciioccupiedsquare(self):
+        return
+
+    def test_displayboard(self):
+        self.board = chessboard.DefaultChessBoard()
+        print ""
+        self.board.displayboard()
+        print ""
+        return
+
+
+  #####  #     #  #####  ####### ####### #     #
+ #     # #     # #     #    #    #     # ##   ##
+ #       #     # #          #    #     # # # # #
+ #       #     #  #####     #    #     # #  #  #
+ #       #     #       #    #    #     # #     #
+ #     # #     # #     #    #    #     # #     #
+  #####   #####   #####     #    ####### #     #
+
+ ######  #######    #    ######  ######   #####
+ #     # #     #   # #   #     # #     # #     #
+ #     # #     #  #   #  #     # #     # #
+ ######  #     # #     # ######  #     #  #####
+ #     # #     # ####### #   #   #     #       #
+ #     # #     # #     # #    #  #     # #     #
+ ######  ####### #     # #     # ######   #####
+
 
 
 class TestDefaultChessBoard(unittest.TestCase):
