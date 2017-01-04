@@ -21,9 +21,8 @@ TABLE OF CONTENTS
     i.   Introduction
     ii.  Front-end
     iii. Back-end
-    iv.  Schedule
-    v.   Relationship to other projects
-    vi.  An example of ASCII board.
+    iv.  Relationship to other projects
+    v.   An example of ASCII board.
 2. Features: Now and Future
 3. Abstraction: How does it work?
 4. Testing/Requirements
@@ -49,6 +48,22 @@ algebraic style chess notation into the terminal. It handles everything you
 would expect in a chess engine: castling, en passant, pawn push, checks, pins,
 illegal moves and much more.
 
+In this engine there is a special type of algebraic notation. This is because it
+is clearer and easier to work with while the engine is under development. The
+rules for each note is as follows:
+
+    1. The move is prepended with the symbol for the chess piece.
+    2. Add the current algebraic position (e.g. 'e6').
+    3. If just moving, the current position is followed by the '->' symbol. If
+       capturing, the position is instead followed by the 'x' symbol.
+    4. Add the final algebraic position.
+    5. Castling, check and checkmate notation is consistent.
+
+So as an example, if the King were to move from e1 to f1 the notation for this
+move would be "Ke1->f1". Another example, if a pawn moved from e2 to e4 it would
+use "e2->e4". As a final example, a knight is capturing a piece on a2 from b1
+which has notation "Na2xb1".
+
 BACK-END
 ---------
 The back end is currently under heavy development and is hard to discuss in any
@@ -60,66 +75,6 @@ engine to calculate a move. The chess pieces each are an individual type of
 class, but have very little control. They mainly store information more then do
 any of the heavy lifting of the program.
 
-SCHEDULE
----------
-
-+==========+=======================+================+============+============+
-| ######## |        Tasks to       | Estimated Time | Time Spent | Completed? |
-| ######## |        Complete       |    Required    |   so far   |            |
-+==========+=======================+================+============+============+
-|          | - Framework for       | - 1 week (so   | - unknown  | - Yes!     |
-|          | chess board and       | until week 2)  |            |            |
-|          | backline pieces.      |                |            |            |
-|          |                       |                |            |            |
-|          | - Basic movement      | - 4 hours for  | - 5hours   | - Basic    |
-|          | for each of the       | the very basic |            | movement   |
-|          | backline pieces.      | and 4 hours for|            |            |
-|          |                       | the more adv.  |            |            |
-|          |                       |                |            |            |
-|          | - Start on front-end  | - 10 hours for | - 0 hours  |            |
-|  Week 1  | of the engine.        | complete model |            |            |
-|          | Specifically, create  | but 4 hours to |            |            |
-|          | a model in which I    | get a working  |            |            |
-|          | can run games in for  | debugger going |            |            |
-|          | testing purposes.     |                |            |            |
-|          |                       |                |            |            |
-|          | - Add more movement   | - 10 hours     | - 0 hours  |            |
-|          | rules, such as checks,|                |            |            |
-|          | pins, castling.       |                |            |            |
-|          |                       |                |            |            |
-|          | - Add pawn class with | - 10 hours     | - 0 hours  |            |
-|          | the more advanced mo- |                |            |            |
-|          | vement rules.         |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-+----------+-----------------------+----------------+------------+------------+
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-| Week 2   |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-+----------+-----------------------+----------------+------------+------------+
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-| Week 3   |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-+----------+-----------------------+----------------+------------+------------+
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-| Week 4   |                       |                |            |            |
-|          |                       |                |            |            |
-|          |                       |                |            |            |
-+----------+-----------------------+----------------+------------+------------+
-
 DEPENDANCY
 -----------
 On a most basic level there is little dependancy on other modules. The testing
@@ -128,11 +83,55 @@ has no dependancy.
 
 ASCII BOARD LAYOUT
 -------------------
-Until a true GUI is developed, the board is rendered as a ASCII picture. An
-example of a board mid-game is shown below.
+Until a true GUI is developed, the board is rendered as a ASCII picture. There
+are multiple designs being considered. Below are some examples that might make
+it into the final game.
 
-[[[ TODO: Show an example of the board. ]]]
+Design 1: Letter representation.
 
++----------+
+| rnbqkbnr |
+| pppppppp |
+| ........ |
+| ........ |
+| ........ |
+| ........ |
+| PPPPPPPP |
+| RNBQKBNR |
++----------+
+
+Design 2 & 3: ASCII art representation.
+
+  +------------------------+       +-*--b--c--d--*--f--g--*-+
+8 |*R *N:*B *Q:*K *B:*N *R:|     8 |[r][n][b][q][k][b][n][r]|
+7 |*P:*P *P:*P *P:*P *P:*P |     7 |[p][p][p][p][p][p][p][p]|
+6 |   :::   :::   :::   :::|     6 |   :::   :::   :::   :::|
+5 |:::   :::   :::   :::   |     5 |:::   :::   :::   :::   |
+4 |   :::   :::   :::   :::|     4 |   :::   :::   :::   :::|
+3 |:::   :::   :::   :::   |     3 |:::   :::   :::   :::   |
+2 | P :P: P :P: P :P: P :P:|     2 |<P><P><P><P><P><P><P><P>|
+1 |:R: N :B: Q :K: B :N: R |     1 |<R><N><B><Q><K><B><N><R>|
+  +------------------------+   =>  +-*--b--c--d--*--f--g--*-+
+    a  b  c  d  e  f  g  h
+
+
+Design 4: Unicode representation.
+
+8 ║♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜
+7 ║♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟
+6 ║… … … … … … … …
+5 ║… … … … … … … …
+4 ║… … … … … … … …
+3 ║… … ♘ … … … … …
+2 ║♙ ♙ ♙ ♙ ♙ ♙ ♙ ♙
+1 ║♖ … ♗ ♕ ♔ ♗ ♘ ♖
+——╚═══════════════
+—— a b c d e f g h
+
+To start with the board will be rendered with design 1 as it is the simplist to
+create.However I like the look of design 2 and 3 the most, purely because it is
+large enough to read and contains enough information about the board. If I can
+get it to work, design 4 also looks quite nice (albeit a tad small).
 
 FEATURES
 ==========
