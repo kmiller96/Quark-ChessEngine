@@ -37,6 +37,7 @@
 #    03/01/17: Made _toindex and _tovector work for both index and vector
 # arguments. Refactored the multiplication methods in vectors. Lots of small
 # fixes.
+#    04/01/17: Added symbol method for the chess pieces.
 
 # NOTES:
 # The board should have its internal structure (i.e. the locations) completely
@@ -298,6 +299,10 @@ class BasePiece:
         """Returns the class of which this piece inherits from."""
         return eval(self.__class__.__name__)
 
+    def symbol(self, forasciiboard=False):
+        """Fetches the symbol of the piece. Optional argument is a WIP."""
+        return self._notationsymbol
+
     def distancefromselfto(self, moveto):
         """Find the relative vector between board index and current position."""
         return self._tovector(moveto) - self._positionvector
@@ -416,6 +421,11 @@ class PawnPiece(BasePiece):
         )
         self._validcapturemoves = (Vector(1, 1), Vector(1, -1))
         return None
+
+    def symbol(self, forasciiboard=False):
+        """A hack-fix of symbol in order to use the same method in the UI"""
+        if forasciiboard: return 'P'
+        else: return ""
 
     def isvalidcapture(self, movetopos):
         """Pawns capture in a strange fashion. This method controls that."""
