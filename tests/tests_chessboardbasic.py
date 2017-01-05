@@ -18,6 +18,7 @@
 # methods created in UI and GUI classes.
 #    04/01/17: Separated testing suites into the components they are designed in.
 # Added some more tests for the newly developed UI and GUI.
+#    05/01/17: Refactored code.
 
 # TESTING REQUIREMENTS:
 # The chess board, for basic tests, should be very strict on what inputs it can
@@ -46,13 +47,20 @@ class CoreTestBoard(unittest.TestCase):
 
         # Pick a position on the board to test.
         self.startpos = randint(0, 63)
+        self.startpos2 = (self.startpos+2) % 63
         self.startcoord = (self.startpos / 8, self.startpos % 8)
+        self.startcoord2 = (self.startpos2 / 8, self.startpos2 % 8)
         self.startvector = core.Vector(*self.startcoord)
+        self.startvector2 = core.Vector(*self.startcoord2)
 
-        # Put a piece on the board.
-        self.piece = core.KingPiece(playerpiece=True, startpositionindex=44)
-        self.realpiece = core.QueenPiece(playerpiece=True, startpositionindex=27)
-        self.board._board[self.startpos] = self.piece  # Insert piece manually.
+        # Put a piece1 on the board.
+        self.piece1 = core.KingPiece(
+            playerpiece=True, startpositionindex=self.startpos
+        )
+        self.piece2 = core.QueenPiece(
+            playerpiece=True, startpositionindex=self.startpos2
+        )
+        self.board._board[self.startpos] = self.piece1  # Insert piece1 manually.
 
         self.errormessage = " PIECE INDEX: %i" % self.startpos
         return None
@@ -77,19 +85,19 @@ class TestChessBoardCore(CoreTestBoard):
 
     def test_read_position_singleindex(self):
         self.assertEqual(
-            self.board[self.startpos], self.piece,
+            self.board[self.startpos], self.piece1,
             "Couldn't read the board using a single index." + self.errormessage
         )
         return None
 
     def test_read_position_coordinate(self):
         self.assertEqual(
-            self.board[self.startcoord], self.piece,
+            self.board[self.startcoord], self.piece1,
             "Couldn't read the board using matrix notation." + self.errormessage
         )
 
         self.assertEqual(
-            self.board[self.startcoord[0], self.startcoord[1]], self.piece,
+            self.board[self.startcoord[0], self.startcoord[1]], self.piece1,
             "Couldn't read the board using 2 integers separated by a comma." + \
             self.errormessage
         )
@@ -198,7 +206,7 @@ class TestChessBoardPieces(CoreTestBoard):
 
     def test_piecesbetween(self):
         self.board._board[self.startpos] = None  # Get a clean board.
-        self.board._board[27] = self.piece  # Move to center for testing.
+        self.board._board[27] = self.piece1  # Move to center for testing.
 
         piecesbetween = self.board._piecesbetween
         errormsg = "The method coudn't find the piece."
@@ -210,14 +218,13 @@ class TestChessBoardPieces(CoreTestBoard):
         return None
 
     def test_allpossiblemoves(self):
-        self.board.addpiece(self.realpiece.piecetype(), 27)
-        print "\n"
-        self.board.allpossiblemoves()
-        print ""
+        # NOTE: This method has been deemed to advanced for simple tests.
+        # Instead you'll find it in the advanced testing suite.
+        return
 
     def test_addpiece_badinput(self):
         self.assertRaises(AssertionError,
-            self.board.addpiece, self.piece, self.startpos
+            self.board.addpiece, self.piece1, self.startpos
         )
 
     def test_addpiece_goodinput(self):
@@ -255,7 +262,7 @@ class TestChessBoardPieces(CoreTestBoard):
                 self.board._board[self.startpos], None,
                 "The piece remains in its old spot." + self.errormessage)
             self.assertEqual(  # Check piece is in new position.
-                self.board._board[(self.startpos+1) % 63], self.piece,
+                self.board._board[(self.startpos+1) % 63], self.piece1,
                 "The piece should have moved, but it didn't.")
         except AssertionError:
             raise
@@ -263,7 +270,7 @@ class TestChessBoardPieces(CoreTestBoard):
             self.fail("An error was raised for some reason.")
 
     def test_capture(self):
-        self.board._board[(self.startpos+1) % 63] = self.realpiece
+        self.board._board[(self.startpos+1) % 63] = self.piece2
         # Bad inputs
         self.assertRaises(AssertionError,  # Index off board.
             self.board.capture, self.startpos, 99)
@@ -299,8 +306,8 @@ class TestChessBoardUI(CoreTestBoard):
 
     def test_determinepiece(self):
         self.assertTrue(isinstance(
-                self.realpiece,
-                self.board._determinepiece(self.realpiece.symbol())))
+                self.piece2,
+                self.board._determinepiece(self.piece2.symbol())))
         return
 
     def test_positiontonotation(self):
@@ -330,31 +337,31 @@ class TestChessBoardUI(CoreTestBoard):
         return None
 
     def test_addmovetohistory(self):
-        piece = self.realpiece
+        piece2 = self.piece2
         startpos = 10
         endpos = 19
 
         # A simple move.
-        self.board.addmovetohistory(piece, startpos, endpos)
+        self.board.addmovetohistory(piece2, startpos, endpos)
         self.assertEqual(self.board.fetchmovehistory()[-1], 'Qc2->d3')
 
         # A move with capture.
-        self.board.addmovetohistory(piece, startpos, endpos, movewascapture=True)
+        self.board.addmovetohistory(piece2, startpos, endpos, movewascapture=True)
         self.assertEqual(self.board.fetchmovehistory()[-1], 'Qc2xd3')
         return
 
     def test_addmovetohistory_pawnpiece(self):
-        piece = core.PawnPiece(playerpiece=True, startpositionindex=10)
+        pawnpiece = core.PawnPiece(playerpiece=True, startpositionindex=10)
         startpos = 10
         movepos = 18  # Move forward once.
         capturepos = 19  # Capture to your right.
 
         # A simple move.
-        self.board.addmovetohistory(piece, startpos, movepos)
+        self.board.addmovetohistory(pawnpiece, startpos, movepos)
         self.assertEqual(self.board.fetchmovehistory()[-1], 'c2->c3')
 
         # A move with capture.
-        self.board.addmovetohistory(piece, startpos, capturepos, movewascapture=True)
+        self.board.addmovetohistory(pawnpiece, startpos, capturepos, movewascapture=True)
         self.assertEqual(self.board.fetchmovehistory()[-1], 'c2xd3')
 
     def test_processplayermove(self):
@@ -419,10 +426,10 @@ class TestGUI(CoreTestBoard):
         return
 
     def test_displayboard(self):
+        # This has no formal testing requirements. It just prints the board.
         self.board = chessboard.DefaultChessBoard()
         print ""
         self.board.displayboard()
-        print ""
         return
 
 

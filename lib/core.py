@@ -38,6 +38,7 @@
 # arguments. Refactored the multiplication methods in vectors. Lots of small
 # fixes.
 #    04/01/17: Added symbol method for the chess pieces.
+#    05/01/17: Small fixes over all code.
 
 # NOTES:
 # The board should have its internal structure (i.e. the locations) completely
@@ -254,6 +255,10 @@ class BasePiece:
         self.isplayerpiece = playerpiece
         return None
 
+    def __str__(self):
+        """How to print the class if called as a string."""
+        return self.__class__.__name__
+
     @staticmethod
     def _checkAllAreVectors(vectorlist):
         """A sanity check to make sure all items in vectorlist are vectors."""
@@ -417,7 +422,7 @@ class PawnPiece(BasePiece):
 
     def __init__(self, playerpiece, startpositionindex):
         BasePiece.__init__(self, playerpiece, startpositionindex, "",
-            validmovevectors=(Vector(1, 0), Vector(2, 0)), onlyunitvectors=True
+            validmovevectors=(Vector(1, 0),), onlyunitvectors=True
         )
         self._validcapturemoves = (Vector(1, 1), Vector(1, -1))
         return None
@@ -432,14 +437,4 @@ class PawnPiece(BasePiece):
         # REVIEW: Can this be moved into chessboard class?
         diffvec = self.distancefromselfto(movetopos)
         return (diffvec in self._validcapturemoves)
-
-    def cantpawnpush(self):
-        """Called once the pawn moves since it can't push once it has moved."""
-        self._validmovevectors = (Vector(1, 0),)
-        return None
-
-    def possiblemoves(self, index):
-        """Pawns move in a strange fashion, and are controlled here."""
-        pawnmoves = BasePiece.possiblemoves()
-        return pawnmoves
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
