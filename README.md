@@ -46,7 +46,6 @@ Don't expect this engine to ever beat anyone with half a brain in chess. I am ho
 ## Examples
 
 The GUI currently looks like so:
-
 <!-- language: lang-none -->
     +----------+
     | rnbqkbnr |
@@ -66,6 +65,7 @@ The notational rules follow a format similar to traditional chess notation but w
   - Add on the current position of the piece (e.g. e3)
   - If just moving, write '->'. If capturing write 'x'
   - Finish the notation with the final position.
+
 The special symbols being used are identical to traditional chess:
   - If the piece has caused check, start the move with '+'
   - If the piece has caused checkmate, start the move with '#'
