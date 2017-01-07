@@ -10,23 +10,24 @@ The front end is what the user interacts with. In the front end there is current
 ### The Back-End
 In the back-end there is a complete chessboard, with rules, built from scratch. This engine uses a mailbox approach to storing the board state with 64 holes, each representing a single square on the board like so:
 
-+---------------------------------------+
-| 56 | 57 | 58 | 59 | 60 | 61 | 62 | 63 |
-+---------------------------------------+
-| 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 |
-+---------------------------------------+
-| 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 |
-+---------------------------------------+
-| 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 |
-+---------------------------------------+
-| 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 |
-+---------------------------------------+
-| 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 |
-+---------------------------------------+
-| 08 | 09 | 10 | 11 | 12 | 13 | 14 | 15 |
-+---------------------------------------+
-| 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 |
-+---------------------------------------+
+<!-- language: lang-none -->
+    +---------------------------------------+
+    | 56 | 57 | 58 | 59 | 60 | 61 | 62 | 63 |
+    +---------------------------------------+
+    | 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 |
+    +---------------------------------------+
+    | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 |
+    +---------------------------------------+
+    | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 |
+    +---------------------------------------+
+    | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 |
+    +---------------------------------------+
+    | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 |
+    +---------------------------------------+
+    | 08 | 09 | 10 | 11 | 12 | 13 | 14 | 15 |
+    +---------------------------------------+
+    | 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 |
+    +---------------------------------------+
 
 However the engine is not required to work in indices.
 
@@ -45,17 +46,17 @@ Don't expect this engine to ever beat anyone with half a brain in chess. I am ho
 ## Examples
 
 The GUI currently looks like so:
-
-+----------+
-| rnbqkbnr |
-| pppppppp |
-| ........ |
-| ........ |
-| ........ |
-| ........ |
-| PPPPPPPP |
-| RNBQKBNR |
-+----------+
+<!-- language: lang-none -->
+    +----------+
+    | rnbqkbnr |
+    | pppppppp |
+    | ........ |
+    | ........ |
+    | ........ |
+    | ........ |
+    | PPPPPPPP |
+    | RNBQKBNR |
+    +----------+
 
 where the capitalised pieces are on white while the lowercase pieces are on black.
 
@@ -64,6 +65,7 @@ The notational rules follow a format similar to traditional chess notation but w
   - Add on the current position of the piece (e.g. e3)
   - If just moving, write '->'. If capturing write 'x'
   - Finish the notation with the final position.
+
 The special symbols being used are identical to traditional chess:
   - If the piece has caused check, start the move with '+'
   - If the piece has caused checkmate, start the move with '#'
