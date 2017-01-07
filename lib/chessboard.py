@@ -221,12 +221,17 @@ class _ChessBoardPieces(_ChessBoardCore):
                 piecepositions.append(ii)
         return piecepositions
 
-    def _piecesattackingking(self, movedic, playerking=True):
+    def _piecesattackingking(self, playerking=True):
         """Find the pieces that are currently attacking the king in movelist."""
+        # Initalise variables.
         kingposvec = self.convert(
-            self.findpiece(KingPiece, playerside=playerking)[0], tovector=True
-        )
+            self.findpiece(KingPiece, playerside=playerking)[0], tovector=True)
         piecesattacking = list()
+
+        # Now get oppositions moves.
+        movedic = self._fetchbasicmovesfor(side=(not playerking))
+
+        # And find pieces who attack king.
         for piece, movetolist in movedic.iteritems():
             if kingposvec in movetolist:
                 piecesattacking.append(piece)
@@ -280,23 +285,42 @@ class _ChessBoardPieces(_ChessBoardCore):
             allowedmoves.append(move)  # If passes tests, then add to allowed moves.
         return allowedmoves
 
-    def allpossiblemoves(self, playerpieces=True):
-        """Gets all of the possible moves available for each piece for either
-        the player or the opposition. WIP."""
-        allpossiblemoves = dict()
+    def _fetchbasicmovesfor(self, side=True):
+        """Gets all the basic moves for 'side'"""
+        possiblemoves = dict()
         # First find all legal moves.
         for square in self._board:
             if square is None:  # Continue loop if square is empty.
                 continue
-            elif square.isplayerpiece is not playerpieces:  # Skip pieces on other side.
+            elif square.isplayerpiece is not side:  # Skip pieces on other side.
                 continue
             movelist = self._allowedmovesforpiece(square)  # Basic allowed moves.
-            allpossiblemoves[square] = movelist  # Add them to possible moves.
+            possiblemoves[square] = movelist  # Add them to possible moves.
+        return possiblemoves
 
-        # Now remove moves that put the king in check.
+    def allpossiblemoves(self, forplayerpieces=True):
+        """Gets all of the possible moves available for each piece for either
+        the player or the opposition. WIP."""
+        # First fetch basic moves and captures.
+        allpossiblemoves = self._fetchbasicmovesfor(side=forplayerpieces)
 
-        # If there are pieces between king and opposite attacks, remove the piece's moves.
-        # If we are in a check, moves only to remove check.
+        # Now remove moves that put/leave the king in check.
+        for piece, movelist in allpossiblemoves.iteritems():
+            piecestartposition = piece.position(indexform=True); ii = 0
+
+            while ii < len(movelist):  # HACK: Allows for dynamic deletions.
+                move = movelist[ii]
+                pieceendposition = self.convert(move, toindex=True)
+                self.move(piecestartposition, pieceendposition)
+                attackingpiecelist = self._piecesattackingking(
+                    playerking=forplayerpieces)
+
+                # If the move leaves the king in check, remove it from allowed moves.
+                if len(attackingpiecelist) > 0:
+                    movelist.remove(move)  # POSSIBLE BUG: Must check!
+                else:
+                    ii += 1
+                self.move(pieceendposition, piecestartposition)
         return allpossiblemoves
 
     def addpiece(self, piece, position, playerpiece=True, force=False):

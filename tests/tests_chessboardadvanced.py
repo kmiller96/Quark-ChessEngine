@@ -37,18 +37,12 @@ class CoreTestingSuite(unittest.TestCase):
         return None
 
     def convert(self, x, **kwargs):
-        "Shortcut for self.board.convert call."
+        """Shortcut for self.board.convert call."""
         return self.board.convert(x, **kwargs)
 
-    @staticmethod
-    def readablelistof(lst):
-        """Prints the list as expected, instead of a jumble of instances.
-
-        This is to be called when dealing with pieces or vectors."""
-        string = ''
-        for item in lst:
-            string += str(item) + ', '
-        return '[' + string[:-2] + ']'
+    def readablelistof(self, lst):
+        """Shortcut for self.board._readablelistof call."""
+        return self.board._readablelistof(lst)
 
     @staticmethod
     def innersquares():
@@ -132,6 +126,34 @@ class CoreTestingSuite(unittest.TestCase):
                 map(lambda x: self.convert(x, toindex=True), moves))
             print "The piece, at index %i, can move to these positions:" % piecepos
             print moves + '\n'
+        check = raw_input("Does all of the above seem right? [y/n]: ")
+        while check.lower() not in ('y', 'n'):
+            check = raw_input("Type either 'y' or 'n' to proceed.")
+        if check.lower() == 'n':
+            self.fail("Incorrect moves for the piece %s." % str(piece))
+        else:
+            print "Test passed!"
+            print "--------------------------------------------------------\n"
+        return None
+
+    def runpinnedtestfor(self, pinpiece, atstartindex):
+        """Runs the pinned test for the piece passed."""
+        print ""
+        self.board.addpiece(pinpiece, position=atstartindex, playerpiece=True)
+        print "Here is the board with the %r pinned on it:\n" % str(pinpiece)
+        self.board.displayboard()
+
+        print "\nTEST: CAN THE PIECE MOVE?"
+        print "================================"
+        pinpieceinstance = self.board[atstartindex]
+        for piece, moves in self.board.allpossiblemoves().iteritems():
+            if piece is not pinpieceinstance:
+                continue
+            else:
+                piecepos = piece.position(indexform=True)
+                mymovelist = map(lambda x: self.convert(x, toindex=True), moves)
+        print "The piece, at index %i, can move to these positions:" % piecepos
+        print str(self.readablelistof(mymovelist)) + '\n'
         check = raw_input("Does all of the above seem right? [y/n]: ")
         while check.lower() not in ('y', 'n'):
             check = raw_input("Type either 'y' or 'n' to proceed.")
@@ -294,12 +316,30 @@ class TestPins(CoreTestingSuite):
     # WIP
 
     def test_FilePin(self):
+        # Setup board.
+        self.board.addpiece(core.KingPiece, 19, playerpiece=True)
+        self.board.addpiece(core.RookPiece, 35, playerpiece=False)
+
+        # Now add a piece between the King and Rook and see if pinned.
+        self.runpinnedtestfor(core.KnightPiece, 27)
         return
 
     def test_RankPin(self):
+        # Setup board.
+        self.board.addpiece(core.KingPiece, 25, playerpiece=True)
+        self.board.addpiece(core.RookPiece, 31, playerpiece=False)
+
+        # Now add a piece between the King and Rook and see if pinned.
+        self.runpinnedtestfor(core.BishopPiece, 28)
         return
 
     def test_DiagonalPin(self):
+        # Setup board.
+        self.board.addpiece(core.KingPiece, 9, playerpiece=True)
+        self.board.addpiece(core.BishopPiece, 36, playerpiece=False)
+
+        # Now add a piece between the King and Rook and see if pinned.
+        self.runpinnedtestfor(core.PawnPiece, 18)
         return
 
 
