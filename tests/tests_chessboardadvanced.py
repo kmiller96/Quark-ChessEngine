@@ -342,6 +342,24 @@ class TestPins(CoreTestingSuite):
         self.runpinnedtestfor(core.PawnPiece, 18)
         return
 
+    def test_ForcedMoveToBlockKing(self):
+        # Box king in with pawns.
+        self.board.addpiece(core.KingPiece, 19, playerpiece=True)
+
+        self.board.addpiece(core.PawnPiece, 10, playerpiece=True)
+        self.board.addpiece(core.PawnPiece, 11, playerpiece=True)
+        self.board.addpiece(core.PawnPiece, 12, playerpiece=True)
+        self.board.addpiece(core.PawnPiece, 18, playerpiece=True)
+        self.board.addpiece(core.PawnPiece, 20, playerpiece=True)
+        self.board.addpiece(core.PawnPiece, 26, playerpiece=True)
+        self.board.addpiece(core.PawnPiece, 28, playerpiece=True)
+
+        self.board.addpiece(core.RookPiece, 59, playerpiece=False)
+
+        # Now add a knight that is required to move in front of king.
+        self.runpinnedtestfor(core.KnightPiece, 21)
+        return
+
 
 class TestChecks(CoreTestingSuite):
     """Runs tests on checks."""
