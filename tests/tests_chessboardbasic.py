@@ -208,8 +208,26 @@ class TestChessBoardPieces(CoreTestBoard):
         kingisat = self.board.findpiece(core.KingPiece, playerside=True)[0]
         self.assertEqual(
             kingisat, self.startpos,
-            "The king wasn't found."
-        )
+            "The king wasn't found.")
+        return
+
+    def test_piecesattackingking(self):
+        self.board.emptysquare(self.startpos)  # Clear the chess board.
+
+        # Add two pieces where I say.
+        self.board._board[27] = \
+            core.KingPiece(playerpiece=True, startpositionindex=27)
+        self.board._board[28] = \
+            core.QueenPiece(playerpiece=False, startpositionindex=29)
+
+        # Now find pieces attacking king (which is the queen).
+        pieceslist = self.board._piecesattackingking(
+            self.board.allpossiblemoves(playerpieces=False), playerking=True)
+
+        self.assertTrue(
+            len(pieceslist) > 0,
+            "The king is under attack but he doesn't know it!")
+        return
 
     def test_piecesbetween(self):
         self.board._board[self.startpos] = None  # Get a clean board.
@@ -240,9 +258,7 @@ class TestChessBoardPieces(CoreTestBoard):
         # Assert that they are correct.
         self.assertEqual(
             sorted(moveindices), sorted([18, 19, 20, 26, 34, 35, 36]),
-            "The king couldn't move as expected."
-        )
-
+            "The king couldn't move as expected.")
 
     def test_allpossiblemoves(self):
         # NOTE: This method has been deemed to advanced for simple tests.

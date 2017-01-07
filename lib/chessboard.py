@@ -71,6 +71,16 @@ class _ChessBoardCore:
             except TypeError:
                 raise TypeError(errormsg)  # If that still doesn't work it's fucked.
 
+    @staticmethod
+    def _readablelistof(lst):
+        """Prints the list as expected, instead of a jumble of instances.
+
+        This is to be called when dealing with pieces or vectors."""
+        string = ''
+        for item in lst:
+            string += str(item) + ', '
+        return '[' + string[:-2] + ']'
+
     def _onlyone(self, iterable):
         """Returns true if only one of the items in iterable is true."""
         # REVIEW: I know there is a better way to write this.
@@ -211,6 +221,16 @@ class _ChessBoardPieces(_ChessBoardCore):
                 piecepositions.append(ii)
         return piecepositions
 
+    def _piecesattackingking(self, movedic, playerking=True):
+        """Find the pieces that are currently attacking the king in movelist."""
+        kingposvec = self.convert(
+            self.findpiece(KingPiece, playerside=playerking)[0], tovector=True
+        )
+        piecesattacking = list()
+        for piece, movetolist in movedic.iteritems():
+            if kingposvec in movetolist:
+                piecesattacking.append(piece)
+        return piecesattacking
 
     def _piecesbetween(self, start, end):
         """Find the pieces between the start and end positions."""
@@ -264,6 +284,7 @@ class _ChessBoardPieces(_ChessBoardCore):
         """Gets all of the possible moves available for each piece for either
         the player or the opposition. WIP."""
         allpossiblemoves = dict()
+        # First find all legal moves.
         for square in self._board:
             if square is None:  # Continue loop if square is empty.
                 continue
@@ -271,6 +292,9 @@ class _ChessBoardPieces(_ChessBoardCore):
                 continue
             movelist = self._allowedmovesforpiece(square)  # Basic allowed moves.
             allpossiblemoves[square] = movelist  # Add them to possible moves.
+
+        # Now remove moves that put the king in check.
+
         # If there are pieces between king and opposite attacks, remove the piece's moves.
         # If we are in a check, moves only to remove check.
         return allpossiblemoves
