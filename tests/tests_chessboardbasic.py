@@ -204,6 +204,13 @@ class TestChessBoardCore(CoreTestBoard):
 class TestChessBoardPieces(CoreTestBoard):
     """Testing suite for all of the methods in _ChessBoardPieces."""
 
+    def test_findpiece(self):
+        kingisat = self.board.findpiece(core.KingPiece, playerside=True)[0]
+        self.assertEqual(
+            kingisat, self.startpos,
+            "The king wasn't found."
+        )
+
     def test_piecesbetween(self):
         self.board._board[self.startpos] = None  # Get a clean board.
         self.board._board[27] = self.piece1  # Move to center for testing.

@@ -199,6 +199,19 @@ class _ChessBoardCore:
 class _ChessBoardPieces(_ChessBoardCore):
     """The component that handles the pieces on the board."""
 
+    def findpiece(self, piecetype, playerside=True):
+        """Finds all instances of piece on the board that belong to one side.
+
+        Returns a list of the board indices."""
+        piecepositions = list()
+        for ii, square in enumerate(self._board):
+            if square is None:
+                continue
+            elif piecetype is square.piecetype():
+                piecepositions.append(ii)
+        return piecepositions
+
+
     def _piecesbetween(self, start, end):
         """Find the pieces between the start and end positions."""
         startvec = self.convert(start, tovector=True)
