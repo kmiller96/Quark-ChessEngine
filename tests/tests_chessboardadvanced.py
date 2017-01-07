@@ -114,13 +114,13 @@ class CoreTestingSuite(unittest.TestCase):
 
         print "\nTEST: WHERE CAN THE PIECES MOVE."
         print "================================="
-        for piece, moves in self.board.allpossiblemoves(playerpieces=True).iteritems():
+        for piece, moves in self.board.allpossiblemoves(True).iteritems():
             piecepos = piece.position(indexform=True)
             moves = self.readablelistof(
                 map(lambda x: self.convert(x, toindex=True), moves))
             print "The piece, at index %i, can move to these positions:" % piecepos
             print moves + '\n'
-        for piece, moves in self.board.allpossiblemoves(playerpieces=False).iteritems():
+        for piece, moves in self.board.allpossiblemoves(False).iteritems():
             piecepos = piece.position(indexform=True)
             moves = self.readablelistof(
                 map(lambda x: self.convert(x, toindex=True), moves))
@@ -339,7 +339,7 @@ class TestPins(CoreTestingSuite):
         self.board.addpiece(core.BishopPiece, 36, playerpiece=False)
 
         # Now add a piece between the King and Rook and see if pinned.
-        self.runpinnedtestfor(core.PawnPiece, 18)
+        self.runpinnedtestfor(core.BishopPiece, 27)
         return
 
     def test_ForcedMoveToBlockKing(self):

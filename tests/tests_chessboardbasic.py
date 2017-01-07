@@ -218,11 +218,10 @@ class TestChessBoardPieces(CoreTestBoard):
         self.board._board[27] = \
             core.KingPiece(playerpiece=True, startpositionindex=27)
         self.board._board[28] = \
-            core.QueenPiece(playerpiece=False, startpositionindex=29)
+            core.QueenPiece(playerpiece=False, startpositionindex=28)
 
         # Now find pieces attacking king (which is the queen).
-        pieceslist = self.board._piecesattackingking(
-            self.board.allpossiblemoves(playerpieces=False), playerking=True)
+        pieceslist = self.board._piecesattackingking(playerking=True)
 
         self.assertTrue(
             len(pieceslist) > 0,

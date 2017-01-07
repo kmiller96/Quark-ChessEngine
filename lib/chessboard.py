@@ -214,8 +214,11 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
 
     def _piecesattackingking(self, playerking=True):
         """Find the pieces that are currently attacking the king in movelist."""
-        kingposvec = self.convert(
-            self.findpiece(KingPiece, playerside=playerking)[0], tovector=True)
+        try:
+            kingposvec = self.convert(
+                self.findpiece(KingPiece, playerside=playerking)[0], tovector=True)
+        except IndexError:  # If there is no king on the board:
+            return []  # Then he can't be attacked!
         oppositionmoves = self._fetchbasicmovesfor(side=(not playerking))
 
         piecesattacking = list()
@@ -229,14 +232,14 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
         startvec = self.convert(start, tovector=True)
         endvec = self.convert(end, tovector=True)
         unitrelvec = (endvec - startvec).unitvector()
-        currentposvec = startvec
+        currentposvec = startvec + unitrelvec
 
         pieceslist = list()
         while currentposvec != endvec:
-            currentposvec += unitrelvec
             currentposindex = self.convert(currentposvec, toindex=True)
             if self._isoccupied(currentposindex):
                 pieceslist.append(self._board[currentposindex])
+            currentposvec += unitrelvec
         return pieceslist
 
     def _allowedmovesforpiece(self, piece):
@@ -261,13 +264,14 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
         # Iterate through all moves and filter out bad ones.
         for move in movelist:
             moveindex = self.convert(move, toindex=True)
+            if piece.piecetype() is KnightPiece:
+                pass
+            elif self._piecesbetween(startpos, moveindex):
+                continue
+
             if self._board[moveindex] != None:
                 if self._piecesareonsameside(piece, self._board[moveindex]):
                     continue  # Can't capture your own side.
-            elif piece.piecetype() is KnightPiece:
-                pass  # If a knight, don't bother checking pieces between.
-            elif self._piecesbetween(startpos, moveindex):
-                continue
             allowedmoves.append(move)
         return allowedmoves
 
@@ -314,19 +318,28 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
         for piece, movelist in allpossiblemoves.iteritems():
             piecestartposition = piece.position(indexform=True); ii = 0
 
-            while ii < len(movelist):  # HACK: Allows for dynamic deletions.
+            while ii < len(movelist):
                 move = movelist[ii]
                 pieceendposition = self.convert(move, toindex=True)
-                self.move(piecestartposition, pieceendposition)
+                if self._board[pieceendposition] != None:
+                    fixboardoncedone = True  # HACK
+                    endpiece = self._board[pieceendposition]
+                else:
+                    fixboardoncedone = False
+                self.move(piecestartposition, pieceendposition, force=True)
                 attackingpiecelist = self._piecesattackingking(
                     playerking=forplayerpieces)
 
                 # If the move leaves the king in check, remove it from allowed moves.
-                if self.kingincheck(forplayerpieces):
+                if len(self._piecesattackingking(playerking=forplayerpieces)) > 0:
                     movelist.remove(move)
                 else:
                     ii += 1
                 self.move(pieceendposition, piecestartposition)
+                if fixboardoncedone:
+                    self.addpiece(
+                        endpiece.piecetype(), endpiece.position(indexform=True),
+                        endpiece.isplayerpiece)
         return allpossiblemoves
 
     def addpiece(self, piece, position, playerpiece=True, force=False):
@@ -346,7 +359,7 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
         self._assertPositionOnBoard(index)
         self._board[index] = None
 
-    def move(self, startindexcoordinate, endindexcoordinate):
+    def move(self, startindexcoordinate, endindexcoordinate, force=False):
         """Move a piece around on the board."""
         # Sanity checks and conversion to indices.
         assert startindexcoordinate != endindexcoordinate, \
@@ -356,7 +369,7 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
         self._assertPositionOnBoard(startindex)
         self._assertPositionOnBoard(endindex)
         self._assertIsOccupied(startindex)
-        self._assertIsUnoccupied(endindex)
+        if not force: self._assertIsUnoccupied(endindex)  # Allow forced overwriting.
 
         # Move the piece to the new position.
         self._board[startindex].movetoindex(endindex)
