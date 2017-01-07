@@ -156,6 +156,10 @@ class _ChessBoardCore:
         else:
             raise TypeError("Passed item is none of the allowed options.")
 
+    def convertlist(self, lst, **kwargs):
+        """Same call as convert but for a list. Basically, a shortcut call."""
+        return map(lambda x: self.convert(x, **kwargs), lst)
+
     @staticmethod
     def _assertPositionOnBoard(indices):
         """Assert that the indices called are on the board as a sanity check."""
@@ -205,34 +209,17 @@ class _ChessBoardCore:
  #       ### #######  #####  #######  #####
 
 
-
-class _ChessBoardPieces(_ChessBoardCore):
-    """The component that handles the pieces on the board."""
-
-    def findpiece(self, piecetype, playerside=True):
-        """Finds all instances of piece on the board that belong to one side.
-
-        Returns a list of the board indices."""
-        piecepositions = list()
-        for ii, square in enumerate(self._board):
-            if square is None:
-                continue
-            elif piecetype is square.piecetype():
-                piecepositions.append(ii)
-        return piecepositions
+class _ChessBoardPiecesCore(_ChessBoardCore):
+    """A class that stores the private methods of the ChessBoardPieces component."""
 
     def _piecesattackingking(self, playerking=True):
         """Find the pieces that are currently attacking the king in movelist."""
-        # Initalise variables.
         kingposvec = self.convert(
             self.findpiece(KingPiece, playerside=playerking)[0], tovector=True)
+        oppositionmoves = self._fetchbasicmovesfor(side=(not playerking))
+
         piecesattacking = list()
-
-        # Now get oppositions moves.
-        movedic = self._fetchbasicmovesfor(side=(not playerking))
-
-        # And find pieces who attack king.
-        for piece, movetolist in movedic.iteritems():
+        for piece, movetolist in oppositionmoves.iteritems():
             if kingposvec in movetolist:
                 piecesattacking.append(piece)
         return piecesattacking
@@ -261,8 +248,7 @@ class _ChessBoardPieces(_ChessBoardCore):
 
         Note that this method doesn't consider if there are any pins, checks
         etc. but simply what it is legally allowed to do on the board."""
-        # FIXME: This method is a clusterfuck.
-        # Setup the function.
+        # TODO: Can this method be improved?
         startpos = piece.position(indexform=True)
         movelist = piece.possiblemoves(); allowedmoves = list()
 
@@ -275,14 +261,14 @@ class _ChessBoardPieces(_ChessBoardCore):
         # Iterate through all moves and filter out bad ones.
         for move in movelist:
             moveindex = self.convert(move, toindex=True)
-            if self._board[moveindex] != None:  # Check for occupied squares.
+            if self._board[moveindex] != None:
                 if self._piecesareonsameside(piece, self._board[moveindex]):
                     continue  # Can't capture your own side.
             elif piece.piecetype() is KnightPiece:
                 pass  # If a knight, don't bother checking pieces between.
-            elif self._piecesbetween(startpos, moveindex): # Check if pieces are blocking.
+            elif self._piecesbetween(startpos, moveindex):
                 continue
-            allowedmoves.append(move)  # If passes tests, then add to allowed moves.
+            allowedmoves.append(move)
         return allowedmoves
 
     def _fetchbasicmovesfor(self, side=True):
@@ -298,9 +284,29 @@ class _ChessBoardPieces(_ChessBoardCore):
             possiblemoves[square] = movelist  # Add them to possible moves.
         return possiblemoves
 
+
+class _ChessBoardPieces(_ChessBoardPiecesCore):
+    """The component that handles the pieces on the board."""
+
+    def findpiece(self, piecetype, playerside=True):
+        """Finds all instances of piece on the board that belong to one side.
+
+        Returns a list of the board indices."""
+        piecepositions = list()
+        for ii, square in enumerate(self._board):
+            if square is None:
+                continue
+            elif piecetype is square.piecetype():
+                piecepositions.append(ii)
+        return piecepositions
+
+    def kingincheck(self, playerking=True):
+        """Returns a bool for whether the king is in check or not."""
+        return len(self._piecesattackingking(playerking=playerking)) > 0
+
     def allpossiblemoves(self, forplayerpieces=True):
         """Gets all of the possible moves available for each piece for either
-        the player or the opposition. WIP."""
+        the player or the opposition."""
         # First fetch basic moves and captures.
         allpossiblemoves = self._fetchbasicmovesfor(side=forplayerpieces)
 
@@ -316,8 +322,8 @@ class _ChessBoardPieces(_ChessBoardCore):
                     playerking=forplayerpieces)
 
                 # If the move leaves the king in check, remove it from allowed moves.
-                if len(attackingpiecelist) > 0:
-                    movelist.remove(move)  # POSSIBLE BUG: Must check!
+                if self.kingincheck(forplayerpieces):
+                    movelist.remove(move)
                 else:
                     ii += 1
                 self.move(pieceendposition, piecestartposition)
