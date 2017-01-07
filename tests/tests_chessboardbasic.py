@@ -224,6 +224,26 @@ class TestChessBoardPieces(CoreTestBoard):
         self.assertTrue(len(piecesbetween(20, 34)) == 1, errormsg)  # SE to NW
         return None
 
+    def test_allowdmovesforpiece(self):
+        self.board.emptysquare(self.startpos)  # Clear the chess board.
+
+        # Add two pieces where I say.
+        self.board._board[27] = \
+            core.KingPiece(playerpiece=True, startpositionindex=27)
+        self.board._board[28] = \
+            core.QueenPiece(playerpiece=True, startpositionindex=28)
+
+        # Get the moves for the king.
+        movevectors = self.board._allowedmovesforpiece(self.board._board[27])
+        moveindices = map(lambda x: self.board.convert(x, toindex=True), movevectors)
+
+        # Assert that they are correct.
+        self.assertEqual(
+            sorted(moveindices), sorted([18, 19, 20, 26, 34, 35, 36]),
+            "The king couldn't move as expected."
+        )
+
+
     def test_allpossiblemoves(self):
         # NOTE: This method has been deemed to advanced for simple tests.
         # Instead you'll find it in the advanced testing suite.
