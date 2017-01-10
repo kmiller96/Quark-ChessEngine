@@ -313,6 +313,15 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
         """Returns a bool for whether the king is in check or not."""
         return len(self._piecesattackingking(playerking=playerking)) > 0
 
+    def checkmate(self, playerking=True):
+        """Determine if the player's king is in checkmate."""
+        underattack = len(self._piecesattackingking(playerking=playerking)) > 0
+        kinginstance = self._board[
+            self.findpiece(KingPiece, playerside=playerking)[0]]
+        kingmoves = self.allpossiblemoves()[kinginstance]
+        cantescapeattack = len(kingmoves) == 0
+        return underattack and cantescapeattack
+
     def allpossiblemoves(self, forplayerpieces=True):
         """Gets all of the possible moves available for each piece for either
         the player or the opposition."""

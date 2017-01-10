@@ -213,6 +213,13 @@ class TestChessBoardPieces(CoreTestBoard):
             "The king wasn't found.")
         return
 
+    def test_checkmate(self):
+        self.board._board[0] = core.KingPiece(True, 0)
+        self.board._board[8] = core.QueenPiece(False, 8)
+        self.board._board[9] = core.QueenPiece(False, 9)
+
+        self.assertTrue(self.board.checkmate(playerking=True))
+
     def test_piecesattackingking(self):
         self.board.emptysquare(self.startpos)  # Clear the chess board.
 
@@ -260,11 +267,6 @@ class TestChessBoardPieces(CoreTestBoard):
         self.assertEqual(
             sorted(moveindices), sorted([18, 19, 20, 26, 34, 35, 36]),
             "The king couldn't move as expected.")
-
-    def test_allpossiblemoves(self):
-        # NOTE: This method has been deemed to advanced for simple tests.
-        # Instead you'll find it in the advanced testing suite.
-        return
 
     def test_addpiece_badinput(self):
         self.assertRaises(AssertionError,
