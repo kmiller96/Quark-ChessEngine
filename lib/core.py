@@ -432,8 +432,15 @@ class PawnPiece(BasePiece):
     # WIP: Still be fixed.
 
     def __init__(self, playerpiece, startpositionindex):
+        if playerpiece:
+            movevector = Vector(1, 0)
+            self._validcapturemoves = (Vector(1, 1), Vector(1, -1))
+        else:
+            movevector = Vector(-1, 0)
+            self._validcapturemoves = (Vector(-1, -1), Vector(-1, 1))
+
         BasePiece.__init__(self, playerpiece, startpositionindex, "",
-            validmovevectors=(Vector(1, 0),), onlyunitvectors=True
+            validmovevectors=(movevector,), onlyunitvectors=True
         )
         self._validcapturemoves = (Vector(1, 1), Vector(1, -1))
         return None
