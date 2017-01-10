@@ -72,10 +72,11 @@ class CoreTestingSuite(unittest.TestCase):
 
         print "\nTEST: WHERE CAN THE PIECE MOVE."
         print "================================"
-        for piece, moves in self.board.allpossiblemoves().iteritems():
-            piecepos = piece.position(indexform=True)
-            moves = self.readablelistof(
-                map(lambda x: self.convert(x, toindex=True), moves))
+        pieceinstance = self.board[atstartindex]
+        piecepos = pieceinstance.position(indexform=True)
+        moves = self.readablelistof(
+            map(lambda x: self.convert(x, toindex=True),
+                self.board.allpossiblemoves()[self.board[atstartindex]]))
         print "The piece, at index %i, can move to these positions:" % piecepos
         print moves + '\n'
         check = raw_input("Does all of the above seem right? [y/n]: ")
@@ -363,7 +364,21 @@ class TestPins(CoreTestingSuite):
 
 class TestChecks(CoreTestingSuite):
     """Runs tests on checks."""
-    pass
+
+    def test_MovesIfKingInCheck(self):
+        # Add player pieces
+        self.board.addpiece(core.KingPiece, 3, playerpiece=True)
+        self.board.addpiece(core.RookPiece, 0, playerpiece=True)
+
+        # Add opposition pieces.
+        self.board.addpiece(core.QueenPiece, 59, playerpiece=False)
+
+        # Now assert the rook can't move.
+        self.runmovementtestfor(core.RookPiece, 7)
+        return
+
+    def test_OnlyKingCanMoveInCheck(self):
+        return
 
 
 class TestCheckmates(CoreTestingSuite):
