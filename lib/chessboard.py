@@ -300,7 +300,8 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
         for ii, square in enumerate(self._board):
             if square is None:
                 continue
-            elif piecetype is square.piecetype():
+            elif ((piecetype is square.piecetype())
+                    and xnor(square.isplayerpiece, playerside)):
                 piecepositions.append(ii)
         return piecepositions
 

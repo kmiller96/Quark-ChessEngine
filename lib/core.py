@@ -53,6 +53,17 @@
 from lib.exceptions import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+def xor(x, y):
+    """An XOR gate for two arguments"""
+    if ((x and y) or (not x and not y)):
+        return False
+    else:
+        return True
+
+def xnor(x, y):
+    """An XNOR gate for two arguments."""
+    return (not xor(x, y))
+
 
  #     # #######  #####  ####### ####### ######   #####
  #     # #       #     #    #    #     # #     # #     #
