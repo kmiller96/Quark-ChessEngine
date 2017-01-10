@@ -162,6 +162,13 @@ class _ChessBoardCore:
         """Same call as convert but for a list. Basically, a shortcut call."""
         return map(lambda x: self.convert(x, **kwargs), lst)
 
+    def simulateboard(self):
+        """Creates an instance of the chess board exactly as it is now."""
+        # REVIEW: Can this be done with more abstract calls?
+        simulation = deepcopy(self)  # Make the chessboard class.
+        simulation._board = self._board
+        return simulation
+
     @staticmethod
     def _assertPositionOnBoard(indices):
         """Assert that the indices called are on the board as a sanity check."""

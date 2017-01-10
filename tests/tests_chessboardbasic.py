@@ -138,6 +138,14 @@ class TestChessBoardCore(CoreTestBoard):
             self.board.convert, 'bad string', toindex=True)
         return None
 
+    def test_simulateboard(self):
+        mycls = chessboard.ChessBoard()
+        mycls.addpiece(core.QueenPiece, 12)
+
+        duplicatecls = mycls.simulateboard()
+        self.assertEqual(duplicatecls[12], mycls[12])
+        self.assertIs(duplicatecls.__class__, chessboard.ChessBoard)
+
     def test_assertPositionOnBoard_goodinput(self):
         testfunc = self.board._assertPositionOnBoard
         try:

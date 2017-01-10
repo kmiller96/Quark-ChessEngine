@@ -53,6 +53,7 @@
 
 # REVIEW: Do I need all of these imports?
 from lib.exceptions import *
+from copy import deepcopy
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def xor(x, y):
