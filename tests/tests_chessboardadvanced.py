@@ -413,7 +413,16 @@ class TestCheckmates(CoreTestingSuite):
 
     def test_TrappedKing(self):
         # Add the line of pawns.
-        self.board.addpiece(core.PawnPiece, 53, playerpiece=False)
+        self.board.addpiece(core.PawnPiece, 8, playerpiece=True)
+        self.board.addpiece(core.PawnPiece, 9, playerpiece=True)
+        self.board.addpiece(core.PawnPiece, 10, playerpiece=True)
+
+        # Add opposition rook.
+        self.board.addpiece(core.RookPiece, 7, playerpiece=False)
+
+        # and run test.
+        self.runmovementtestfor(core.KingPiece, 1)
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
