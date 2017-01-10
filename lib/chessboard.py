@@ -21,6 +21,8 @@
 #    05/01/17: Added banner titles for each component of the chessboard, for
 # easy navigation. Fixed the _allowedmovesforpiece method which now works for
 # pieces by themselves on the board and for basic movements and captures.
+#    !!NOTE!! This development log has been made redundant now that it is on
+# GitHub.
 
 from lib.exceptions import *
 from lib.core import *

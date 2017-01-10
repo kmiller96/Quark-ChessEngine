@@ -16,6 +16,8 @@
 #    03/01/17: Wrote more tests/made broken tests work. This file is a major
 # item on the list of things to do. There are lots of unfinished methods to
 # complete.
+#    !!NOTE!! This development log has been made redundant now that it is on
+# GitHub.
 
 # TODO:
 # Rewrite these tests from scratch :(

@@ -39,6 +39,8 @@
 # fixes.
 #    04/01/17: Added symbol method for the chess pieces.
 #    05/01/17: Small fixes over all code.
+#    !!NOTE!! This development log has been made redundant now that it is on
+# GitHub.
 
 # NOTES:
 # The board should have its internal structure (i.e. the locations) completely

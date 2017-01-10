@@ -19,6 +19,8 @@
 #    04/01/17: Separated testing suites into the components they are designed in.
 # Added some more tests for the newly developed UI and GUI.
 #    05/01/17: Refactored code.
+#    !!NOTE!! This development log has been made redundant now that it is on
+# GitHub.
 
 # TESTING REQUIREMENTS:
 # The chess board, for basic tests, should be very strict on what inputs it can
