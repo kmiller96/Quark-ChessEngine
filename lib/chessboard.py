@@ -356,10 +356,15 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
 
     def _move(self, startindex, endindex):
         """Move a piece from startined to endindex."""
-        self._assertIsOccupied(startindex)
-        self._board[startindex].movetoindex(endindex)
-        self._board[endindex] = self._board[startindex]
-        self._board[startindex] = None
+        # BUG: I need the initial if statement otherwise the piece somehow
+        # disappears? Play around with it yourself, if you dare...
+        if startindex == endindex:
+            return None
+        else:
+            self._assertIsOccupied(startindex)
+            self._board[startindex].movetoindex(endindex)
+            self._board[endindex] = self._board[startindex]
+            self._board[startindex] = None
         return None
 
     def _thismoveislegal(self, startpos, endpos, playerside=True):
