@@ -161,6 +161,46 @@ class CoreTestingSuite(unittest.TestCase):
             print "--------------------------------------------------------\n"
         return None
 
+    def runcastlingtest(self, playerside=True, autoplace=True):
+        """Runs the test that checks to see if the king can castle."""
+        print ""
+
+        if playerside and autoplace:
+            self.board.addpiece(core.RookPiece, 0)
+            self.board.addpiece(core.RookPiece, 7)
+            self.board.addpiece(core.KingPiece, 4)
+        elif not playerside and autoplace:
+            self.board.addpiece(core.RookPiece, 56, playerpiece=False)
+            self.board.addpiece(core.RookPiece, 63, playerpiece=False)
+            self.board.addpiece(core.KingPiece, 60, playerpiece=False)
+
+        print "Here is the board:\n"
+        self.board.displayboard()
+        print "\nTEST: CAN THE PIECES CASTLE?"
+        print "================================"
+
+        castleleft = self.board._allowedtocastle(left=True, playerside=playerside)
+        castleright = self.board._allowedtocastle(right=True, playerside=playerside)
+        if castleleft:
+            leftstr = 'can'
+        else:
+            leftstr = "can't"
+        if castleright:
+            rightstr = 'can'
+        else:
+            rightstr = "can't"
+
+        print "The pieces %s castle left and %s castle right." % (leftstr, rightstr)
+        check = raw_input("Does that seem right? [y/n]: ")
+        while check.lower() not in ('y', 'n'):
+            check = raw_input("Type either 'y' or 'n' to proceed.")
+        if check.lower() == 'n':
+            self.fail("The king castled badly!")
+        else:
+            print "Test passed!"
+            print "--------------------------------------------------------\n"
+        return None
+
 
 class TestSinglePieceMovement(CoreTestingSuite):
     """These tests involve moving a single piece around the board and making
@@ -437,6 +477,93 @@ class TestCheckmates(CoreTestingSuite):
         print "The king also in checkmate?", self.board.checkmate(playerking=True)
         print ""
         print "--------------------------------------------------------\n"
+
+class TestCastling(CoreTestingSuite):
+    """These tests check to see if the castling is working properly."""
+
+    def test_EmptyBoardCastle_White(self):
+        self.runcastlingtest()
+        return None
+
+    def test_CastleBlockedByPieces_White(self):
+        self.board.addpiece(core.BishopPiece, 2)
+        self.runcastlingtest()
+        return None
+
+    def test_MoveRook_White(self):
+        self.board.addpiece(core.RookPiece, 0)
+        self.board.addpiece(core.RookPiece, 7)
+        self.board.addpiece(core.KingPiece, 4)
+
+        print "\n"
+        print ".:.:. MOVE THE ROOK & TEST .:.:."
+        print "################################"
+        self.board.move(7, 15)
+        self.runcastlingtest(autoplace=False)
+
+        print "\n"
+        print ".:.:. MOVE THE ROOK BACK TO START & TEST .:.:."
+        print "##############################################"
+        self.board.move(15, 7)
+        self.runcastlingtest(autoplace=False)
+        return None
+
+    def test_CastleThroughCheck_White(self):
+        self.board.addpiece(core.QueenPiece, 51, playerpiece=False)
+        self.runcastlingtest()
+        return None
+
+    def test_CastleOutOfCheck_White(self):
+        self.board.addpiece(core.QueenPiece, 52, playerpiece=False)
+        self.runcastlingtest()
+        return None
+
+    def test_CastleIntoCheck_White(self):
+        self.board.addpiece(core.QueenPiece, 50, playerpiece=False)
+        self.runcastlingtest()
+        return None
+
+    def test_EmptyBoardCastle_Black(self):
+        self.runcastlingtest(playerside=False)
+        return None
+
+    def test_CastleBlockedByPieces_Black(self):
+        self.board.addpiece(core.BishopPiece, 58, playerpiece=False)
+        self.runcastlingtest(playerside=False)
+        return None
+
+    def test_MoveRook_Black(self):
+        self.board.addpiece(core.RookPiece, 56, playerpiece=False)
+        self.board.addpiece(core.RookPiece, 63, playerpiece=False)
+        self.board.addpiece(core.KingPiece, 60, playerpiece=False)
+
+        print "\n"
+        print ".:.:. MOVE THE ROOK & TEST .:.:."
+        print "################################"
+        self.board.move(56, 48)
+        self.runcastlingtest(playerside=False, autoplace=False)
+
+        print "\n"
+        print ".:.:. MOVE THE ROOK BACK TO START & TEST .:.:."
+        print "##############################################"
+        self.board.move(48, 56)
+        self.runcastlingtest(playerside=False, autoplace=False)
+        return None
+
+    def test_CastleThroughCheck_Black(self):
+        self.board.addpiece(core.QueenPiece, 11, playerpiece=True)
+        self.runcastlingtest(playerside=False)
+        return None
+
+    def test_CastleOutOfCheck_Black(self):
+        self.board.addpiece(core.QueenPiece, 12, playerpiece=True)
+        self.runcastlingtest(playerside=False)
+        return None
+
+    def test_CastleIntoCheck_Black(self):
+        self.board.addpiece(core.QueenPiece, 10, playerpiece=True)
+        self.runcastlingtest(playerside=False)
+        return None
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
