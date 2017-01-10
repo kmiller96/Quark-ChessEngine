@@ -77,6 +77,7 @@ class CoreTestingSuite(unittest.TestCase):
         moves = self.readablelistof(
             map(lambda x: self.convert(x, toindex=True),
                 self.board.allpossiblemoves()[self.board[atstartindex]]))
+
         print "The piece, at index %i, can move to these positions:" % piecepos
         print moves + '\n'
         check = raw_input("Does all of the above seem right? [y/n]: ")
@@ -377,7 +378,7 @@ class TestChecks(CoreTestingSuite):
         self.runmovementtestfor(core.RookPiece, 7)
         return
 
-    def test_OnlyKingCanMoveInCheck(self):
+    def test_ForcedMovesInCheck(self):
         # Add opposition pieces.
         self.board.addpiece(core.QueenPiece, 59, playerpiece=False)
 
@@ -391,7 +392,22 @@ class TestChecks(CoreTestingSuite):
 
 class TestCheckmates(CoreTestingSuite):
     """Runs tests on checkmate conditions."""
-    pass
+
+    def test_EndGameMate(self):
+        # Add opposition pieces.
+        self.board.addpiece(core.QueenPiece, 54, playerpiece=False)
+        self.board.addpiece(core.KingPiece, 46, playerpiece=False)
+
+        # And run the movement test.
+        self.runmovementtestfor(core.KingPiece, 62)
+
+    def test_RookRoll(self):
+        # Add opposition pieces.
+        self.board.addpiece(core.RookPiece, 54, playerpiece=False)
+        self.board.addpiece(core.RookPiece, 56, playerpiece=False)
+
+        # And run the movement test.
+        self.runmovementtestfor(core.KingPiece, 59)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
