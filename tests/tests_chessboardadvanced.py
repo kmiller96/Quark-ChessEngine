@@ -423,6 +423,21 @@ class TestCheckmates(CoreTestingSuite):
         # and run test.
         self.runmovementtestfor(core.KingPiece, 1)
 
+    def test_SmotheredMate(self):
+        # Trap king in corner.
+        self.board.addpiece(core.PawnPiece, 8, playerpiece=True)
+        self.board.addpiece(core.PawnPiece, 9, playerpiece=True)
+        self.board.addpiece(core.RookPiece, 1, playerpiece=True)
+
+        # Add opposing knight.
+        self.board.addpiece(core.KnightPiece, 10, playerpiece=False)
+
+        # Now run test.
+        self.runmovementtestfor(core.KingPiece, 0)
+        print "The king also in checkmate?", self.board.checkmate(playerking=True)
+        print ""
+        print "--------------------------------------------------------\n"
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
