@@ -255,11 +255,13 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
         startpos = piece.position(indexform=True)
         movelist = piece.possiblemoves(); allowedmoves = list()
 
-        # HACK: Add an extra move to the pawn piece if on 2nd rank.
+        # HACK: Add an extra move to the pawn piece if on 2nd or 7th rank.
         if piece.piecetype() is PawnPiece:
             startposvec = piece.position(vectorform=True)
-            if startposvec.tupleform()[0] == 1:
+            if startposvec.tupleform()[0] == 1 and piece.isplayerpiece:
                 movelist.append(startposvec + Vector(2, 0))
+            elif startposvec.tupleform()[0] == 6 and not piece.isplayerpiece:
+                movelist.append(startposvec + Vector(-2, 0))
 
         # Iterate through all moves and filter out bad ones.
         for move in movelist:
