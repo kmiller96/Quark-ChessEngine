@@ -113,7 +113,7 @@ class CoreTestingSuite(unittest.TestCase):
         print "Here is the board with the pieces %r on it:\n" % self.readablelistof(piecelist)
         self.board.displayboard()
 
-        print "\nTEST: WHERE CAN THE PIECES MOVE."
+        print "\nTEST: WHERE CAN ALL THE PIECES MOVE."
         print "================================="
         for piece, moves in self.board.allpossiblemoves(True).iteritems():
             piecepos = piece.position(indexform=True)
@@ -378,6 +378,14 @@ class TestChecks(CoreTestingSuite):
         return
 
     def test_OnlyKingCanMoveInCheck(self):
+        # Add opposition pieces.
+        self.board.addpiece(core.QueenPiece, 59, playerpiece=False)
+
+        # Now test movement of pieces on the board.
+        self.runmovementtestforpieces(
+            [(core.RookPiece, 0), (core.KingPiece, 3), (core.RookPiece, 15)],
+            sameside=True
+        )
         return
 
 
