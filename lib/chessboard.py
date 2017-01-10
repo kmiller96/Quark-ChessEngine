@@ -55,6 +55,10 @@ class _ChessBoardCore:
         # Needed for pieces:
         self._pieceslist = list()
 
+        # Needed for castling rules.
+        self._castleleft = True
+        self._castleright = True
+
         # Needed for UI:
         self._movehistory = list()
         self._ranksymbols = tuple(map(lambda x: str(x), range(1, 8+1)))
@@ -296,6 +300,59 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
             movelist = self._allowedmovesforpiece(square)  # Basic allowed moves.
             possiblemoves[square] = movelist  # Add them to possible moves.
         return possiblemoves
+
+    def _allowedtocastle(self, left=False, right=False, playerside=True):
+        """A special call that determines what castling is allowed."""
+        # TODO: Fix this method by breaking it into smaller methods.
+        assert any([left, right]) and not all([left, right])
+        # Determine the correct positions for the pieces.
+        if playerside:
+            king = 4
+            if left: rook = 0
+            elif right: rook = 7
+        else:
+            king = 60
+            if left: rook = 56
+            elif right: rook = 63
+        # Determine if the king "walks" right or left & see if legal to castle.
+        if left:
+            if not self._castleleft:
+                return False
+            else:
+                walk = -3
+        elif right:
+            if not self._castleright:
+                return False
+            else:
+                walk = 3
+
+        # Check that the rook and king are there.
+        if (self._board[rook] == None or self._board[king] == None):
+            if left:
+                self._castleleft = False
+            elif right:
+                self._castleright = False
+            return False
+        elif not (self._board[rook].piecetype() is RookPiece
+                and self._board[king].piecetype() is KingPiece):
+            if left:
+                self._castleleft = False
+            elif right:
+                self._castleright = False
+            return False
+        # Check that the spaces between are open.
+        elif self._piecesbetween(rook, king):
+            return False
+        # Check if the king moves through check.
+        else:
+            moveswerelegal = [
+                self._thismoveislegal(king, index, playerside)
+                for index in sorted(range(king, king + walk, walk/abs(walk)))]
+            if not all(moveswerelegal):
+                return False
+            else:
+                return True
+        return -1
 
     def _move(self, startindex, endindex):
         """Move a piece from startined to endindex."""

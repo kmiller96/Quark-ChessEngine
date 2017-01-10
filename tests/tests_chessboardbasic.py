@@ -221,6 +221,23 @@ class TestChessBoardPieces(CoreTestBoard):
             "The king wasn't found.")
         return
 
+    def test_allowedtocastle(self):
+        board = chessboard.ChessBoard()
+        board.addpiece(core.KingPiece, 4)
+        board.addpiece(core.RookPiece, 0)
+        board.addpiece(core.RookPiece, 7)
+
+        self.assertTrue(board._allowedtocastle(left=True))
+        self.assertTrue(board._allowedtocastle(right=True))
+
+        board.move(4, 12)
+
+        self.assertFalse(board._allowedtocastle(left=True))
+        self.assertFalse(board._allowedtocastle(right=True))
+
+        self.assertEqual(board._castleleft, False)
+        self.assertEqual(board._castleright, False)
+
     def test_thismoveislegal(self):
         self.assertTrue(
             self.board._thismoveislegal(self.startpos, self.startpos2),
