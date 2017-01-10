@@ -63,10 +63,10 @@ class CoreTestingSuite(unittest.TestCase):
         ]  # All squares that aren't on the edge.
         return flatten(possible_positions)
 
-    def runmovementtestfor(self, piece, atstartindex):
+    def runmovementtestfor(self, piece, atstartindex, player=True):
         """Runs the movement test for the piece passed."""
         print ""
-        self.board.addpiece(piece, position=atstartindex, playerpiece=True)
+        self.board.addpiece(piece, position=atstartindex, playerpiece=player)
         print "Here is the board with the %r on it:\n" % str(piece)
         self.board.displayboard()
 
@@ -76,7 +76,7 @@ class CoreTestingSuite(unittest.TestCase):
         piecepos = pieceinstance.position(indexform=True)
         moves = self.readablelistof(
             map(lambda x: self.convert(x, toindex=True),
-                self.board.allpossiblemoves()[self.board[atstartindex]]))
+                self.board.allpossiblemoves(forplayerpieces=player)[self.board[atstartindex]]))
 
         print "The piece, at index %i, can move to these positions:" % piecepos
         print moves + '\n'
@@ -195,8 +195,16 @@ class TestSinglePieceMovement(CoreTestingSuite):
         self.runmovementtestfor(core.RookPiece, randint(0, 63))
         return None
 
-    def test_PawnMovement(self):
+    def test_WhitePawnMovement(self):
         self.runmovementtestfor(core.PawnPiece, randint(0, 63))
+        return None
+
+    def test_WhitePawnMovement(self):
+        self.runmovementtestfor(core.PawnPiece, randint(0, 63))
+        return None
+
+    def test_BlackPawnMovement(self):
+        self.runmovementtestfor(core.PawnPiece, randint(0, 63), player=False)
         return None
 
 
@@ -385,8 +393,7 @@ class TestChecks(CoreTestingSuite):
         # Now test movement of pieces on the board.
         self.runmovementtestforpieces(
             [(core.RookPiece, 0), (core.KingPiece, 3), (core.RookPiece, 15)],
-            sameside=True
-        )
+            sameside=True)
         return
 
 
