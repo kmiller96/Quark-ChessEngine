@@ -165,9 +165,7 @@ class _ChessBoardCore:
     def simulateboard(self):
         """Creates an instance of the chess board exactly as it is now."""
         # REVIEW: Can this be done with more abstract calls?
-        simulation = deepcopy(self)  # Make the chessboard class.
-        simulation._board = self._board
-        return simulation
+        return deepcopy(self)
 
     @staticmethod
     def _assertPositionOnBoard(indices):
@@ -299,6 +297,28 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
             possiblemoves[square] = movelist  # Add them to possible moves.
         return possiblemoves
 
+    def _move(self, startindex, endindex):
+        """Move a piece from startined to endindex."""
+        self._assertIsOccupied(startindex)
+        self._board[startindex].movetoindex(endindex)
+        self._board[endindex] = self._board[startindex]
+        self._board[startindex] = None
+        return None
+
+    def _thismoveislegal(self, startpos, endpos, playerside=True):
+        """Checks to see if the supplied move is legal. Returns bool."""
+        # Simulate board and make move.
+        simboard = self.simulateboard()
+        simboard._move(startpos, endpos)
+
+        # See if the king is under attack.
+        attackingpiecelist = simboard._piecesattackingking(
+            playerking=playerside)
+
+        if len(attackingpiecelist) > 0:
+            return False
+        else:
+            return True
 
 class _ChessBoardPieces(_ChessBoardPiecesCore):
     """The component that handles the pieces on the board."""
@@ -339,14 +359,17 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
         for piece, movelist in allpossiblemoves.iteritems():
             piecestartposition = piece.position(indexform=True); ii = 0
 
+            # Now iterate through each possible move:
             while ii < len(movelist):
                 move = movelist[ii]
                 pieceendposition = self.convert(move, toindex=True)
+                # If there is a piece at the end, remember to fix the board.
                 if self._board[pieceendposition] != None:
                     fixboardoncedone = True  # HACK
                     endpiece = self._board[pieceendposition]
                 else:
                     fixboardoncedone = False
+                # Make the move and see if the king is underattack.
                 self.move(piecestartposition, pieceendposition, force=True)
                 attackingpiecelist = self._piecesattackingking(
                     playerking=forplayerpieces)
@@ -365,50 +388,57 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
 
     def addpiece(self, piece, position, playerpiece=True, force=False):
         """Add a new piece to the board."""
-        # Converting into index and sanity checks.
-        index = self.convert(position, toindex=True)
-        if not force: self._assertIsUnoccupied(index)  # Allow forced overwriting.
-        self._assertPositionOnBoard(index)
-
-        # Now add the piece.
-        self._board[index] = piece(playerpiece, startpositionindex=index)
+        try:
+            index = self.convert(position, toindex=True)
+            if not force: self._assertIsUnoccupied(index)  # Allow forced overwriting.
+            self._assertPositionOnBoard(index)
+        except AssertionError:
+            raise
+        else:
+            self._board[indexpos] = piece(playerpiece, startpositionindex=indexpos)
         return None
 
     def emptysquare(self, position):
         """Removes a piece from the board."""
-        index = self.convert(position, toindex=True)
-        self._assertPositionOnBoard(index)
-        self._board[index] = None
+        try:
+            index = self.convert(position, toindex=True)
+            self._assertPositionOnBoard(index)
+        except AssertionError:
+            raise
+        else:
+            self._board[indexpos] = None
 
     def move(self, startindexcoordinate, endindexcoordinate, force=False):
         """Move a piece around on the board."""
         # Sanity checks and conversion to indices.
-        assert startindexcoordinate != endindexcoordinate, \
-            "To move the piece, the start and end points must be different."
-        startindex = self.convert(startindexcoordinate, toindex=True)
-        endindex = self.convert(endindexcoordinate, toindex=True)
-        self._assertPositionOnBoard(startindex)
-        self._assertPositionOnBoard(endindex)
-        self._assertIsOccupied(startindex)
-        if not force: self._assertIsUnoccupied(endindex)  # Allow forced overwriting.
-
-        # Move the piece to the new position.
-        self._board[startindex].movetoindex(endindex)
-        self._board[endindex] = self._board[startindex]
-        self._board[startindex] = None
+        try:
+            assert startindexcoordinate != endindexcoordinate, \
+                "To move the piece, the start and end points must be different."
+            startindex = self.convert(startindexcoordinate, toindex=True)
+            endindex = self.convert(endindexcoordinate, toindex=True)
+            self._assertPositionOnBoard(startindex)
+            self._assertPositionOnBoard(endindex)
+            self._assertIsOccupied(startindex)
+            if not force: self._assertIsUnoccupied(endindex)
+        except AssertionError:
+            raise
+        else:
+            self._move(startindex, endindex)
         return None
 
     def capture(self, startindexcoordinate, endindexcoordinate):
         """Captures a piece on the board. Shorter call then emptysquare & move."""
-        startindex = self.convert(startindexcoordinate, toindex=True)
-        endindex = self.convert(endindexcoordinate, toindex=True)
-        self._assertPositionOnBoard(startindex)
-        self._assertPositionOnBoard(endindex)
-        self._assertIsOccupied(startindex)
-        self._assertIsOccupied(endindex)
-
-        self.emptysquare(endindex)
-        self.move(startindex, endindex)
+        try:
+            startindex = self.convert(startindexcoordinate, toindex=True)
+            endindex = self.convert(endindexcoordinate, toindex=True)
+            self._assertPositionOnBoard(startindex)
+            self._assertPositionOnBoard(endindex)
+            self._assertIsOccupied(startindex)
+            self._assertIsOccupied(endindex)
+        except AssertionError:
+            raise
+        else:
+            self._move(startindex, endindex)
         return None
 
 

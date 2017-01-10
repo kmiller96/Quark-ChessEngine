@@ -143,7 +143,7 @@ class TestChessBoardCore(CoreTestBoard):
         mycls.addpiece(core.QueenPiece, 12)
 
         duplicatecls = mycls.simulateboard()
-        self.assertEqual(duplicatecls[12], mycls[12])
+        self.assertEqual(duplicatecls[12].piecetype(), mycls[12].piecetype())
         self.assertIs(duplicatecls.__class__, chessboard.ChessBoard)
 
     def test_assertPositionOnBoard_goodinput(self):
@@ -220,6 +220,21 @@ class TestChessBoardPieces(CoreTestBoard):
             kingisat, self.startpos,
             "The king wasn't found.")
         return
+
+    def test_thismoveislegal(self):
+        self.assertTrue(
+            self.board._thismoveislegal(self.startpos, self.startpos2),
+            "A legal chess move wasn't legal."
+        )
+
+        self.board._move(self.startpos, 27)
+        self.board._addpiece(self.piece2.piecetype(), 28)
+        self.board[28].isplayerpiece = False
+        self.board.displayboard()
+        self.assertFalse(
+            self.board._thismoveislegal(27, 26),
+            "The king should still be in check!"
+        )
 
     def test_checkmate(self):
         self.board._board[0] = core.KingPiece(True, 0)
