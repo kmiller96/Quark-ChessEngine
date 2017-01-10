@@ -228,7 +228,7 @@ class TestChessBoardPieces(CoreTestBoard):
         )
 
         self.board._move(self.startpos, 27)
-        self.board._addpiece(self.piece2.piecetype(), 28)
+        self.board.addpiece(self.piece2.piecetype(), 28)
         self.board[28].isplayerpiece = False
         self.board.displayboard()
         self.assertFalse(

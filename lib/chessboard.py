@@ -363,27 +363,10 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
             while ii < len(movelist):
                 move = movelist[ii]
                 pieceendposition = self.convert(move, toindex=True)
-                # If there is a piece at the end, remember to fix the board.
-                if self._board[pieceendposition] != None:
-                    fixboardoncedone = True  # HACK
-                    endpiece = self._board[pieceendposition]
-                else:
-                    fixboardoncedone = False
-                # Make the move and see if the king is underattack.
-                self.move(piecestartposition, pieceendposition, force=True)
-                attackingpiecelist = self._piecesattackingking(
-                    playerking=forplayerpieces)
-
-                # If the move leaves the king in check, remove it from allowed moves.
-                if len(self._piecesattackingking(playerking=forplayerpieces)) > 0:
-                    movelist.remove(move)
-                else:
+                if self._thismoveislegal(piecestartposition, pieceendposition):
                     ii += 1
-                self.move(pieceendposition, piecestartposition)
-                if fixboardoncedone:
-                    self.addpiece(
-                        endpiece.piecetype(), endpiece.position(indexform=True),
-                        endpiece.isplayerpiece)
+                else:
+                    movelist.remove(move)
         return allpossiblemoves
 
     def addpiece(self, piece, position, playerpiece=True, force=False):
@@ -395,7 +378,7 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
         except AssertionError:
             raise
         else:
-            self._board[indexpos] = piece(playerpiece, startpositionindex=indexpos)
+            self._board[index] = piece(playerpiece, startpositionindex=index)
         return None
 
     def emptysquare(self, position):
@@ -406,7 +389,7 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
         except AssertionError:
             raise
         else:
-            self._board[indexpos] = None
+            self._board[index] = None
 
     def move(self, startindexcoordinate, endindexcoordinate, force=False):
         """Move a piece around on the board."""
