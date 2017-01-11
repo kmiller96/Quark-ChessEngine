@@ -146,6 +146,13 @@ class TestChessBoardCore(CoreTestBoard):
         self.assertEqual(duplicatecls[12].piecetype(), mycls[12].piecetype())
         self.assertIs(duplicatecls.__class__, chessboard.ChessBoard)
 
+    def test_endturn(self):
+        self.board.playerturn = True
+        self.board.endturn()
+        self.assertFalse(self.board.playerturn)
+        self.board.endturn()
+        self.assertTrue(self.board.playerturn)
+
     def test_assertPositionOnBoard_goodinput(self):
         testfunc = self.board._assertPositionOnBoard
         try:

@@ -24,6 +24,9 @@
 #    !!NOTE!! This development log has been made redundant now that it is on
 # GitHub.
 
+# REVIEW: Now there is a method that ends the turn of the player/computer, Lots
+# of the "playerside=True" crap can go and just rely on the internal attribute.
+
 from lib.exceptions import *
 from lib.core import *
 
@@ -58,6 +61,10 @@ class _ChessBoardCore:
         # Needed for castling rules.
         self._castleleft = True
         self._castleright = True
+
+        # Needed for En Passant.
+        self._enpassant_onplayer = None
+        self._enpassant_oncomputer = None
 
         # Needed for UI:
         self._movehistory = list()
@@ -171,6 +178,15 @@ class _ChessBoardCore:
         # REVIEW: Can this be done with more abstract calls?
         return deepcopy(self)
 
+    def endturn(self):
+        """Ends the turn and runs some cleanup code."""
+        self.playerturn = not self.playerturn
+        if self.playerturn:
+            self._enpassant_onplayer = None
+        else:
+            self._enpassant_oncomputer = None
+        return None
+
     @staticmethod
     def _assertPositionOnBoard(indices):
         """Assert that the indices called are on the board as a sanity check."""
@@ -230,7 +246,7 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
                 self.findpiece(KingPiece, playerside=playerking)[0], tovector=True)
         except IndexError:  # If there is no king on the board:
             return []  # Then he can't be attacked!
-        oppositionmoves = self._fetchbasicmovesfor(side=(not playerking))
+        oppositionmoves = self._fetchbasicmovesfor(playerside=(not playerking))
 
         piecesattacking = list()
         for piece, movetolist in oppositionmoves.iteritems():
@@ -288,17 +304,75 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
             allowedmoves.append(move)
         return allowedmoves
 
-    def _fetchbasicmovesfor(self, side=True):
-        """Gets all the basic moves for 'side'"""
+    def _fetchbasicmovesfor(self, playerside=True):
+        """Gets all the basic moves for 'playerside'"""
         possiblemoves = dict()
         # First find all legal moves.
         for square in self._board:
             if square is None:  # Continue loop if square is empty.
                 continue
-            elif square.isplayerpiece is not side:  # Skip pieces on other side.
+            elif square.isplayerpiece is not playerside:  # Skip pieces on other side.
                 continue
             movelist = self._allowedmovesforpiece(square)  # Basic allowed moves.
             possiblemoves[square] = movelist  # Add them to possible moves.
+
+        # REVIEW: There has to be a better way of doing this. The two if chains
+        # could be replaced by a method.
+        if self._enpassant_onplayer != None and not playerside:
+            attackedpiece = self._board[
+                self.convert((3, self._enpassant_onplayer), toindex=True)]
+
+            fileleft = self._enpassant_onplayer-1
+            fileright = self._enpassant_onplayer+1
+
+            # HACK: Because I just cbf with this method today.
+            if fileleft < 0:
+                ileft = None
+            else:
+                ileft = self.convert((3, self._enpassant_onplayer-1), toindex=True)
+            if fileright > 7:
+                iright = None
+            else:
+                iright = self.convert((3, self._enpassant_onplayer+1), toindex=True)
+
+            for ii in [ileft, iright]:
+                # HACK: Skip over bad indices.
+                if ii == None:
+                    continue
+                piece = self._board[ii]
+                if piece == None:
+                    continue
+                elif (piece.piecetype() is PawnPiece
+                      and xor(piece.isplayerpiece, attackedpiece.isplayerpiece)):
+                    possiblemoves[piece].append(Vector(2, self._enpassant_onplayer))
+        elif self._enpassant_oncomputer != None and playerside:
+            attackedpiece = self._board[
+                self.convert((4, self._enpassant_oncomputer), toindex=True)]
+
+            fileleft = self._enpassant_oncomputer-1
+            fileright = self._enpassant_oncomputer+1
+
+            # HACK: Because I just cbf with this method today.
+            if fileleft < 0:
+                ileft = None
+            else:
+                ileft = self.convert((4, self._enpassant_oncomputer-1), toindex=True)
+            if fileright > 7:
+                iright = None
+            else:
+                iright = self.convert((4, self._enpassant_oncomputer+1), toindex=True)
+
+            for ii in [ileft, iright]:
+                # HACK: Skip over bad indices.
+                if ii == None:
+                    continue
+
+                piece = self._board[ii]
+                if piece == None:
+                    continue
+                elif (piece.piecetype() is PawnPiece
+                      and xor(piece.isplayerpiece, attackedpiece.isplayerpiece)):
+                    possiblemoves[piece].append(Vector(5, self._enpassant_oncomputer))
         return possiblemoves
 
     def _allowedtocastle(self, left=False, right=False, playerside=True):
@@ -356,15 +430,25 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
 
     def _move(self, startindex, endindex):
         """Move a piece from startined to endindex."""
-        # BUG: I need the initial if statement otherwise the piece somehow
-        # disappears? Play around with it yourself, if you dare...
         if startindex == endindex:
             return None
-        else:
-            self._assertIsOccupied(startindex)
-            self._board[startindex].movetoindex(endindex)
-            self._board[endindex] = self._board[startindex]
-            self._board[startindex] = None
+
+        # Assertion check & enpassant enforcement.
+        self._assertIsOccupied(startindex)
+        if self._board[startindex].piecetype() is PawnPiece:
+            relvec = (self.convert(endindex, tovector=True)
+                    - self.convert(startindex, tovector=True))
+            if abs(relvec) == 2:
+                x = self.convert(startindex, tocoordinate=True)[1]
+                if self._board[startindex].isplayerpiece:
+                    self._enpassant_onplayer = x
+                else:
+                    self._enpassant_oncomputer = x
+
+        # Actual movement code.
+        self._board[startindex].movetoindex(endindex)
+        self._board[endindex] = self._board[startindex]
+        self._board[startindex] = None
         return None
 
     def _thismoveislegal(self, startpos, endpos, playerside=True):
@@ -415,7 +499,7 @@ class _ChessBoardPieces(_ChessBoardPiecesCore):
         """Gets all of the possible moves available for each piece for either
         the player or the opposition."""
         # First fetch basic moves and captures.
-        allpossiblemoves = self._fetchbasicmovesfor(side=forplayerpieces)
+        allpossiblemoves = self._fetchbasicmovesfor(playerside=forplayerpieces)
 
         # Now remove moves that put/leave the king in check.
         for piece, movelist in allpossiblemoves.iteritems():

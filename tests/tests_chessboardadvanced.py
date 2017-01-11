@@ -201,6 +201,60 @@ class CoreTestingSuite(unittest.TestCase):
             print "--------------------------------------------------------\n"
         return None
 
+    def runenpassanttest(self, indexpawnpiecetotest):
+        """Each tuple is (piece, startindex, playerside)"""
+        print ""
+        print "Here is the board:\n"
+        self.board.displayboard()
+        print "\nTEST: EN PASSANT."
+        print "================================"
+
+        if indexpawnpiecetotest in range(32, 39+1):
+            endpos = indexpawnpiecetotest
+            (capturerank, capturefile) = self.convert(endpos+8, tocoordinate=True)
+        elif indexpawnpiecetotest in range(24, 31+1):
+            endpos = indexpawnpiecetotest
+            (capturerank, capturefile) = self.convert(endpos-8, tocoordinate=True)
+        else:
+            raise IndexError("The index isn't valid")
+
+        pawnonplayerside = self.board[endpos].isplayerpiece
+
+        if pawnonplayerside:
+            possiblemoves = self.board.allpossiblemoves(forplayerpieces=False)
+        else:
+            possiblemoves = self.board.allpossiblemoves(forplayerpieces=True)
+
+        if self.board[endpos-1] != None:
+            piece = self.board[endpos-1]
+            movelist = possiblemoves[piece]
+            if core.Vector(capturerank, capturefile) in movelist:
+                strleft = 'can'
+            else:
+                strleft = "can't"
+        else:
+            strleft = "can't"
+        if self.board[endpos+1] != None:
+            piece = self.board[endpos+1]
+            movelist = possiblemoves[piece]
+            if core.Vector(capturerank, capturefile) in movelist:
+                strright = 'can'
+            else:
+                strright = "can't"
+        else:
+            strright = "can't"
+
+        print "The pawn at index %i %s be captured on the left and %s be captured on the right." % (indexpawnpiecetotest, strleft, strright)
+        check = raw_input("Does that seem right? [y/n]: ")
+        while check.lower() not in ('y', 'n'):
+            check = raw_input("Type either 'y' or 'n' to proceed.")
+        if check.lower() == 'n':
+            self.fail("The king castled badly!")
+        else:
+            print "Test passed!"
+            print "--------------------------------------------------------\n"
+        return None
+
 
 class TestSinglePieceMovement(CoreTestingSuite):
     """These tests involve moving a single piece around the board and making
@@ -228,10 +282,6 @@ class TestSinglePieceMovement(CoreTestingSuite):
 
     def test_RookMovement(self):
         self.runmovementtestfor(core.RookPiece, randint(0, 63))
-        return None
-
-    def test_WhitePawnMovement(self):
-        self.runmovementtestfor(core.PawnPiece, randint(0, 63))
         return None
 
     def test_WhitePawnMovement(self):
@@ -564,6 +614,65 @@ class TestCastling(CoreTestingSuite):
         self.board.addpiece(core.QueenPiece, 10, playerpiece=True)
         self.runcastlingtest(playerside=False)
         return None
+
+class TestEnPassant(CoreTestingSuite):
+    """See if the en passant rules work."""
+
+    def test_BasicEnPassant(self):
+        self.board.addpiece(core.PawnPiece, 51, False)
+        self.board.addpiece(core.PawnPiece, 34, True)
+        self.board.addpiece(core.PawnPiece, 36, True)
+
+        self.board.move(51, 35)
+
+        self.runenpassanttest(35)
+        return None
+
+    def test_EnPassantLeft(self):
+        self.board.addpiece(core.PawnPiece, 51, False)
+        self.board.addpiece(core.PawnPiece, 34, True)
+
+        self.board.move(51, 35)
+
+        self.runenpassanttest(35)
+        return None
+
+    def test_EnPassantRight(self):
+        self.board.addpiece(core.PawnPiece, 51, False)
+        self.board.addpiece(core.PawnPiece, 36, True)
+
+        self.board.move(51, 35)
+
+        self.runenpassanttest(35)
+        return None
+
+    def test_CaptureNextTurn(self):
+        self.board.addpiece(core.PawnPiece, 51, False)
+        self.board.addpiece(core.PawnPiece, 53, False)
+        self.board.addpiece(core.PawnPiece, 34, True)
+        self.board.addpiece(core.PawnPiece, 36, True)
+        self.board.addpiece(core.KingPiece, 3, True)
+
+        self.board.playerturn = False
+        self.board.move(51, 35)
+        self.board.endturn()
+
+        self.board.move(3, 4)
+        self.board.endturn()
+
+        self.board.move(53, 37)
+
+        self.runenpassanttest(35)
+        self.runenpassanttest(37)
+
+    def test_CaptureOnEdge(self):
+        self.board.addpiece(core.PawnPiece, 48, False)
+        self.board.addpiece(core.PawnPiece, 33, True)
+
+        self.board.move(48, 32)
+
+        self.runenpassanttest(32)
+        return
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
