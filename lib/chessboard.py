@@ -304,6 +304,56 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
             allowedmoves.append(move)
         return allowedmoves
 
+    def _enpassant(self, targetindex, left=False, right=False):
+        assert any([left, right]), "Pass either left, right or both."
+
+        attackedpiece = self._board[targetindex]
+
+        attackerlist = list()
+        if left:
+            attacker = self._board[targetindex - 1]
+            if attacker == None:
+                pass
+            elif (attacker.piecetype() is PawnPiece
+                  and xor(attacker.isplayerpiece, attackedpiece.isplayerpiece)):
+                attackerlist.append(attacker)
+        if right:
+            attacker = self._board[targetindex + 1]
+            if attacker == None:
+                pass
+            elif (attacker.piecetype() is PawnPiece
+                  and xor(attacker.isplayerpiece, attackedpiece.isplayerpiece)):
+                attackerlist.append(attacker)
+        return attackerlist
+
+    def _getenpassantattackers(self, playerside=True):
+        """Returns pieces and vectors that are also allowed moves."""
+        # Determine which side you want enpassant for.
+        if playerside:
+            targetindex = self.convert((4, self._enpassant_oncomputer), toindex=True)
+        else:
+            targetindex = self.convert((3, self._enpassant_onplayer), toindex=True)
+
+        # Now find the current attackers depending on location.
+        if enpassant == 0:
+            attackerlist = self._enpassant(targetindex, left=False, right=True)
+            capturevector = [attackerlist[0]._captureleft]
+        elif enpassant == 7:
+            attackerlist = self._enpassant(targetindex, left=True, right=False)
+            capturelist = [attackerlist[0]._captureright]
+        else:
+            attackerlist = self._enpassant(targetindex, left=True, right=True)
+            capturelist = (
+                attackerlist[0]._captureleft,
+                attackerlist[1]._captureright
+            )
+        attackvectors = map(
+            lambda x, y: x.position(indexform=True) + y,
+            attackerlist,
+            capturelist
+        )
+        return attackerlist, attackvectors
+
     def _fetchbasicmovesfor(self, playerside=True):
         """Gets all the basic moves for 'playerside'"""
         possiblemoves = dict()
@@ -316,63 +366,19 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
             movelist = self._allowedmovesforpiece(square)  # Basic allowed moves.
             possiblemoves[square] = movelist  # Add them to possible moves.
 
-        # REVIEW: There has to be a better way of doing this. The two if chains
-        # could be replaced by a method.
+        # Add in en passant moves.
         if self._enpassant_onplayer != None and not playerside:
-            attackedpiece = self._board[
-                self.convert((3, self._enpassant_onplayer), toindex=True)]
-
-            fileleft = self._enpassant_onplayer-1
-            fileright = self._enpassant_onplayer+1
-
-            # HACK: Because I just cbf with this method today.
-            if fileleft < 0:
-                ileft = None
-            else:
-                ileft = self.convert((3, self._enpassant_onplayer-1), toindex=True)
-            if fileright > 7:
-                iright = None
-            else:
-                iright = self.convert((3, self._enpassant_onplayer+1), toindex=True)
-
-            for ii in [ileft, iright]:
-                # HACK: Skip over bad indices.
-                if ii == None:
-                    continue
-                piece = self._board[ii]
-                if piece == None:
-                    continue
-                elif (piece.piecetype() is PawnPiece
-                      and xor(piece.isplayerpiece, attackedpiece.isplayerpiece)):
-                    possiblemoves[piece].append(Vector(2, self._enpassant_onplayer))
+            pieces, vectors = self._getenpassantattackers(playerside=playerside)
         elif self._enpassant_oncomputer != None and playerside:
-            attackedpiece = self._board[
-                self.convert((4, self._enpassant_oncomputer), toindex=True)]
+            pieces, vectors = self._getenpassantattackers(playerside=playerside)
+        else:
+            pieces, vectors = [], []
 
-            fileleft = self._enpassant_oncomputer-1
-            fileright = self._enpassant_oncomputer+1
-
-            # HACK: Because I just cbf with this method today.
-            if fileleft < 0:
-                ileft = None
-            else:
-                ileft = self.convert((4, self._enpassant_oncomputer-1), toindex=True)
-            if fileright > 7:
-                iright = None
-            else:
-                iright = self.convert((4, self._enpassant_oncomputer+1), toindex=True)
-
-            for ii in [ileft, iright]:
-                # HACK: Skip over bad indices.
-                if ii == None:
-                    continue
-
-                piece = self._board[ii]
-                if piece == None:
-                    continue
-                elif (piece.piecetype() is PawnPiece
-                      and xor(piece.isplayerpiece, attackedpiece.isplayerpiece)):
-                    possiblemoves[piece].append(Vector(5, self._enpassant_oncomputer))
+        try:
+            for piece, vector in pieces, vectors:
+                possiblemoves[piece] = vector
+        except ValueError:
+            pass  # This is the error thrown when pieces and vectors are empty.
         return possiblemoves
 
     def _allowedtocastle(self, left=False, right=False, playerside=True):

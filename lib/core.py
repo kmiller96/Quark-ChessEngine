@@ -437,10 +437,12 @@ class PawnPiece(BasePiece):
     def __init__(self, playerpiece, startpositionindex):
         if playerpiece:
             movevector = Vector(1, 0)
-            self._validcapturemoves = (Vector(1, 1), Vector(1, -1))
+            self._captureleft = Vector(1, -1)
+            self._captureright = Vector(1, 1)
         else:
             movevector = Vector(-1, 0)
-            self._validcapturemoves = (Vector(-1, -1), Vector(-1, 1))
+            self._captureleft = Vector(-1, -1)
+            self._captureright = Vector(-1, 1)
 
         BasePiece.__init__(self, playerpiece, startpositionindex, "",
             validmovevectors=(movevector,), onlyunitvectors=True
@@ -457,5 +459,6 @@ class PawnPiece(BasePiece):
         """Pawns capture in a strange fashion. This method controls that."""
         # REVIEW: Can this be moved into chessboard class?
         diffvec = self.distancefromselfto(movetopos)
+        capturemoves = (self._captureleft, self._captureright)
         return (diffvec in self._validcapturemoves)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

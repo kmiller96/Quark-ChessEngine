@@ -254,7 +254,6 @@ class TestChessBoardPieces(CoreTestBoard):
         self.board._move(self.startpos, 27)
         self.board.addpiece(self.piece2.piecetype(), 28)
         self.board[28].isplayerpiece = False
-        self.board.displayboard()
         self.assertFalse(
             self.board._thismoveislegal(27, 26),
             "The king should still be in check!"
@@ -314,6 +313,18 @@ class TestChessBoardPieces(CoreTestBoard):
         self.assertEqual(
             sorted(moveindices), sorted([18, 19, 20, 26, 34, 35, 36]),
             "The king couldn't move as expected.")
+
+    def test_enpassantmethod(self):
+        self.fail("This hasn't been tested yet.")
+        return
+
+    def test_getenpassantattackers(self):
+        self.fail("This hasn't been tested yet.")
+        return
+
+    def test_fetchbasicmovesfor(self):
+        self.fail("This hasn't been tested yet.")
+        return
 
     def test_addpiece_badinput(self):
         self.assertRaises(AssertionError,
