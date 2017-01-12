@@ -235,8 +235,16 @@ class _ChessBoardCore:
  #        #  #       #     # #       #     #
  #       ### #######  #####  #######  #####
 
+  #####  ####### ######  #######
+ #     # #     # #     # #
+ #       #     # #     # #
+ #       #     # ######  #####
+ #       #     # #   #   #
+ #     # #     # #    #  #
+  #####  ####### #     # #######
 
-class _ChessBoardPiecesCore(_ChessBoardCore):
+
+class _PiecesCore(_ChessBoardCore):
     """A class that stores the private methods of the ChessBoardPieces component."""
 
     def _piecesattackingking(self, playerking=True):
@@ -355,7 +363,17 @@ class _ChessBoardPiecesCore(_ChessBoardCore):
         else:
             return True
 
-class _ChessBoardCastling(_ChessBoardCore, _ChessBoardPiecesCore):
+
+  #####     #     #####  ####### #       ### #     #  #####
+ #     #   # #   #     #    #    #        #  ##    # #     #
+ #        #   #  #          #    #        #  # #   # #
+ #       #     #  #####     #    #        #  #  #  # #  ####
+ #       #######       #    #    #        #  #   # # #     #
+ #     # #     # #     #    #    #        #  #    ## #     #
+  #####  #     #  #####     #    ####### ### #     #  #####
+
+
+class _ChessBoardCastling(_ChessBoardCore, _PiecesCore):
     """The component that handles the castling during the chess game."""
 
     def _allowedtocastle(self, left=False, right=False, playerside=True):
@@ -412,7 +430,16 @@ class _ChessBoardCastling(_ChessBoardCore, _ChessBoardPiecesCore):
         return -1
 
 
-class _ChessBoardEnPassant(_ChessBoardCore, _ChessBoardPiecesCore):
+ ####### #     #    ######     #     #####   #####     #    #     # #######
+ #       ##    #    #     #   # #   #     # #     #   # #   ##    #    #
+ #       # #   #    #     #  #   #  #       #        #   #  # #   #    #
+ #####   #  #  #    ######  #     #  #####   #####  #     # #  #  #    #
+ #       #   # #    #       #######       #       # ####### #   # #    #
+ #       #    ##    #       #     # #     # #     # #     # #    ##    #
+ ####### #     #    #       #     #  #####   #####  #     # #     #    #
+
+
+class _ChessBoardEnPassant(_ChessBoardCore, _PiecesCore):
     """This component handles the en passant rule."""
 
     def _enpassant(self, targetindex, left=False, right=False):
@@ -469,7 +496,24 @@ class _ChessBoardEnPassant(_ChessBoardCore, _ChessBoardPiecesCore):
         return attackerlist, attackvectors
 
 
-class _ChessBoardPieces(_ChessBoardEnPassant, _ChessBoardCastling):
+ ######  ### #######  #####  #######  #####
+ #     #  #  #       #     # #       #     #
+ #     #  #  #       #       #       #
+ ######   #  #####   #       #####    #####
+ #        #  #       #       #             #
+ #        #  #       #     # #       #     #
+ #       ### #######  #####  #######  #####
+
+ #     #    #    #     # ######  #       ### #     #  #####
+ #     #   # #   ##    # #     # #        #  ##    # #     #
+ #     #  #   #  # #   # #     # #        #  # #   # #
+ ####### #     # #  #  # #     # #        #  #  #  # #  ####
+ #     # ####### #   # # #     # #        #  #   # # #     #
+ #     # #     # #    ## #     # #        #  #    ## #     #
+ #     # #     # #     # ######  ####### ### #     #  #####
+                                                            
+
+class ChessBoard_Pieces(_ChessBoardEnPassant, _ChessBoardCastling):
     """The component that handles the pieces on the board."""
 
     def findpiece(self, piecetype, playerside=True):
@@ -615,7 +659,7 @@ class _ChessBoardPieces(_ChessBoardEnPassant, _ChessBoardCastling):
 
 
 
-class _ChessBoardUI(_ChessBoardCore):
+class ChessBoard_UI(_ChessBoardCore):
     """Controls interacting with the user as well as algebraic notation."""
 
     def _determinepiece(self, symbol):
@@ -733,7 +777,7 @@ class _ChessBoardUI(_ChessBoardCore):
 
 
 
-class _ChessBoardGUI(_ChessBoardCore):
+class ChessBoard_GUI(_ChessBoardCore):
     """The component that handles drawing up the board on the screen."""
 
     def _uppercaseif(self, condition, string):
@@ -812,7 +856,7 @@ class _ChessBoardGUI(_ChessBoardCore):
  ####### #     #  #####  ### #     # #######
 
 
-class _ChessBoardEngine(_ChessBoardCore):
+class ChessBoard_Engine(_ChessBoardCore):
     """The component that handles all of the engine behind the board."""
     # WIP: This is not even close to being started, but is placeholder for when
     # it will begin to be developed.
@@ -828,8 +872,8 @@ class _ChessBoardEngine(_ChessBoardCore):
   #####  #     # #######  #####   #####  ######  ####### #     # #     # ######
 
 
-class ChessBoard(_ChessBoardCore, _ChessBoardPieces, _ChessBoardEngine,
-                 _ChessBoardUI, _ChessBoardGUI):
+class ChessBoard(_ChessBoardCore, ChessBoard_Pieces, ChessBoard_Engine,
+                 ChessBoard_UI, ChessBoard_GUI):
     """The parent of all public classes for the chessboard.
 
     Since the board embraces composition OOP mentality, this class is where the
