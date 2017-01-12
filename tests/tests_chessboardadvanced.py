@@ -3,6 +3,8 @@
 # 4920646f6e5c2774206361726520696620697420776f726b73206f6e20796f7572206d61636869
 # 6e652120576520617265206e6f74207368697070696e6720796f7572206d616368696e6521
 
+# TODO: Fix the core testing suite; separate the code up and refactor.
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~IMPORTS/GLOBALS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from time import time
