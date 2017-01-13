@@ -56,9 +56,6 @@ class _ChessBoardCore:
         self.playerturn = True
         self.playercolour = 'white'
 
-        # Needed for pieces:
-        self._pieceslist = list()
-
         # Needed for castling rules.
         self._castleleft = True
         self._castleright = True
@@ -72,6 +69,7 @@ class _ChessBoardCore:
         self._ranksymbols = tuple(map(lambda x: str(x), range(1, 8+1)))
         self._filesymbols = tuple('abcdefgh')
 
+    # REVIEW: Do I need this method?
     def __getitem__(self, pos):
         """Controls calling the piece at a position on the board like a list."""
 
@@ -85,25 +83,7 @@ class _ChessBoardCore:
             except TypeError:
                 raise TypeError(errormsg)  # If that still doesn't work it's fucked.
 
-    @staticmethod
-    def _readablelistof(lst):
-        """Prints the list as expected, instead of a jumble of instances.
-
-        This is to be called when dealing with pieces or vectors."""
-        string = ''
-        for item in lst:
-            string += str(item) + ', '
-        return '[' + string[:-2] + ']'
-
-    def _onlyone(self, iterable):
-        """Returns true if only one of the items in iterable is true."""
-        # REVIEW: I know there is a better way to write this.
-        count = 0
-        for ii in iterable:
-            if ii:
-                count += 1
-        return count == 1
-
+    # REVIEW: Where is this being used, and why?
     @staticmethod
     def _piecesareonsameside(*pieces):
         """Checks to see if the passed pieces are all on the same side."""
@@ -119,112 +99,39 @@ class _ChessBoardCore:
                 return False
         return True
 
-    def convert(self, indexorcoordinateorvector,
-                tocoordinate=False, toindex=False, tovector=False):
-        """Makes the input into a coordinate, vector or index, regardless of form.
-
-        This monolithic function basically forces either an index or a
-        coordinate into the specified form. This is the translator required to
-        calculate possible moves using vector attacks. See docs for more
-        information into the algoithims used and why this method is required."""
-        # TODO: Write notes on why this method is required.
-        # Sanity checks.
-        assert any([tocoordinate, toindex, tovector]), \
-            "Specify the output using the optional arguments."
-        assert self._onlyone([tocoordinate, toindex, tovector]), \
-            "The output is only a coordinate, vector or an index, not multiple."
-
-        # Define functions
-        def isindex(x):
-            return isinstance(x, int)
-        def iscoordinate(x):
-            return (isinstance(x, (tuple, list)) and len(x) == 2)
-        def isvector(x):
-            return isinstance(x, Vector)
-
-        # Convert to desired form:
-        x = indexorcoordinateorvector  # Shorthand notation.
-        self._assertPositionOnBoard(x)
-        if tocoordinate:  # Convert to coordinate.
-            if isindex(x):
-                return (x/8, x % 8)
-            elif isvector(x):
-                return x.tupleform()
-            elif iscoordinate(x):
-                return x
-        elif toindex:  # Convert to index.
-            if isindex(x):
-                return x
-            elif isvector(x):
-                x = x.tupleform()
-                return x[0]*8 + x[1]
-            elif iscoordinate(x):
-                return x[0]*8 + x[1]
-        elif tovector:  # Convert to vector.
-            if isindex(x):
-                return Vector(x/8, x % 8)
-            elif iscoordinate(x):
-                return Vector(*x)
-            elif isvector(x):
-                return x
-        else:
-            raise TypeError("Passed item is none of the allowed options.")
-
-    def convertlist(self, lst, **kwargs):
-        """Same call as convert but for a list. Basically, a shortcut call."""
-        return map(lambda x: self.convert(x, **kwargs), lst)
-
     def simulateboard(self):
         """Creates an instance of the chess board exactly as it is now."""
-        # REVIEW: Can this be done with more abstract calls?
         return deepcopy(self)
 
-    def endturn(self):
-        """Ends the turn and runs some cleanup code."""
-        self.playerturn = not self.playerturn
-        if self.playerturn:
-            self._enpassant_onplayer = None
-        else:
-            self._enpassant_oncomputer = None
+    def assertPositionOnBoard(self, position):
+        """Asserts that the position is valid."""
+        try:
+            index = convert(position, toindex=True)
+            self._board[index]
+        except IndexError:  # If off board.
+            raise AssertionError("The position %r is off the board." % position)
         return None
 
-    @staticmethod
-    def _assertPositionOnBoard(indices):
-        """Assert that the indices called are on the board as a sanity check."""
-        # TODO: Rewrite this method to use try-chains instead of if-chains.
-        if isinstance(indices, Vector):
-            assert all([0 <= x <= 7 for x in indices.vector]), \
-                "Row/Column index is out the the board range."
-        elif isinstance(indices, (list, tuple)):
-            for ii in indices:
-                assert isinstance(ii, int), \
-                    "The value(s) passed are not integers."
-                assert 0 <= ii <= 7, \
-                    "Row/Column index is out the the board range."
-        elif isinstance(indices, int):
-            assert 0 <= indices <= 63, "The integer passed must be between 0 to 63."
-        else:
-            raise TypeError("Please pass an index, coordinate or vector.")
-        return None
-
-    def _assertIsUnoccupied(self, index):
+    def assertIsUnoccupied(self, position):
         """Asserts that the square is free and unoccupied."""
         try:
+            index = convert(position, toindex=True)
             assert self._board[index] == None, "The target square is occupied."
         except IndexError:
             raise IndexError("The index used is off the board!")
         return None
 
-    def _assertIsOccupied(self, index):
+    def assertIsOccupied(self, position):
         """Asserts that the square is occupied."""
         try:
+            index = convert(position, toindex=True)
             assert self._board[index] != None, "The target square is unoccupied."
         except IndexError:
             raise IndexError("The index used is off the board!")
         return None
 
-    def _isoccupied(self, index):
-        """Similar to _assertIsUnoccupied but just returns a True/False only."""
+    def squareisoccupied(self, index):
+        """Returns true if the square is occupied, false if empty."""
         return self._board[index] != None
 
 
@@ -662,10 +569,13 @@ class ChessBoard_Pieces(_ChessBoardEnPassant, _ChessBoardCastling):
 
 class ChessBoard_UI(_ChessBoardCore):
     """Controls interacting with the user as well as algebraic notation."""
+    # TODO: Update class docstring.
 
     def _addmovetohistory(self, piece, startposition, endposition,
                          movewascapture=False):
         """Writes a move into the game history using *my* notation rules."""
+        # TODO: Update docstring.
+
         # ############################ #
         # Start with defining methods. #
         # ############################ #
@@ -709,6 +619,7 @@ class ChessBoard_UI(_ChessBoardCore):
 
         The method returns the piece that is to move, along with the position
         the piece will move to."""
+        # TODO: Update docstring.
 
         # ############################ #
         # Start with defining methods. #
@@ -788,8 +699,9 @@ class ChessBoard_UI(_ChessBoardCore):
 
 class ChessBoard_GUI(_ChessBoardCore):
     """The component that handles drawing up the board on the screen."""
+    # TODO: Update the class docstring
 
-    def displayboard(self):
+    def displayASCIIboard(self):
         """Prints the board using ASCII graphics"""
         # TODO: Flesh out docstring.
 
@@ -949,10 +861,10 @@ class ChessBoard(_ChessBoardCore, ChessBoard_Pieces, ChessBoard_Engine,
             'movehistory'
         )
 
-    def drawboard(self, whiteperspective=True, blackperspective=False):
+    def drawboard(self):
         """Displays the board in the terminal from either side."""
         # WIP!
-        self.displayboard()
+        self.displayASCIIboard()
         return
 
     def legalmovesfor(self, colour):
@@ -972,6 +884,15 @@ class ChessBoard(_ChessBoardCore, ChessBoard_Pieces, ChessBoard_Engine,
     def makemove(self, userstring):
         """Moves a piece to the position supplied."""
         return
+
+    def endturn(self):
+        """Ends the turn and runs some cleanup code."""
+        self.playerturn = not self.playerturn
+        if self.playerturn:
+            self._enpassant_onplayer = None
+        else:
+            self._enpassant_oncomputer = None
+        return None
 
 
 class DefaultChessBoard(ChessBoard):
