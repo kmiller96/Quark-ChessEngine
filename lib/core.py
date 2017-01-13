@@ -348,21 +348,20 @@ class Vector:
 class BasePiece:
     """The class all chess pieces inherit from."""
 
-    def __init__(self, playerpiece, startpositionindex, notationsymbol,
+    def __init__(self, colour, startpositionindex, notationsymbol,
                  validmovevectors, onlyunitvectors=False):
         # Sanity checks.
         assert isinstance(onlyunitvectors, bool), \
             "'onlyunitvectors' parameter must be true or false."
-        assert isinstance(playerpiece, bool), \
-            "The piece either belongs to the user (True) or does not (False). " \
-            "Please pass a boolean arguement."
+        assert colour in ('white', 'black'), \
+            "The colour of the piece must be 'white' or 'black'"
 
         # Assignment of attributes.
         self._positionvector = self._tovector(startpositionindex)
         self._notationsymbol = notationsymbol
         self._validmovevectors = self._checkAllAreVectors(validmovevectors)
         self._onlyunitvectors = onlyunitvectors
-        self.isplayerpiece = playerpiece
+        self.colour = colour
         return None
 
     def __str__(self):
@@ -483,8 +482,8 @@ class BasePiece:
 class RookPiece(BasePiece):
     """The class for the Rook."""
 
-    def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self, playerpiece, startpositionindex, 'R',
+    def __init__(self, colour, startpositionindex):
+        BasePiece.__init__(self, colour, startpositionindex, 'R',
             validmovevectors=(
                 Vector(1,0), Vector(0,1), Vector(-1, 0), Vector(0, -1))
         )
@@ -494,8 +493,8 @@ class RookPiece(BasePiece):
 class KnightPiece(BasePiece):
     """The class for the knight."""
 
-    def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self, playerpiece, startpositionindex, 'N',
+    def __init__(self, colour, startpositionindex):
+        BasePiece.__init__(self, colour, startpositionindex, 'N',
             validmovevectors=(
                 Vector(2, 1), Vector(1, 2), Vector(2, -1), Vector (1, -2),
                 Vector(-2, -1), Vector(-1, -2), Vector(-2, 1), Vector (-1, 2)),
@@ -507,8 +506,8 @@ class KnightPiece(BasePiece):
 class BishopPiece(BasePiece):
     """The class for the bishop."""
 
-    def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self, playerpiece, startpositionindex, 'B',
+    def __init__(self, colour, startpositionindex):
+        BasePiece.__init__(self, colour, startpositionindex, 'B',
             validmovevectors=(
                 Vector(1, 1), Vector(1, -1), Vector(-1, -1), Vector(-1, 1))
         )
@@ -517,8 +516,8 @@ class BishopPiece(BasePiece):
 class QueenPiece(BasePiece):
     """The class for the queen."""
 
-    def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self, playerpiece, startpositionindex, 'Q',
+    def __init__(self, colour, startpositionindex):
+        BasePiece.__init__(self, colour, startpositionindex, 'Q',
             validmovevectors=(
                 Vector(1, 0), Vector(0, 1), Vector(1, 1), Vector(1, -1),
                 Vector(-1, 0), Vector(0, -1), Vector(-1, -1), Vector(-1, 1))
@@ -529,8 +528,8 @@ class QueenPiece(BasePiece):
 class KingPiece(BasePiece):
     """The class for the King"""
 
-    def __init__(self, playerpiece, startpositionindex):
-        BasePiece.__init__(self, playerpiece, startpositionindex, 'K',
+    def __init__(self, colour, startpositionindex):
+        BasePiece.__init__(self, colour, startpositionindex, 'K',
             validmovevectors=(
                 Vector(1, 0), Vector(0, 1), Vector(1, 1), Vector(1, -1),
                 Vector(-1, 0), Vector(0, -1), Vector(-1, -1), Vector(-1, 1)),
@@ -543,17 +542,17 @@ class PawnPiece(BasePiece):
     """The very special class for the pawn."""
     # WIP: Still be fixed.
 
-    def __init__(self, playerpiece, startpositionindex):
-        if playerpiece:
+    def __init__(self, colour, startpositionindex):
+        if colour == 'white':
             movevector = Vector(1, 0)
             self._captureleft = Vector(1, -1)
             self._captureright = Vector(1, 1)
-        else:
+        elif colour == 'black':
             movevector = Vector(-1, 0)
             self._captureleft = Vector(-1, -1)
             self._captureright = Vector(-1, 1)
 
-        BasePiece.__init__(self, playerpiece, startpositionindex, "",
+        BasePiece.__init__(self, colour, startpositionindex, "",
             validmovevectors=(movevector,), onlyunitvectors=True
         )
         self._validcapturemoves = (Vector(1, 1), Vector(1, -1))

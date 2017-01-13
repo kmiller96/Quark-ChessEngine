@@ -96,16 +96,25 @@ class _ChessBoardCore:
     def _piecesareonsameside(*pieces):
         """Checks to see if the passed pieces are all on the same side."""
         side = None
-        for ii in pieces:
+        for piece in pieces:
             if side is None:
-                side = ii.isplayerpiece
+                side = piece.colour  # Use the first piece's colour as comparison.
                 continue
 
-            if ii.isplayerpiece == side:
+            if piece.colour == side:  # Same side is ok.
                 continue
-            else:
+            else:  # Different sides are not.
                 return False
         return True
+
+    def isplayercolour(self, colour):
+        """Determines if the colour passed is the player's colour or not."""
+        assert colour.lower() in ('white', 'black'), \
+            "The colour of the piece must be 'white' or 'black'"
+        if colour.lower() == 'white':
+            return True
+        else:
+            return False
 
     def simulateboard(self):
         """Creates an instance of the chess board exactly as it is now."""
@@ -201,13 +210,14 @@ class _PiecesCore(_ChessBoardCore):
             currentposvec += unitrelvec
         return pieceslist
 
-    def _leaveskingincheck(self, startpos, endpos, playerside=True):
+    def _kingincheckaftermove(self, startpos, endpos, kingcolour):
         """Checks to see if the supplied move leaves the king in check."""
         # Find the king.
+        playerking = self.isplayercolour(kingcolour)
         for ii, square in enumerate(self._board):
             if square == None:
                 continue
-            elif square == KingPiece and xnor(square.isplayerpiece, playerside):
+            elif square == KingPiece and xnor(square.isplayerpiece, playerking):
                 kinglocation = ii
                 break
 
@@ -215,123 +225,41 @@ class _PiecesCore(_ChessBoardCore):
         simboard = self.simulateboard()
         simboard._move(startpos, endpos)
 
-        if playerside: attackingcolour = self.computercolour
+        if playerking: attackingcolour = self.computercolour
         else: attackingcolour = self.playercolour
         attackers = simboard._piecesattacking(kinglocation, attackingcolour)
         return len(attackers) > 0
 
-    def _fetchbasicmovesfor(self, playerside=True):
-        """Gets all the basic moves for 'playerside'"""
-        possiblemoves = dict()
-        # First find all legal moves.
-        for square in self._board:
-            if square is None:  # Continue loop if square is empty.
-                continue
-            elif square.isplayerpiece is not playerside:  # Skip pieces on other side.
-                continue
-            movelist = self._allowedmovesforpiece(square)  # Basic allowed moves.
-            possiblemoves[square] = movelist  # Add them to possible moves.
-        return possiblemoves
+    def _castle(self, colour, longside=False, shortside=False):
+        """Castle the king long."""
+        assert any((longside, shortside)) and not all((longside, shortside)), \
+            "Please specify whether you are castling long or short."
+        playercastle = self.isplayercolour(colour)
+        if playercastle:
+            if longside:
+                self._move(4, 2)
+                self._move(0, 3)
+            elif shortside:
+                self._move(4, 6)
+                self._move(7, 5)
+        elif not playercastle:
+            if longside:
+                self._move(60, 58)
+                self._move(56, 59)
+            elif shortside:
+                self._move(60, 62)
+                self._move(63, 61)
+        return None
 
     def _move(self, startindex, endindex):
         """Move a piece from startined to endindex."""
         if startindex == endindex:
             return None
-
-        # Assertion check & enpassant enforcement.
-        self._assertIsOccupied(startindex)
-        if self._board[startindex].piecetype() is PawnPiece:
-            relvec = (self.convert(endindex, tovector=True)
-                    - self.convert(startindex, tovector=True))
-            if abs(relvec) == 2:
-                x = self.convert(startindex, tocoordinate=True)[1]
-                if self._board[startindex].isplayerpiece:
-                    self._enpassant_onplayer = x
-                else:
-                    self._enpassant_oncomputer = x
-
-        # Actual movement code.
+        self.assertIsOccupied(startindex)  # Just so the method call doesn't fail.
         self._board[startindex].movetoindex(endindex)
         self._board[endindex] = self._board[startindex]
         self._board[startindex] = None
         return None
-
-
- ####### #     #    ######     #     #####   #####     #    #     # #######
- #       ##    #    #     #   # #   #     # #     #   # #   ##    #    #
- #       # #   #    #     #  #   #  #       #        #   #  # #   #    #
- #####   #  #  #    ######  #     #  #####   #####  #     # #  #  #    #
- #       #   # #    #       #######       #       # ####### #   # #    #
- #       #    ##    #       #     # #     # #     # #     # #    ##    #
- ####### #     #    #       #     #  #####   #####  #     # #     #    #
-
-
-class _ChessBoardEnPassant(_ChessBoardCore, _PiecesCore):
-    """This component handles the en passant rule."""
-
-    def _enpassantattackers(self, playerside=True):
-        """Returns pieces and vectors that can en passant."""
-
-        # ############################ #
-        # Start with defining methods. #
-        # ############################ #
-
-        def pieceCanEnPassant(attacker, target):
-            """See if the attacker can en passant the target."""
-            if attacker == None:
-                return False
-            elif (attacker == PawnPiece
-                  and xor(attacker.isplayerpiece, target.isplayerpiece)):
-                return True
-            else:
-                return False
-
-
-        def _enpassant(self, targetindex, left=False, right=False):
-            assert any([left, right]), "Pass either left, right or both."
-
-            attackedpiece = self._board[targetindex]
-
-            # Get attackers.
-            attackerlist = list(); capturelist = list()
-            if left:
-                attacker = self._board[targetindex - 1]
-                if pieceCanEnPassant(attacker, attackedpiece):
-                    attackerlist.append(attacker)
-                    capturelist.append(attacker._captureright)
-            if right:
-                attacker = self._board[targetindex + 1]
-                if pieceCanEnPassant(attacker, attackedpiece):
-                    attackerlist.append(attacker)
-                    capturelist.append(attacker._captureleft)
-            return attackerlist, capturelist
-
-        # ######################## #
-        # Now process the request. #
-        # ######################## #
-        if playerside:
-            enpassant = self._enpassant_oncomputer
-            targetindex = self.convert((4, self._enpassant_oncomputer), toindex=True)
-        else:
-            enpassant = self._enpassant_onplayer
-            targetindex = self.convert((3, self._enpassant_onplayer), toindex=True)
-
-        # Now find the current attackers depending on location.
-        capturelist = list()
-
-        if enpassant == 0:
-            right = True; left = False
-        elif enpassant == 7:
-            right = True; left = False
-        else:
-            right = True; left = True
-        attackerlist, capturelist = self._enpassant(targetindex, left=True, right=True)
-        attackvectors = map(
-            lambda x, y: x.position(vectorform=True) + y,
-            attackerlist,
-            capturelist
-        )
-        return attackerlist, attackvectors
 
 
  ######  ### #######  #####  #######  #####       ##
@@ -354,7 +282,7 @@ class _ChessBoardEnPassant(_ChessBoardCore, _PiecesCore):
 class ChessBoard_Pieces(_ChessBoardEnPassant, _ChessBoardCastling):
     """The component that handles the pieces and their motion on the board."""
 
-    def findpiece(self, piecetype, playerside=True):
+    def findpiece(self, piecetype, colour):
         """Finds all instances of piece on the board that belong to one side.
 
         Returns a list of the board indices."""
@@ -363,7 +291,7 @@ class ChessBoard_Pieces(_ChessBoardEnPassant, _ChessBoardCastling):
             if square is None:
                 continue
             elif ((piecetype is square.piecetype())
-                    and xnor(square.isplayerpiece, playerside)):
+                    and square.colour == colour):
                 piecepositions.append(ii)
         return piecepositions
 
@@ -388,46 +316,6 @@ class ChessBoard_Pieces(_ChessBoardEnPassant, _ChessBoardCastling):
         kingmoves = self.allpossiblemoves()[kinginstance]
         cantmove = len(kingmoves) == 0
         return (not underattack) and cantmove
-
-    def allpossiblemoves(self, forplayerpieces=True):
-        """Gets all of the possible moves available for each piece for either
-        the player or the opposition."""
-        # First fetch basic moves and captures.
-        possiblemoves = dict()
-        for square in self._board:
-            if square is None:
-                continue
-            elif square.isplayerpiece is not forplayerpieces:
-                continue
-            possiblemoves[square] = self._allowedmovesforpiece(square)
-
-        # Add in en passant moves.
-        if self._enpassant_onplayer != None and not forplayerpieces:
-            pieces, vectors = self._getenpassantattackers(forplayerpieces)
-        elif self._enpassant_oncomputer != None and forplayerpieces:
-            pieces, vectors = self._getenpassantattackers(forplayerpieces)
-        else:
-            pieces, vectors = [], []
-        try:
-            for ii in xrange(len(pieces)):
-                piece, vector = pieces[ii], vectors[ii]
-                allpossiblemoves[piece].append(vector)
-        except ValueError:
-            pass  # This is the error thrown when pieces and vectors are empty.
-
-        # Now remove moves that put/leave the king in check.
-        for piece, movelist in allpossiblemoves.iteritems():
-            piecestartposition = piece.position(indexform=True); ii = 0
-
-            # Now iterate through each possible move:
-            while ii < len(movelist):
-                move = movelist[ii]
-                pieceendposition = self.convert(move, toindex=True)
-                if self._thismoveislegal(piecestartposition, pieceendposition):
-                    ii += 1
-                else:
-                    movelist.remove(move)
-        return allpossiblemoves
 
     def addpiece(self, piece, position, playerpiece=True, force=False):
         """Add a new piece to the board."""
@@ -459,13 +347,38 @@ class ChessBoard_Pieces(_ChessBoardEnPassant, _ChessBoardCastling):
                 "To move the piece, the start and end points must be different."
             startindex = self.convert(startindexcoordinate, toindex=True)
             endindex = self.convert(endindexcoordinate, toindex=True)
-            self._assertPositionOnBoard(startindex)
-            self._assertPositionOnBoard(endindex)
-            self._assertIsOccupied(startindex)
+
+            self.assertPositionOnBoard(startindex)
+            self.assertPositionOnBoard(endindex)
+            self.assertIsOccupied(startindex)
             if not force: self._assertIsUnoccupied(endindex)
+
         except AssertionError:
             raise
         else:
+            # Enpassant enforcement.
+            if self._board[startindex] == PawnPiece:
+                relvec = (self.convert(endindex, tovector=True)
+                        - self.convert(startindex, tovector=True))
+                if abs(relvec) == 2:
+                    x = self.convert(startindex, tocoordinate=True)[1]
+                    if self._board[startindex].isplayerpiece:
+                        self._enpassant_onplayer = x
+                    else:
+                        self._enpassant_oncomputer = x
+
+            # TODO: Move this to the public call of move()
+            # Castling enforcement
+            elif self._board[startindex] == KingPiece:
+                relvec = (self.convert(endindex, tovector=True)
+                        - self.convert(startindex, tovector=True))
+                if abs(relvec) == 2:
+                    if relvec.vector[1] < 0:
+                        self._castle(longside=True)
+                    elif relvec.vector[1] > 0:
+                        self._castle(shortside=True)
+                    return None
+
             self._move(startindex, endindex)
         return None
 
@@ -505,42 +418,64 @@ class ChessBoard_Pieces(_ChessBoardEnPassant, _ChessBoardCastling):
 class ChessBoard_MoveGeneration(_ChessBoardCore, _PiecesCore):
     """The component that handles all of the move generations"""
 
-    def _basicallowedmovesforpiece(self, piece):
-        """Finds the allowed moves for 'piece' at its current position.
+    def _basicmovementfor(self, colour):
+        """Gets all the basic moves for the colour supplied."""
 
-        This method filters out some of the moves generated by a piece's
-        possiblemoves method by checking the board conditions. It uses the
-        method _piecesbetween to find where is legal to move.
+        # ############################ #
+        # Start with defining methods. #
+        # ############################ #
 
-        Note that this method doesn't consider if there are any pins, checks
-        etc. but simply what it is legally allowed to do on the board."""
-        # TODO: Update docstring
-        startpos = piece.position(indexform=True)
-        movelist = piece.possiblemoves(); allowedmoves = list()
+        def basicallowedmovesforpiece(piece):
+            """Finds the allowed moves for 'piece' at its current position.
 
-        # HACK: Add an extra move to the pawn piece if on 2nd or 7th rank.
-        if piece.piecetype() is PawnPiece:
-            startposvec = piece.position(vectorform=True)
-            if startposvec.tupleform()[0] == 1 and piece.isplayerpiece:
-                movelist.append(startposvec + Vector(2, 0))
-            elif startposvec.tupleform()[0] == 6 and not piece.isplayerpiece:
-                movelist.append(startposvec + Vector(-2, 0))
+            This method filters out some of the moves generated by a piece's
+            possiblemoves method by checking the board conditions. It uses the
+            method _piecesbetween to find where is legal to move.
 
-        # Iterate through all moves and filter out bad ones.
-        for move in movelist:
-            moveindex = self.convert(move, toindex=True)
-            if piece.piecetype() is KnightPiece:
-                pass
-            elif self._piecesbetween(startpos, moveindex):
-                continue
+            Note that this method doesn't consider if there are any pins, checks
+            etc. but simply what it is legally allowed to do on the board."""
+            # TODO: Update docstring
+            startpos = piece.position(indexform=True)
+            movelist = piece.possiblemoves(); allowedmoves = list()
 
-            if self._board[moveindex] != None:
-                if self._piecesareonsameside(piece, self._board[moveindex]):
-                    continue  # Can't capture your own side.
-            allowedmoves.append(move)
-        return allowedmoves
+            # Add an extra move to the pawn piece if on 2nd or 7th rank.
+            if piece.piecetype() is PawnPiece:
+                startposvec = piece.position(vectorform=True)
+                if startposvec.vector[0] == 1 and piece.colour == self.playercolour:
+                    movelist.append(startposvec + Vector(2, 0))
+                elif startposvec.vector[0] == 6 and not piece.colour == self.computercolour:
+                    movelist.append(startposvec + Vector(-2, 0))
 
-    def _allowedtocastle(self, left=False, right=False, playerside=True):
+            # Iterate through all moves and filter out bad ones.
+            for move in movelist:
+                moveindex = self.convert(move, toindex=True)
+                if piece.piecetype() is KnightPiece:
+                    pass
+                elif self._piecesbetween(startpos, moveindex):
+                    continue
+
+                if self._board[moveindex] != None:
+                    if self._piecesareonsameside(piece, self._board[moveindex]):
+                        continue  # Can't capture your own side.
+                allowedmoves.append(move)
+            return allowedmoves
+
+        # ######################## #
+        # Now process the request. #
+        # ######################## #
+
+        possiblemoves = dict(); playerside = self.isplayercolour(colour)
+        for square in self._board:
+            if square is None:
+                continue  # Skip empty square.
+            elif square.isplayerpiece is not playerside:
+                continue  # Skip pieces on other colour.
+            movelist = self._allowedmovesforpiece(square)
+            possiblemoves[square] = movelist
+        return possiblemoves
+
+
+    def _allowedtocastle(self, colour, left=False, right=False):
         """A special call that determines what castling is allowed."""
         # TODO: Update docstring.
 
@@ -549,7 +484,6 @@ class ChessBoard_MoveGeneration(_ChessBoardCore, _PiecesCore):
         # ############################ #
 
         def cancastle():
-            """See if the king is allowed to castle."""
             if left:
                 if not self._castleleft:
                     return False
@@ -558,7 +492,6 @@ class ChessBoard_MoveGeneration(_ChessBoardCore, _PiecesCore):
                     return False
             return True
         def correctpositons():
-            """See if the king and rook are in the right positions"""
             if playerside:
                 king = 4
                 if left: rook = 0
@@ -576,11 +509,10 @@ class ChessBoard_MoveGeneration(_ChessBoardCore, _PiecesCore):
             else:
                 return True
         def castlethroughcheck():
-            """See if the king moves through check at all when castling."""
             if left: walk = -3
             elif right: walk = 3
             moveswerelegal = [
-                self._leaveskingincheck(king, index, playerside)
+                self._kingincheckaftermove(king, index, playerside)
                 for index
                 in sorted(range(king, king + walk, walk/abs(walk)))
             ]
@@ -591,6 +523,7 @@ class ChessBoard_MoveGeneration(_ChessBoardCore, _PiecesCore):
         # ######################## #
 
         assert any([left, right]) and not all([left, right])
+        playerside = self.isplayercolour(colour)
         if not cancastle():
             return False
         elif not correctpositons():
@@ -602,6 +535,88 @@ class ChessBoard_MoveGeneration(_ChessBoardCore, _PiecesCore):
         elif castlethroughcheck():
             return False
         return True
+
+
+    # REVIEW: What do I want from this method?
+    def _enpassantattackers(self, colour):
+        """Returns pieces and vectors that can en passant."""
+        # TODO: Update docstring
+
+        # ############################ #
+        # Start with defining methods. #
+        # ############################ #
+
+        def pieceCanEnPassant(attacker, target):
+            """See if the attacker can en passant the target."""
+            if attacker == None:
+                return False
+            elif (attacker == PawnPiece
+                  and xor(attacker.isplayerpiece, target.isplayerpiece)):
+                return True
+            else:
+                return False
+        def _enpassant(self, targetindex, left=False, right=False):
+            assert any([left, right]), "Pass either left, right or both."
+
+            attackedpiece = self._board[targetindex]
+
+            # Get attackers.
+            attackerlist = list(); capturelist = list()
+            if left:
+                attacker = self._board[targetindex - 1]
+                if pieceCanEnPassant(attacker, attackedpiece):
+                    attackerlist.append(attacker)
+                    capturelist.append(attacker._captureright)
+            if right:
+                attacker = self._board[targetindex + 1]
+                if pieceCanEnPassant(attacker, attackedpiece):
+                    attackerlist.append(attacker)
+                    capturelist.append(attacker._captureleft)
+            return attackerlist, capturelist
+
+        # ######################## #
+        # Now process the request. #
+        # ######################## #
+        if playerside:
+            enpassant = self._enpassant_oncomputer
+            targetindex = self.convert((4, self._enpassant_oncomputer), toindex=True)
+        else:
+            enpassant = self._enpassant_onplayer
+            targetindex = self.convert((3, self._enpassant_onplayer), toindex=True)
+
+        # Now find the current attackers depending on location.
+        if enpassant == 0:    (right, left) = (True, False)
+        elif enpassant == 7:  (right, left) = (False, True)
+        else:                 (right, left) = (True,  True)
+
+        attackerlist, capturelist = self._enpassant(
+            targetindex,
+            left=left, right=right
+        )
+        attackvectors = map(
+                lambda x, y: x.position(vectorform=True) + y,
+                attackerlist, capturelist
+        )
+        return attackerlist, attackvectors
+
+    def _removeillegalmoves(self, movedic):
+        """Filters out moves from movedic that are illegal.
+
+        For the most part, this method removes any moves that put or leave the
+        king in check.
+        """
+        for piece, movelist in movedic.iteritems():
+            piecestartposition = piece.position(indexform=True); ii = 0
+
+            # Now iterate through each possible move:
+            while ii < len(movelist):
+                move = movelist[ii]
+                pieceendposition = self.convert(move, toindex=True)
+                if self._kingincheckaftermove(
+                        piecestartposition, pieceendposition, piece.colour):
+                    movelist.remove(move)
+                else:
+                    ii += 1
 
 
  #     #  #####  ####### ######
@@ -663,6 +678,7 @@ class ChessBoard_UI(_ChessBoardCore):
             raise
         except TypeError as err2:
             raise
+
 
     # REVIEW: What do I need this to return?
     def _processplayermovestring(self, userstring):
@@ -843,7 +859,7 @@ class ChessBoard_GUI(_ChessBoardCore):
 
 
 class ChessBoard_Engine(_ChessBoardCore):
-    """The component that handles all of the engine behind the board."""
+    """The component that handles the interface of the engine."""
     # WIP: This is not even close to being started, but is placeholder for when
     # it will begin to be developed.
     pass
@@ -858,8 +874,9 @@ class ChessBoard_Engine(_ChessBoardCore):
   #####  #     # #######  #####   #####  ######  ####### #     # #     # ######
 
 
-class ChessBoard(_ChessBoardCore, ChessBoard_Pieces, ChessBoard_Engine,
-                 ChessBoard_UI, ChessBoard_GUI):
+class ChessBoard(_ChessBoardCore, _PiecesCore, ChessBoard_Pieces,
+                 ChessBoard_MoveGeneration, ChessBoard_UI, ChessBoard_GUI,
+                 ChessBoard_Engine):
     """The parent of all public classes for the chessboard.
 
     Since the board embraces composition OOP mentality, this class is where the
@@ -918,7 +935,39 @@ class ChessBoard(_ChessBoardCore, ChessBoard_Pieces, ChessBoard_Engine,
 
     def fetchpossiblemovesfor(self, white=False, black=False):
         """Generate the move dictionary for either white or black."""
-        return
+        # First fetch basic moves and captures.
+        assert any((white, black)) and not all((white, black)), \
+            "Pick one colour only (white or black)."
+        if white:
+            colour = 'white'
+        elif black:
+            colour = 'black'
+        possiblemoves = self._basicmovementfor(colour)
+
+        # Add in en passant moves.
+        if self._enpassant_onplayer != None and not forplayerpieces:
+            pieces, vectors = self._enpassantattackers(forplayerpieces)
+        elif self._enpassant_oncomputer != None and forplayerpieces:
+            pieces, vectors = self._enpassantattackers(forplayerpieces)
+        else:
+            pieces, vectors = [], []
+        try:
+            for ii in xrange(len(pieces)):
+                piece, vector = pieces[ii], vectors[ii]
+                possiblemoves[piece].append(vector)
+        except ValueError:
+            pass  # This is the error thrown when pieces and vectors are empty.
+
+        # Add in castling moves.
+        kingpiece = self._board[self.findpiece(KingPiece, colour)[0]]
+        if self._allowedtocastle(colour, left=True):
+            possiblemoves[kingpiece].append(Vector(0, 2))
+        if self._allowedtocastle(colour, right=True):
+            possiblemoves[kingpiece].append(Vector(0, 6))
+
+        # Remove the moves that leave/put the king in check.
+        possiblemoves = self._removeillegalmoves(possiblemoves)
+        return possiblemoves
 
     def drawboard(self):
         """Displays the board in the terminal from either side."""
