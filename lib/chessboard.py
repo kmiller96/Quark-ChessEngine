@@ -54,6 +54,7 @@ class _ChessBoardCore:
         # Needed for the core operations:
         self._board = [None] * 64
         self.playerturn = True
+        self.playercolour = 'white'
 
         # Needed for pieces:
         self._pieceslist = list()
@@ -67,7 +68,7 @@ class _ChessBoardCore:
         self._enpassant_oncomputer = None
 
         # Needed for UI:
-        self._movehistory = list()
+        self.movehistory = list()
         self._ranksymbols = tuple(map(lambda x: str(x), range(1, 8+1)))
         self._filesymbols = tuple('abcdefgh')
 
@@ -511,7 +512,7 @@ class _ChessBoardEnPassant(_ChessBoardCore, _PiecesCore):
  #     # ####### #   # # #     # #        #  #   # # #     #
  #     # #     # #    ## #     # #        #  #    ## #     #
  #     # #     # #     # ######  ####### ### #     #  #####
-                                                            
+
 
 class ChessBoard_Pieces(_ChessBoardEnPassant, _ChessBoardCastling):
     """The component that handles the pieces on the board."""
@@ -662,74 +663,44 @@ class ChessBoard_Pieces(_ChessBoardEnPassant, _ChessBoardCastling):
 class ChessBoard_UI(_ChessBoardCore):
     """Controls interacting with the user as well as algebraic notation."""
 
-    def _determinepiece(self, symbol):
-        """Using the symbols for the pieces, return class for passed symbol."""
-        piecesymbols = tuple('RNBQK')
-        pieces = (RookPiece, KnightPiece, BishopPiece, QueenPiece, KingPiece)
-        try:
-            return pieces[piecesymbols.index(symbol)]
-        except ValueError:
-            raise ValueError("The symbol passed isn't a valid option.")
-
-
-    def _positiontonotation(self, startpos, endpos, capture=False):
-        """Converts a position into *my* notation."""
-
-        def getpositionstring(pos):
-            """Gets the position as a algebraic string."""
-            vec = self.convert(pos, tovector=True)
-            (rank_, file_) = vec.tupleform()
-            return self._filesymbols[file_] + self._ranksymbols[rank_]
-
-        startnotation = getpositionstring(startpos)
-        endnotation = getpositionstring(endpos)
-        if capture: concat = 'x'
-        else: concat = '->'
-        return startnotation + concat + endnotation
-
-    def _notationtopositions(self, notationstring):
-        """Converts *my* algebraic notation to a chess position.
-
-        This method takes the movement part of the string the user passes and
-        converts it into a vector. Note that this only takes the movement part.
-        You can not include the piece symbol at the start."""
-        try:
-            assert 'x' in notationstring or '->' in notationstring
-            (startpos, endpos) = (notationstring[:2], notationstring[-2:])
-
-            filefunc = lambda x: self._filesymbols.index(x[0])
-            rankfunc = lambda x: self._ranksymbols.index(x[1])
-
-            startvec = Vector(rankfunc(startpos), filefunc(startpos))
-            endvec = Vector(rankfunc(endpos), filefunc(endpos))
-        except AssertionError:
-            raise Exception(
-                "The notation string doesn't follow correct syntax rules.")
-        except RuntimeError as e:
-            raise RuntimeError("This shouldn't be raised! Something went wrong.")
-        else:
-            return startvec, endvec
-
-    def fetchmovehistory(self):
-        """Fetches the list with the move history."""
-        return self._movehistory
-
-    def addmovetohistory(self, piece, startposition, endposition,
+    def _addmovetohistory(self, piece, startposition, endposition,
                          movewascapture=False):
-        """Writes a move into the game history using *my* notation."""
+        """Writes a move into the game history using *my* notation rules."""
+        # ############################ #
+        # Start with defining methods. #
+        # ############################ #
+        def positiontonotation(startpos, endpos, capture=False):
+            def getpositionstring(pos):
+                vec = self.convert(pos, tovector=True)
+                (rank_, file_) = vec.tupleform()
+                return self._filesymbols[file_] + self._ranksymbols[rank_]
+            startnotation = getpositionstring(startpos)
+            endnotation = getpositionstring(endpos)
+            if capture: concat = 'x'
+            else: concat = '->'
+            return startnotation + concat + endnotation
+
+        def addmovetohistory(move):
+            history = self.movehistory
+            history.append(move)
+            self.__dict__['movehistory'] = move
+        # ######################## #
+        # Now process the request. #
+        # ######################## #
         try:
             piecesymbol = piece.symbol()
-            movesymbol = self._positiontonotation(
+            movesymbol = self.positiontonotation(
                 startposition, endposition, capture=movewascapture)
 
             notationstring = piecesymbol + movesymbol
-            self._movehistory.append(notationstring)
+            self.movehistory.append(notationstring)
         except AttributeError as err1:
             raise
         except TypeError as err2:
             raise
 
-    def processplayermove(self, userstring):
+    # REVIEW: What do I need this to return?
+    def _processplayermovestring(self, userstring):
         """Figure out what the hell the user is trying to say.
 
         Currently this method only has the ability to read in my algebraic
@@ -738,14 +709,52 @@ class ChessBoard_UI(_ChessBoardCore):
 
         The method returns the piece that is to move, along with the position
         the piece will move to."""
+
+        # ############################ #
+        # Start with defining methods. #
+        # ############################ #
+        def determinepiece(self, symbol):
+            piecesymbols = tuple('RNBQK')
+            pieces = (
+                RookPiece,
+                KnightPiece,
+                BishopPiece,
+                QueenPiece,
+                KingPiece
+            )
+            try:
+                return pieces[piecesymbols.index(symbol)]
+            except ValueError:
+                raise ValueError("The symbol passed isn't a valid option.")
+
+        def notationtopositions(self, notationstring):
+            try:
+                assert 'x' in notationstring or '->' in notationstring
+                (startpos, endpos) = (notationstring[:2], notationstring[-2:])
+
+                filefunc = lambda x: self._filesymbols.index(x[0])
+                rankfunc = lambda x: self._ranksymbols.index(x[1])
+
+                startvec = Vector(rankfunc(startpos), filefunc(startpos))
+                endvec = Vector(rankfunc(endpos), filefunc(endpos))
+            except AssertionError:
+                raise Exception(
+                    "The notation string doesn't follow correct syntax rules.")
+            except RuntimeError as e:
+                raise RuntimeError("This shouldn't be raised! Something went wrong.")
+            else:
+                return startvec, endvec
+
+        # ######################## #
+        # Now process the request. #
+        # ######################## #
         # TODO: Add checks/more stringent tests for user input.
-        # REVIEW: What do I need this function to return?
         if userstring[0] in 'RNBQK':  # Moving a backline piece.
-            piecetomove = self._determinepiece(userstring[0])
-            startvec, endvec = self._notationtopositions(userstring[1:])
+            piecetomove = self.determinepiece(userstring[0])
+            startvec, endvec = self.notationtopositions(userstring[1:])
         elif userstring[0] in self._filesymbols:  # If just moving a pawn.
             piecetomove = PawnPiece
-            startvec, endvec = self._notationtopositions(userstring)
+            startvec, endvec = self.notationtopositions(userstring)
         else:
             raise SyntaxError("Notation has invalid syntax.")
         return piecetomove, (startvec, endvec)
@@ -780,70 +789,80 @@ class ChessBoard_UI(_ChessBoardCore):
 class ChessBoard_GUI(_ChessBoardCore):
     """The component that handles drawing up the board on the screen."""
 
-    def _uppercaseif(self, condition, string):
-        """Either force a string into uppercase or lower case."""
-        if condition:
-            return string.upper()
-        else:
-            return string.lower()
-
-    def _asciiemptysquare(self, indexorcoordinateorvector):
-        """Returns the string for the board at the supplied index."""
-        vector = self.convert(indexorcoordinateorvector, tocoordinate=True)
-        darksquare = ':::'
-        lightsquare = '   '
-
-        if coordinate[0] % 2 == 0:  # If even rank.
-            if coordinate[1] % 2 == 0:  # If even file.
-                return darksquare
-            else:  # If odd.
-                return lightsquare
-        else:  # If odd rank.
-            if coordinate[1] % 2 == 0:  # If even file.
-                return lightsquare
-            else:  # If odd.
-                return darksquare
-
-    def _asciioccupiedsquare(self, index):
-        """Returns the string to be used if occupied."""
-        piece = self._board[index]
-        piecesym = self._uppercaseif(
-            piece.isplayerpiece, piece.symbol(forasciiboard=True))
-        return piecesym
-
-    def _topborder(self):
-        """Returns the top border string."""
-        return '+----------+'
-
-    def _bottomborder(self):
-        """Returns the bottom border string. WIP for when it is interesting."""
-        return '+----------+'
-
     def displayboard(self):
         """Prints the board using ASCII graphics"""
+        # TODO: Flesh out docstring.
+
+        # ############################ #
+        # Start with defining methods. #
+        # ############################ #
+        def _asciisymbolofoccupiedsquare(index):
+            """Returns the string to be used if occupied."""
+            piece = self._board[index]
+            if piece.isplayerpiece:
+                return piece.symbol(forasciiboard=True).upper()
+            else:
+                return piece.symbol(forasciiboard=True).lower()
+
+        def _asciisymbolforemptysquare(index):
+            """Returns the string for the board at the supplied index."""
+            if True:  # NOTE: This is an early exit since below is a WIP.
+                return '.'
+
+            # [[  WIP CODE  ]]
+            coordinate = self.convert(index, tocoordinate=True)
+            darksquare = ':::'
+            lightsquare = '   '
+
+            if coordinate[0] % 2 == 0:  # If even rank.
+                if coordinate[1] % 2 == 0:  # If even file.
+                    return darksquare
+                else:  # If odd.
+                    return lightsquare
+            else:  # If odd rank.
+                if coordinate[1] % 2 == 0:  # If even file.
+                    return lightsquare
+                else:  # If odd.
+                    return darksquare
+
+        def join(x):
+            """Joins a list of strings together."""
+            return reduce(lambda x, y: x+y, x)
+
+        # ######################## #
+        # Now process the request. #
+        # ######################## #
+        spacing = " "; edgeborder = ' | '
+        topborder = '+----------+'
+        bottomborder = topborder
+
         # Get the board state in ASCII art.
         asciisquares = [None] * 64
         for index, square in enumerate(self._board):
             if square is None:
-                # WIP: Future code below.
-                # asciisquares[index] = self._asciiemptysquare(index)
-                asciisquares[index] = '.'
+                asciisquares[index] = self._asciisymbolforemptysquare(index)
             else:
-                asciisquares[index] = self._asciioccupiedsquare(index)
+                asciisquares[index] = self._asciisymbolofoccupiedsquare(index)
+        rankrows = [
+            join(asciisquares[0:8]),    # First rank
+            join(asciisquares[8:16]),   # Second rank
+            join(asciisquares[16:24]),  # ...
+            join(asciisquares[24:32]),  # ...
+            join(asciisquares[32:40]),  # ...
+            join(asciisquares[40:48]),  # ...
+            join(asciisquares[48:56]),  # Seventh rank
+            join(asciisquares[56:64])   # Eigth rank
+        ]
+        if self.playercolour is 'white':
+            rankrows = rankrows[::-1]  # Print the first rank last.
+        else:
+            rankrows = rankrows  # Print eighth rank last.
 
         # Now print it.
-        # FIXME: Find a better way of doing this.
-        join = lambda l: reduce(lambda x, y: x+y, l)
-        print " " + self._topborder()
-        print ' | ' + join(asciisquares[56:63+1]) + ' |'
-        print ' | ' + join(asciisquares[48:55+1]) + ' |'
-        print ' | ' + join(asciisquares[40:47+1]) + ' |'
-        print ' | ' + join(asciisquares[32:39+1]) + ' |'
-        print ' | ' + join(asciisquares[24:31+1]) + ' |'
-        print ' | ' + join(asciisquares[16:23+1]) + ' |'
-        print ' | ' + join(asciisquares[8:15+1]) + ' |'
-        print ' | ' + join(asciisquares[0:7+1]) + ' |'
-        print " " + self._bottomborder()
+        print spacing + topborder
+        for row in rankrows:
+            print edgeborder + row + edgeborder
+        print spacing + bottomborder
         return
 
 
@@ -907,10 +926,52 @@ class ChessBoard(_ChessBoardCore, ChessBoard_Pieces, ChessBoard_Engine,
     - assertIsUnoccupied: Asserts that the square passed is, in fact, unoccupied.
     """
 
+    # WHAT DO YOU WANT TO BE ABLE TO CALL?
+    # ======================================
+    # - Fetch the allowed moves for the current board state
+    # - Get a user input and process it
+    # - Draw the board if requested.
+    # - Figure out whos turn it is.
+
     def __init__(self):
         """Initalise the chessboard."""
         # Call the __init__ of all the parents.
         _ChessBoardCore.__init__(self)
+
+        # Define your own attributes.
+        self.movesforwhite = dict()
+        self.movesforblack = dict()
+        self._needtoupdate = True
+
+        self.protectedattributes = (
+            'movesforwhite',
+            'movesforblack',
+            'movehistory'
+        )
+
+    def drawboard(self, whiteperspective=True, blackperspective=False):
+        """Displays the board in the terminal from either side."""
+        # WIP!
+        self.displayboard()
+        return
+
+    def legalmovesfor(self, colour):
+        "Gets all of the legal moves for the colour supplied."
+        if colour.lower() == 'white':
+            if self._needtoupdate:
+                self.movesforwhite = self.fetchpossiblemovesfor(white=True)
+                self._needtoupdate = False
+            return self.movesforwhite
+        elif colour.lower() == 'black':
+            if self._needtoupdate:
+                self.movesforwhite = self.fetchpossiblemovesfor(black=True)
+                self._needtoupdate = False
+            return self.movesforblack
+        return
+
+    def makemove(self, userstring):
+        """Moves a piece to the position supplied."""
+        return
 
 
 class DefaultChessBoard(ChessBoard):
