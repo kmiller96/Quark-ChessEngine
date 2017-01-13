@@ -369,6 +369,18 @@ class BasePiece:
         """How to print the class if called as a string."""
         return self.__class__.__name__
 
+    def _sametype(self, other):
+        """Sees if the other is the same type of piece as this one."""
+        return other.__class__.__name__ == self.__class__.__name__
+
+    def __eq__(self, other):
+        """Controls equality."""
+        return self._sametype(other)
+
+    def __ne__(self, other):
+        """Controls inequality."""
+        return not self._sametype(other)
+
     @staticmethod
     def _checkAllAreVectors(vectorlist):
         """A sanity check to make sure all items in vectorlist are vectors."""
@@ -412,6 +424,7 @@ class BasePiece:
 
     def piecetype(self):
         """Returns the class of which this piece inherits from."""
+        # NOTE: This has no catches in place for bad inputs!
         return eval(self.__class__.__name__)
 
     def symbol(self, forasciiboard=False):
