@@ -5,25 +5,6 @@
 # 737369626c65207461736b20696e746f207365766572616c207665727920736d616c6c20706f73
 # 7369626c65207461736b732e
 
-# DEVELOPMENT LOG:
-#    01/01/17: Initialized chessboard.py, the new script that controls the
-# board. Was moved from core as it was becoming much larger then I anticipated
-# and made the core.py script too large. Changed the ChessBoard class from being
-# a monolithic class by breaking it apart into components and used the OOP
-# composition to rebuild it.
-#    03/01/17: Lots of small changes/aesthetics fixes. ASCII headings were added
-# to help organise the script better. Added some more private attributes to the
-# chessboard that control move history and notation generation. Refactord some
-# code to make it more readable. Initalised the UI and GUI classes for the
-# chessboard.
-#    04/01/17: Added basic UI and GUI functionality. Started adding move
-# generation from the board state. Currently this is heavily untested however.
-#    05/01/17: Added banner titles for each component of the chessboard, for
-# easy navigation. Fixed the _allowedmovesforpiece method which now works for
-# pieces by themselves on the board and for basic movements and captures.
-#    !!NOTE!! This development log has been made redundant now that it is on
-# GitHub.
-
 # REVIEW: Now there is a method that ends the turn of the player/computer, Lots
 # of the "playerside=True" crap can go and just rely on the internal attribute.
 
