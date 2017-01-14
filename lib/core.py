@@ -6,7 +6,7 @@
 # 7369626c65207461736b732e
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-from lib.exceptions import *
+from lib import vectors
 from copy import deepcopy
 
 
@@ -160,5 +160,13 @@ class ColourError(TypeError):
     def __init__(self, errormsg=None):
         if errormsg == None:
             errormsg = "The colours of the players are either white or black."
+        TypeError.__init__(self, errormsg)
+
+class UnknownPieceError(TypeError):
+    """The piece passed is unknown (not in 'RNBQK')."""
+
+    def __init__(self, errormsg=None):
+        if errormsg == None:
+            errormsg = "I don't know the piece passed."
         TypeError.__init__(self, errormsg)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
