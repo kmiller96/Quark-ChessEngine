@@ -20,14 +20,14 @@ from copy import deepcopy
 
 
 def xor(x, y):
-    """An XOR gate for two arguments"""
+    """An XOR gate for two condition checks."""
     if ((x and y) or (not x and not y)):
         return False
     else:
         return True
 
 def xnor(x, y):
-    """An XNOR gate for two arguments."""
+    """An XNOR gate, which is simply a NOT XOR gate."""
     return (not xor(x, y))
 
 def onlyone(iterable):
@@ -35,7 +35,7 @@ def onlyone(iterable):
     count = 0
     for ii in iterable:
         if count > 1:
-            return False
+            return False  # Stop iterating if there is more then one.
         elif ii:
             count += 1
             continue
@@ -43,13 +43,44 @@ def onlyone(iterable):
 
 def convert(indexorcoordinateorvector,
             tocoordinate=False, toindex=False, tovector=False):
-    """Makes the input into a coordinate, vector or index, regardless of form.
+    """Converts the input into a coordinate, vector or index.
 
-    This monolithic function basically forces either an index or a
-    coordinate into the specified form. This is the translator required to
-    calculate possible moves using vector attacks. See docs for more
-    information into the algoithims used and why this method is required."""
-    # TODO: Flesh out this docsting.
+    What this function does is it forces the input to change into the desired
+    form, with each different form being useful in different conditions. This
+    conversion is done via if-elif chains nested inside an if-elif-else chain.
+
+    This method has catches in place: only one of the output types are allowed
+    and if the input isn't an index, coordinate or vector it raises TypeErrors.
+
+    PARAMETERS & RETURNS
+    ======================
+    :indexorcoordinateorvector: This parameter is the item to convert.
+    :toindex:       Converts the input into an index.
+    :tocoordinate:  Converts the input into the coordinate (rank, file).
+    :tovector:      Converts the input into a vector define by core.Vector with
+                    the x-component being the rank and the y-component being the
+                    file.
+
+    :return:        The input but in the forced form.
+
+    EXAMPLES
+    ======================
+    How this function works on a basic level, input the square 'b1' as an index:
+        >>> print core.convert(9, tocoordinate=True)
+        >>> (1, 1)
+
+        >>> print core.convert((1, 1), toindex=True)
+        >>> 9
+
+    Using the tovector parameter is harder to observe (as it is just a class):
+        >>> print core.convert(9, tovector=True) == vector.Vector(1, 1)
+        >>> True  # An equivalent call
+
+        >>> a = core.convert(10, tovector=True)  # (1, 2)
+        >>> b = core.convert(25, tovector=True)  # (3, 1)
+        >>> print a + b
+        >>> (4, 3)
+    """
     # Sanity checks.
     assert any([tocoordinate, toindex, tovector]), \
         "Specify the output using the optional arguments."
@@ -99,9 +130,7 @@ def convertlist(lst, **kwargs):
     return map(lambda x: convert(x, **kwargs), lst)
 
 def readablelistof(lst):
-    """Prints the list as expected, instead of a jumble of instances.
-
-    This is to be called when dealing with pieces or vectors."""
+    """Calls the __str__ method of classes, but structures it traditionally."""
     string = ''
     for item in lst:
         string += str(item) + ', '
@@ -120,8 +149,10 @@ def readablelistof(lst):
 class IllegalMoveError(IndexError):
     """Called if the move is illegal for any reason."""
 
-    def __init__(self):
-        IndexError.__init__(self, "The move supplied is not valid.")
+    def __init__(self, errormsg=None):
+        if errormsg == None:
+            errormsg = "The move supplied is not valid."
+        IndexError.__init__(self, errormsg)
 
 class ColourError(TypeError):
     """Raised if the colour specified isn't either white or black."""
