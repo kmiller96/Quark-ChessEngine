@@ -41,6 +41,10 @@ def onlyone(iterable):
             continue
     return True
 
+def combinelists(*lists):
+    """Combine lists together into a single list (i.e. unflatten lists)."""
+    return [element for sublist in lists for element in sublist]
+
 def convert(indexorcoordinateorvector,
             tocoordinate=False, toindex=False, tovector=False):
     """Converts the input into a coordinate, vector or index.
