@@ -28,8 +28,8 @@ class BasePiece:
 
         for vec in moveunitvectors:
             self._assertisvector(vec)
-        self._moveunitvectors = moveunitvectors
-        self._onlyunitvectors = crawler
+        self.moveunitvectors = moveunitvectors
+        self.crawler = crawler
         return None
 
     def __str__(self):
@@ -60,30 +60,6 @@ class BasePiece:
         # TODO: Move this method into somewhere else, or remove it.
         """Find the relative vector between board index and current position."""
         return core.convert(moveto, tovector=True) - self._positionvector
-
-    def possiblemoves(self):
-        # TODO: Move this method to the movegeneration file.
-        """Gets possibles moves for piece if board was empty.
-
-        The chess board controls whether the move is legal or not in terms of
-        occupacy, pins etc. but this method just returns possible moves that
-        each piece could take if the board was completely empty.
-        """
-        # Quick definition of function.
-        def vectoronboard(vectorclass):
-            """Checks to see if a vector is on the board."""
-            vector = vectorclass.vector
-            return (0 <= vector[0] <= 7 and 0 <= vector[1] <= 7)
-
-        # Main execution.
-        possiblemoveslist = list()
-        for unitvector in self._validmovevectors:
-            posvector = self._positionvector + unitvector
-            while vectoronboard(posvector):  # Break if vector now off the board.
-                possiblemoveslist.append(posvector)
-                if self._onlyunitvectors: break  # Don't loop if onlyunitvectors.
-                posvector += unitvector
-        return possiblemoveslist
 
 
 class RookPiece(BasePiece):
