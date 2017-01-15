@@ -14,14 +14,89 @@
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from lib import core, exceptions
+from lib import core, vectors, pieces
+from copy import deepcopy
 
 class _ChessBoardCore:
     """Contains the core methods, plus the __init__ method."""
 
     def __init__(self):
+        """Initialises the board."""
+        self._board = [None] * 64
+        self.playercolour = 'white'
+        self.computercolour = 'black'
+
+        # Define initial states
+        # REVIEW: Should I move this to the move generator?
+        self._cancastleleft = True
+        self._cancastleright = True
+
+    def __getitem__(self, pos):
+        """Controls calling the piece at a position on the board like a list."""
+
+        errormsg = "The board is read either as a index from 0 to 63 or a " \
+        "tuple/list that specifies the row and column index."
+        try:
+            position = core.convert(pos, toindex=True)
+            return self._board[pos]
+        except IndexError:
+            raise IndexError(errormsg)
+        except TypeError:
+            raise TypeError(errormsg)  # If the pos is wrong type, raise TypeError.
+
+    def __setitem__(self, pos, piece):
+        """Add a piece on the board at pos."""
+        errormsg = ("Please pass a position on the board and a piece that "
+                    "derives from BasePiece")
+        try:
+            assert isinstance(piece, pieces.BasePiece), errormsg
+            self._board[pos] = piece
+        except IndexError:
+            raise IndexError(errormsg)
+        except TypeError:
+            raise TypeError(errormsg)
+        else:
+            return None
+
+    def duplicateboard(self):
+        """Creates an instance of the chess board exactly as it is now."""
+        return deepcopy(self)
+
+    def isplayercolour(self, colour):
+        """Determines if the colour passed is the player's colour or not."""
+        assert colour.lower() in ('white', 'black'), \
+            "The colour of the piece must be 'white' or 'black'"
+        if colour.lower() == 'white':
+            return True
+        else:
+            return False
+
+    def assertPositionOnBoard(self, position):
+        """Asserts that the position is valid."""
+        try:
+            index = convert(position, toindex=True)
+            self._board[index]
+        except IndexError:  # If off board.
+            raise AssertionError("The position %r is off the board." % position)
         return None
 
+    def assertIsUnoccupied(self, position):
+        """Asserts that the square is free and unoccupied."""
+        try:
+            index = convert(position, toindex=True)
+            assert self._board[index] == None, "The target square is occupied."
+        except IndexError:
+            raise IndexError("The index used is off the board!")
+        return None
+
+    def assertIsOccupied(self, position):
+        """Asserts that the square is occupied."""
+        try:
+            index = convert(position, toindex=True)
+            assert self._board[index] != None, "The target square is unoccupied."
+        except IndexError:
+            raise IndexError("The index used is off the board!")
+        return None
 
 class ChessBoard(_ChessBoardCore):
     """The public class that is the chessboard.
@@ -31,4 +106,42 @@ class ChessBoard(_ChessBoardCore):
     checks in place for moves and it can't do anything special like make moves.
     """
 
-    pass
+    def findpiece(self, piecetype, colour):
+        """Finds all instances of piece on the board that belong to one side.
+
+        Returns a list of the board indices."""
+        piecepositions = list()
+        for ii, square in enumerate(self._board):
+            if square is None:
+                continue
+            elif ((piecetype is square.piecetype())
+                    and square.colour == colour):
+                piecepositions.append(ii)
+        return piecepositions
+
+    def move(self, startpos, endpos, force=False):
+        """A clean way of moving pieces around on the board."""
+        # Sanity checks and assertions.
+        assert startpos != endpos, \
+            "To move the piece, the start and end points must be different."
+        startindex = core.convert(startpos, toindex=True)
+        endindex = core.convert(endpos, toindex=True)
+        self.assertPositionOnBoard(startindex)
+        self.assertPositionOnBoard(endindex)
+        self.assertIsOccupied(startindex)
+        if not force: self.assertIsUnoccupied(endindex)
+
+        # Movement code.
+        if startindex == endindex:
+            return None  # HACK: Prevents deleting the piece from the board.
+        self._board[endindex] = self._board[startindex]
+        self._board[startindex] = None
+        return None
+
+    def promotepawn(self, position, promoteto):
+        """Promotes a pawn at position specified."""
+        position = core.convert(position, toindex=True)
+        pawnpiece = self._board[position]
+        colour = pawnpiece.colour
+        self._board[position] = promoteto(colour)
+        return None
