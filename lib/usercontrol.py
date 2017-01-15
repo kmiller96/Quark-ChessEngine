@@ -92,7 +92,7 @@ class EngineUI:
             if capture: concat = 'x'
             else: concat = '->'
 
-            movestring = startnotation + concat + endnotation
+            movestring = piecesymbol + startnotation + concat + endnotation
 
             if check:
                 movestring += '+'
@@ -121,7 +121,52 @@ class EngineUI:
 
 
 class EngineGUI:
-    """The class that handles displaying and creating the GUI for the engine."""
+    """The class that handles displaying and creating the GUI for the engine.
+
+    The board, once decorated, looks like so:
+
+    + -------- +
+    | ....kq.. |
+    | .bb..... |
+    | ........ |
+    | ..pp.... |
+    | ..P..N.. |
+    | ........ |
+    | ....Q... |
+    | ..k..... |
+    + -------- +
+
+    Where each '.' is a square on the board and the letter are the pieces.
+    """
 
     def __init__(self):
+        self.topborder = ' + -------- + \n'
+        self.bottomborder = ' + -------- + \n'
+        self.leftedgeborder = ' | '
+        self.rightedgeborder = ' | \n'
         return None
+
+    def drawasciiboard(self, boardlist):
+        """Draws the ascii board."""
+        # Start by drawing an empty board.
+        # Iterate through boardlist.
+        # If there is a piece there, get the piece symbol and draw it on the board.
+        rankstrings = ['........'] * 8
+
+        # Assign piece symbols to the undecorated board.
+        for ii, square in enumerate(boardlist):
+            if square == None:
+                continue
+            else:
+                piece = square
+                symbol = piece.notationsymbol
+                (rank_, file_) = core.convert(ii, tocoordinate=True)
+                rankstrings[rank_][file_] = symbol
+
+        # Now decorate board.
+        board = reduce(lambda x, y: x+y, map(
+            lambda x: self.leftedgeborder + x self.rightedgeborder,
+            rankstrings
+        ))
+        board = self.topborder + board + self.bottomborder
+        return board
