@@ -89,9 +89,9 @@ class BasePiece:
 class RookPiece(BasePiece):
     """The class for the Rook."""
 
-    def __init__(self, colour, startpositionindex):
-        BasePiece.__init__(self, colour, startpositionindex, 'R',
-            validmovevectors=(
+    def __init__(self, colour):
+        BasePiece.__init__(self, colour, 'R',
+            moveunitvectors=(
                 Vector(1,0), Vector(0,1), Vector(-1, 0), Vector(0, -1))
         )
         return None
@@ -100,12 +100,12 @@ class RookPiece(BasePiece):
 class KnightPiece(BasePiece):
     """The class for the knight."""
 
-    def __init__(self, colour, startpositionindex):
-        BasePiece.__init__(self, colour, startpositionindex, 'N',
-            validmovevectors=(
+    def __init__(self, colour):
+        BasePiece.__init__(self, colour, 'N',
+            moveunitvectors=(
                 Vector(2, 1), Vector(1, 2), Vector(2, -1), Vector (1, -2),
                 Vector(-2, -1), Vector(-1, -2), Vector(-2, 1), Vector (-1, 2)),
-            onlyunitvectors=True
+            crawler=True
         )
         return None
 
@@ -113,9 +113,9 @@ class KnightPiece(BasePiece):
 class BishopPiece(BasePiece):
     """The class for the bishop."""
 
-    def __init__(self, colour, startpositionindex):
+    def __init__(self, colour):
         BasePiece.__init__(self, colour, 'B',
-            validmovevectors=(
+            moveunitvectors=(
                 Vector(1, 1), Vector(1, -1), Vector(-1, -1), Vector(-1, 1))
         )
         return None
@@ -123,9 +123,9 @@ class BishopPiece(BasePiece):
 class QueenPiece(BasePiece):
     """The class for the queen."""
 
-    def __init__(self, colour, startpositionindex):
+    def __init__(self, colour):
         BasePiece.__init__(self, colour, 'Q',
-            validmovevectors=(
+            moveunitvectors=(
                 Vector(1, 0), Vector(0, 1), Vector(1, 1), Vector(1, -1),
                 Vector(-1, 0), Vector(0, -1), Vector(-1, -1), Vector(-1, 1))
         )
@@ -135,12 +135,12 @@ class QueenPiece(BasePiece):
 class KingPiece(BasePiece):
     """The class for the King"""
 
-    def __init__(self, colour, startpositionindex):
+    def __init__(self, colour):
         BasePiece.__init__(self, colour, 'K',
-            validmovevectors=(
+            moveunitvectors=(
                 Vector(1, 0), Vector(0, 1), Vector(1, 1), Vector(1, -1),
                 Vector(-1, 0), Vector(0, -1), Vector(-1, -1), Vector(-1, 1)),
-            onlyunitvectors=True
+            crawler=True
         )
         return None
 
@@ -148,7 +148,7 @@ class KingPiece(BasePiece):
 class PawnPiece(BasePiece):
     """The very special class for the pawn."""
 
-    def __init__(self, colour, startpositionindex):
+    def __init__(self, colour):
         if colour == 'white':
             movevector = Vector(1, 0)
             self._captureleft = Vector(1, -1)
@@ -158,8 +158,8 @@ class PawnPiece(BasePiece):
             self._captureleft = Vector(-1, -1)
             self._captureright = Vector(-1, 1)
 
-        BasePiece.__init__(self, colour, startpositionindex, "P",
-            validmovevectors=(movevector,), onlyunitvectors=True
+        BasePiece.__init__(self, colour, "P",
+            moveunitvectors=(movevector,), crawler=True
         )
         return None
 
