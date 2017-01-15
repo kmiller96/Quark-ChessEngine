@@ -27,9 +27,9 @@ class _ChessBoardCore:
         self.computercolour = 'black'
 
         # Define initial states
-        # REVIEW: Should I move this to the move generator?
-        self._cancastleleft = True
-        self._cancastleright = True
+        self.cancastleleft = True
+        self.cancastleright = True
+        self.enpassant = None
 
     def __getitem__(self, pos):
         """Controls calling the piece at a position on the board like a list."""
@@ -58,6 +58,11 @@ class _ChessBoardCore:
         else:
             return None
 
+    def __iter__(self):
+        """Iterate over each square on the board."""
+        for square in self._board:
+            yield square
+
     def duplicateboard(self):
         """Creates an instance of the chess board exactly as it is now."""
         return deepcopy(self)
@@ -71,13 +76,21 @@ class _ChessBoardCore:
         else:
             return False
 
+    def positiononboard(self, position):
+        """Returns boolean depending on if the position is on the board."""
+        pos = core.convert(position, tocoordinate=True)
+        if 0 <= pos[0] <= 7 and 0 <= pos[1] <= 7:
+            return True
+        else:
+            return False
+
     def assertPositionOnBoard(self, position):
         """Asserts that the position is valid."""
         try:
             index = convert(position, toindex=True)
             self._board[index]
         except IndexError:  # If off board.
-            raise AssertionError("The position %r is off the board." % position)
+            raise IndexError("The position %r is off the board." % position)
         return None
 
     def assertIsUnoccupied(self, position):
@@ -107,9 +120,7 @@ class ChessBoard(_ChessBoardCore):
     """
 
     def findpiece(self, piecetype, colour):
-        """Finds all instances of piece on the board that belong to one side.
-
-        Returns a list of the board indices."""
+        """Finds all instances of piece on the board that belong to one side."""
         piecepositions = list()
         for ii, square in enumerate(self._board):
             if square is None:
