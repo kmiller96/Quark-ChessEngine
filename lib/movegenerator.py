@@ -61,28 +61,6 @@ class _CoreMoveGenerator:
             currentposvec += unitrelvec
         return pieceslist
 
-
-
- #     # ####### #     # #######
- ##   ## #     # #     # #
- # # # # #     # #     # #
- #  #  # #     # #     # #####
- #     # #     #  #   #  #
- #     # #     #   # #   #
- #     # #######    #    #######
-
-  #####  ####### #     # ####### ######     #    ####### ### ####### #     #
- #     # #       ##    # #       #     #   # #      #     #  #     # ##    #
- #       #       # #   # #       #     #  #   #     #     #  #     # # #   #
- #  #### #####   #  #  # #####   ######  #     #    #     #  #     # #  #  #
- #     # #       #   # # #       #   #   #######    #     #  #     # #   # #
- #     # #       #    ## #       #    #  #     #    #     #  #     # #    ##
-  #####  ####### #     # ####### #     # #     #    #    ### ####### #     #
-
-
-class MoveGenerator:
-    """Generates the possible moves based off the rules of chess."""
-
     def _basicmoves(self, colour):
         """Get the most basic moves, such as simple captures and movement."""
         # Define the method that finds the alllowed moves for each piece.
@@ -123,21 +101,44 @@ class MoveGenerator:
             movepairs = map(lambda x: (startpos, x), endposlist)
         return movepairs
 
+    def kingincheck(self, kingcolour, simulateboard=None):
+        """Determine if the king of a certain colour is in check."""
+        basicoppositionmoves = self._basicmoves(oppositioncolour)
+        oppositionendmoves = map(lambda x: x[1], basicoppositionmoves)
+        kingpos = self.board.findpiece(pieces.KingPiece, kingcolour.lower())[0]
+        return (kingpos in oppositionendmoves)
+
+
+
+ #     # ####### #     # #######
+ ##   ## #     # #     # #
+ # # # # #     # #     # #
+ #  #  # #     # #     # #####
+ #     # #     #  #   #  #
+ #     # #     #   # #   #
+ #     # #######    #    #######
+
+  #####  ####### #     # ####### ######     #    ####### ### ####### #     #
+ #     # #       ##    # #       #     #   # #      #     #  #     # ##    #
+ #       #       # #   # #       #     #  #   #     #     #  #     # # #   #
+ #  #### #####   #  #  # #####   ######  #     #    #     #  #     # #  #  #
+ #     # #       #   # # #       #   #   #######    #     #  #     # #   # #
+ #     # #       #    ## #       #    #  #     #    #     #  #     # #    ##
+  #####  ####### #     # ####### #     # #     #    #    ### ####### #     #
+
+
+class MoveGenerator:
+    """Generates the possible moves based off the rules of chess."""
+
     def _illegalmove(self, startpos, endpos, kingcolour):
         """Checks to see if the supplied move if illegal."""
-        if kingcolour == 'white': oppositioncolour = 'black'
-        else: oppositioncolour = 'white'
+        if kingcolour.lower() == 'white': oppositioncolour = 'black'
+        elif kingcolour.lower() == 'black': oppositioncolour = 'white'
+        else: raise TypeError("King is either white or black.")
 
         simboard = self.board.duplicateboard()
         simboard.move(startpos, endpos, force=True)
-        basicoppositionmoves = self._basicmoves(oppositioncolour)
-        oppositionendmoves = map(lambda x: x[1], basicoppositionmoves)
-
-        kingpos = self.board.findpiece(pieces.KingPiece, kingcolour)[0]
-        if kingpos in oppositionendmoves:
-            return True
-        else:
-            return False
+        return self.kingincheck(kingcolour)  # REVIEW: This makes no sense right now.
 
     def _onlylegalmoves(self, colour, movepairlist):
         """Filter a list, keeping only legal moves."""
@@ -193,11 +194,11 @@ class MoveGenerator:
         # Then see what if castle moves can be added.
         if castleleft:
             castlemoves.append(
-                (rookleft, rookleft+3), (king, king-2)
+                ((rookleft, rookleft+3), (king, king-2))
             )
         if castleright:
             castlemoves.append(
-                (rookleft, rookleft-2), (king, king+2)
+                ((rookleft, rookleft-2), (king, king+2))
             )
         return castlemoves
 
