@@ -149,8 +149,6 @@ class EngineGUI:
     def drawasciiboard(self, boardlist):
         """Draws the ascii board."""
         # Start by drawing an empty board.
-        # Iterate through boardlist.
-        # If there is a piece there, get the piece symbol and draw it on the board.
         rankstrings = ['........'] * 8
 
         # Assign piece symbols to the undecorated board.
