@@ -89,3 +89,4 @@ ENV/
 
 # My files
 gitdiff.sh
+lib/chessboard_old.py
