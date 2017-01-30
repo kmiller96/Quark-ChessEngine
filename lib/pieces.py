@@ -14,11 +14,11 @@ class BasePiece:
         # Sanity checks.
         assert isinstance(crawler, bool), \
             "'crawler' parameter must be true or false."
-        assert colour in ('white', 'black'), \
+        assert colour.lower() in ('white', 'black'), \
             "The colour of the piece must be 'white' or 'black'"
 
         # Assignment of attributes.
-        self.colour = colour
+        self.colour = colour.lower()
 
         if colour == 'white':
             notationsymbol = notationsymbol.upper()
