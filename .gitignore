@@ -90,3 +90,6 @@ ENV/
 # My files
 gitdiff.sh
 lib/chessboard_old.py
+tests/tests_chessboardadvanced.py
+tests/tests_chessboardbasic.py
+tests/tests_chessboardpieces.py
