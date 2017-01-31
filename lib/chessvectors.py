@@ -34,8 +34,12 @@ class Vector:
 
     def __init__(self, rank, File):
         """Initialise the Vector class."""
-        self.vector = (rank, File)
-
+        try:
+            assert isinstance(rank, int) and isinstance(File, int)
+        except AssertionError:
+            raise TypeError("Both initialisation parameters must be integers.")
+        else:
+            self.vector = (rank, File)
     def __str__(self):
         """String representation of vector."""
         return str(self.vector)
@@ -95,17 +99,19 @@ class Vector:
         try:
             if isinstance(other, int):
                 return self._scalar_multiply(other)
-            else:
+            elif isinstance(other, Vector):
                 return self._dot(other)
+            else:
+                raise AttributeError
         except AttributeError:
-            raise AttributeError("Other must be a vector or scalar.")
+            raise TypeError("Other must be a vector or scalar.")
 
     def __eq__(self, other):
         """Implement equality operations."""
         try:
             return self.vector == other.vector
         except AttributeError:
-            raise AttributeError(
+            raise TypeError(
                 "Equality can only be determined against another vector.")
 
     def __ne__(self, other):
@@ -113,7 +119,7 @@ class Vector:
         try:
             return self.vector != other.vector
         except AttributeError:
-            raise AttributeError(
+            raise TypeError(
                 "Equality can only be determined against another vector.")
 
     def __add__(self, other):
@@ -121,56 +127,56 @@ class Vector:
         try:
             return Vector(*self._add(other))
         except AttributeError:
-            raise AttributeError("Other must be a vector.")
+            raise TypeError("Other must be a vector.")
 
     def __radd__(self, other):
         """Reversed __add__ method."""
         try:
             return Vector(*self._add(other))
         except AttributeError:
-            raise AttributeError("Other must be a vector.")
+            raise TypeError("Other must be a vector.")
 
     def __iadd__(self, other):
         """ The += operation."""
         try:
             return Vector(*self._add(other))
         except AttributeError:
-            raise AttributeError("Other must be a vector.")
+            raise TypeError("Other must be a vector.")
 
     def __sub__(self, other):
         """Allows for vector subtraction with the use of the - character."""
         try:
             return Vector(*self._add(-1*other))
         except AttributeError:
-            raise AttributeError("Other must be a vector.")
+            raise TypeError("Other must be a vector.")
 
     def __rsub__(self, other):
         """Reversed __sub__ method."""
         try:
             return Vector(*self._add(-1*other))
         except AttributeError:
-            raise AttributeError("Other must be a vector.")
+            raise TypeError("Other must be a vector.")
 
     def __isub__(self, other):
         """The -= operation."""
         try:
             return Vector(*self._add(-1*other))
         except AttributeError:
-            raise AttributeError("Other must be a vector.")
+            raise TypeError("Other must be a vector.")
 
     def __mul__(self, other):
         """Allows for dot product and scalar multiplication."""
         try:
             return Vector(*self._multiply(other))
         except AttributeError:
-            raise AttributeError("Other must be a vector.")
+            raise TypeError("Other must be a vector.")
 
     def __rmul__(self, other):
         """Reversed __mul__ method."""
         try:
             return Vector(*self._multiply(other))
         except AttributeError:
-            raise AttributeError("Other must be a vector.")
+            raise TypeError("Other must be a vector.")
 
     def __abs__(self):
         """Magnitude of the vector"""
