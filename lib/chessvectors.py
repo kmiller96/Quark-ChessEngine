@@ -17,8 +17,8 @@ class Vector:
 
     INITALISATION PARAMETERS
     =========================
-    :rank: The rank of the position (0 <= x <= 7)
-    :File: The file of the position (0 <= x <= 7)
+    :rank: The rank of the position
+    :File: The file of the position
 
     PUBLIC METHODS
     ========================
