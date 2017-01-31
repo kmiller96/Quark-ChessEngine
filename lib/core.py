@@ -142,6 +142,120 @@ def readablelistof(lst):
     return '[' + string[:-2] + ']'
 
 
+ ######  #######  #####  ### ####### ### ####### #     #
+ #     # #     # #     #  #     #     #  #     # ##    #
+ #     # #     # #        #     #     #  #     # # #   #
+ ######  #     #  #####   #     #     #  #     # #  #  #
+ #       #     #       #  #     #     #  #     # #   # #
+ #       #     # #     #  #     #     #  #     # #    ##
+ #       #######  #####  ###    #    ### ####### #     #
+
+  #####  #          #     #####   #####
+ #     # #         # #   #     # #     #
+ #       #        #   #  #       #
+ #       #       #     #  #####   #####
+ #       #       #######       #       #
+ #     # #       #     # #     # #     #
+  #####  ####### #     #  #####   #####
+                                                         
+
+class Position:
+    """Store a position as a coordinate, vector or index.
+
+    The position is stored internally in the class as all three types (since
+    it isn't too heavy computationally) and allows the user to get any form of
+    the position without any extensive calls.
+
+    The only parameter of the initalisation of the class is a position, which
+    can be either an index, coordinate or vector. There is a catch in place to
+    ensure this is always true. Then the user can call any of the attributes to
+    get the value.
+
+    EXAMPLES
+    ======================
+    How this function works on a basic level, input the square 'b1' as an index:
+        >>> print core.convert(9, tocoordinate=True)
+        >>> (1, 1)
+
+        >>> print core.convert((1, 1), toindex=True)
+        >>> 9
+
+    Using the tovector parameter is harder to observe (as it is just a class):
+        >>> print core.convert(9, tovector=True) == vector.Vector(1, 1)
+        >>> True  # An equivalent call
+
+        >>> a = core.convert(10, tovector=True)  # (1, 2)
+        >>> b = core.convert(25, tovector=True)  # (3, 1)
+        >>> print a + b
+        >>> (4, 3)
+    """
+
+    def __init__(self, indexorcoordinateorvector):
+        assert (
+            self._isindex(indexorcoordinateorvector) or
+            self._iscoordinate(indexorcoordinateorvector) or
+            self._isvector(indexorcoordinateorvector)
+        ), "The postion on the board is either a index, coordinate or vector."
+
+        self._locked = False
+        self.index = self._toindex(indexorcoordinateorvector)
+        self.tuple = self._totuple(indexorcoordinateorvector)
+        self.vector = self._tovector(indexorcoordinateorvector)
+        self._locked = True
+
+    def __setattr__(self, name, value):
+        if self._locked:
+            raise RuntimeError(
+                "You are not permitted to make this change. Make a new instance"
+                " of this class to change the postiion on the board."
+            )
+        else:
+            self.__dict__[name] = value
+
+    @staticmethod
+    def _isindex(x):
+        return isinstance(x, int)
+
+    @staticmethod
+    def _iscoordinate(x):
+        return (isinstance(x, (tuple, list)) and len(x) == 2)
+
+    @staticmethod
+    def _isvector(x):
+        return isinstance(x, Vector)
+
+    @staticmethod
+    def _toindex(x):
+        if self._isindex(x):
+            return x
+        elif self._isvector(x):
+            x = x.vector
+            return x[0]*8 + x[1]
+        elif self._iscoordinate(x):
+            return x[0]*8 + x[1]
+        return None
+
+    @staticmethod
+    def _tocoordinate(x):
+        if self._isindex(x):
+            return (x/8, x % 8)
+        elif self._isvector(x):
+            return x.vector
+        elif self._iscoordinate(x):
+            return x
+        return None
+
+    @staticmethod
+    def _tovector(x):
+        if self._isindex(x):
+            return Vector(x/8, x % 8)
+        elif self._iscoordinate(x):
+            return Vector(*x)
+        elif self._isvector(x):
+            return x
+        return None
+
+
  #     # #######  #####  ####### ####### ######   #####
  #     # #       #     #    #    #     # #     # #     #
  #     # #       #          #    #     # #     # #
