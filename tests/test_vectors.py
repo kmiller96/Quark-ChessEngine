@@ -6,7 +6,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import unittest
-from lib import chessvectors as vectors
+from lib import core
 
 def errormessage(resultstring, expectedstring):
     """Does the formatting for the error message"""
@@ -17,7 +17,7 @@ class MiscellaneousVectorCalls(unittest.TestCase):
     """These tests are for the random methods that lie around in the class."""
 
     def setUp(self):
-        self.vector = vectors.Vector(1, 2)
+        self.vector = core.Vector(1, 2)
 
     def test_init(self):
         self.assertEqual(
@@ -32,32 +32,32 @@ class MiscellaneousVectorCalls(unittest.TestCase):
         return None
 
     def test_equality(self):
-        self.assertTrue(self.vector == vectors.Vector(1, 2))
-        self.assertFalse(self.vector == vectors.Vector(0, 5))
+        self.assertTrue(self.vector == core.Vector(1, 2))
+        self.assertFalse(self.vector == core.Vector(0, 5))
         return None
 
     def test_inequality(self):
-        self.assertTrue(self.vector != vectors.Vector(0, 9))
-        self.assertFalse(self.vector != vectors.Vector(1, 2))
+        self.assertTrue(self.vector != core.Vector(0, 9))
+        self.assertFalse(self.vector != core.Vector(1, 2))
 
 
 class BadInputVectorTests(unittest.TestCase):
     """Use bad inputs on the methods and see if they fail appropriately."""
 
     def setUp(self):
-        self.vector = vectors.Vector(2, 3)
+        self.vector = core.Vector(2, 3)
         self.stringinput = ("2", "3")
         self.floatinput = (2.1, 3.0)
         return None
 
     def test_initparametersarestrings(self):
         with self.assertRaises(TypeError):
-            vectors.Vector(*self.stringinput)
+            core.Vector(*self.stringinput)
         return None
 
     def test_initparametersarefloats(self):
         with self.assertRaises(TypeError):
-            vectors.Vector(*self.floatinput)
+            core.Vector(*self.floatinput)
         return None
 
     def test_addnonvector(self):
@@ -90,8 +90,8 @@ class BasicVectorPlusOperator(unittest.TestCase):
     """Tests the plus operator for the Vector class."""
 
     def setUp(self):
-        self.vector1 = vectors.Vector(3, 3)
-        self.vector2 = vectors.Vector(5, 5)
+        self.vector1 = core.Vector(3, 3)
+        self.vector2 = core.Vector(5, 5)
         self.ans = (8, 8)
         return None
 
@@ -143,8 +143,8 @@ class BasicVectorMinusOperator(unittest.TestCase):
     """Tests the overloaded minus operator."""
 
     def setUp(self):
-        self.vector1 = vectors.Vector(3, 3)
-        self.vector2 = vectors.Vector(5, 5)
+        self.vector1 = core.Vector(3, 3)
+        self.vector2 = core.Vector(5, 5)
         self.ans1 = (-2, -2)
         self.ans2 = (2, 2)
         return None
