@@ -6,7 +6,6 @@
 # 7369626c65207461736b732e
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-from lib import vectors
 from copy import deepcopy
 
 
