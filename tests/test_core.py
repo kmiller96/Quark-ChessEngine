@@ -111,9 +111,104 @@ class TestCombineLists(unittest.TestCase):
         return None
 
 
-class TestConversionBetweenIntTupleAndVector(unittest.TestCase):
+class TestConversions(unittest.TestCase):
     """This suite, obviously, tests the way the script converts between ints,
     tuples and vectors."""
+
+    def setUp(self):
+        self.indexpos = 56
+        self.tuplepos = (7, 0)
+        self.vectorpos = core.Vector(7, 0)
+
+    def test_convertfunction_indextoindex(self):
+        finalpos = core.convert(self.indexpos, toindex=True)
+        self.assertEqual(
+            finalpos, self.indexpos,
+            errormessage(
+                finalpos, self.indexpos
+            )
+        )
+        return None
+
+    def test_convertfunction_indextocoordinate(self):
+        finalpos = core.convert(self.indexpos, tocoordinate=True)
+        self.assertEqual(
+            finalpos, self.tuplepos,
+            errormessage(
+                finalpos, self.tuplepos
+            )
+        )
+        return None
+
+    def test_convertfunction_indextovector(self):
+        finalpos = core.convert(self.indexpos, tovector=True)
+        self.assertEqual(
+            finalpos, self.vectorpos,
+            errormessage(
+                finalpos, self.vectorpos
+            )
+        )
+        return None
+
+    def test_convertfunction_coordinatetoindex(self):
+        finalpos = core.convert(self.tuplepos, toindex=True)
+        self.assertEqual(
+            finalpos, self.indexpos,
+            errormessage(
+                finalpos, self.indexpos
+            )
+        )
+        return None
+
+    def test_convertfunction_coordinatetocoordinate(self):
+        finalpos = core.convert(self.tuplepos, tocoordinate=True)
+        self.assertEqual(
+            finalpos, self.tuplepos,
+            errormessage(
+                finalpos, self.tuplepos
+            )
+        )
+        return None
+
+    def test_convertfunction_coordinatetovector(self):
+        finalpos = core.convert(self.tuplepos, tovector=True)
+        self.assertEqual(
+            finalpos, self.vectorpos,
+            errormessage(
+                finalpos, self.vectorpos
+            )
+        )
+        return None
+
+    def test_convertfunction_vectortoindex(self):
+        finalpos = core.convert(self.vectorpos, toindex=True)
+        self.assertEqual(
+            finalpos, self.indexpos,
+            errormessage(
+                finalpos, self.indexpos
+            )
+        )
+        return None
+
+    def test_convertfunction_vectortocoordinate(self):
+        finalpos = core.convert(self.vectorpos, tocoordinate=True)
+        self.assertEqual(
+            finalpos, self.tuplepos,
+            errormessage(
+                finalpos, self.tuplepos
+            )
+        )
+        return None
+
+    def test_convertfunction_vectortovector(self):
+        finalpos = core.convert(self.vectorpos, tovector=True)
+        self.assertEqual(
+            finalpos, self.vectorpos,
+            errormessage(
+                finalpos, self.vectorpos
+            )
+        )
+        return None
 
 
 if __name__ == '__main__':
