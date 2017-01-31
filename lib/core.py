@@ -106,14 +106,14 @@ def convert(indexorcoordinateorvector,
         if isindex(x):
             return (x/8, x % 8)
         elif isvector(x):
-            return x.tupleform()
+            return x.vector
         elif iscoordinate(x):
             return x
     elif toindex:  # Convert to index.
         if isindex(x):
             return x
         elif isvector(x):
-            x = x.tupleform()
+            x = x.vector
             return x[0]*8 + x[1]
         elif iscoordinate(x):
             return x[0]*8 + x[1]
@@ -157,7 +157,7 @@ def readablelistof(lst):
  #       #       #######       #       #
  #     # #       #     # #     # #     #
   #####  ####### #     #  #####   #####
-                                                         
+
 
 class Position:
     """Store a position as a coordinate, vector or index.
