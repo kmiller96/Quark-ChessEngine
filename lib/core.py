@@ -173,21 +173,14 @@ class Position:
 
     EXAMPLES
     ======================
-    How this function works on a basic level, input the square 'b1' as an index:
-        >>> print core.convert(9, tocoordinate=True)
-        >>> (1, 1)
-
-        >>> print core.convert((1, 1), toindex=True)
+    How this class works on a basic level, input the square 'b1' as an index:
+        >>> x = core.Position(9)
+        >>> x.index
         >>> 9
-
-    Using the tovector parameter is harder to observe (as it is just a class):
-        >>> print core.convert(9, tovector=True) == vector.Vector(1, 1)
-        >>> True  # An equivalent call
-
-        >>> a = core.convert(10, tovector=True)  # (1, 2)
-        >>> b = core.convert(25, tovector=True)  # (3, 1)
-        >>> print a + b
-        >>> (4, 3)
+        >>> x.coordinate
+        >>> (1, 1)
+        >>> str(x.vector + 2*x.vector)
+        >>> (3, 3)
     """
 
     def __init__(self, indexorcoordinateorvector):
@@ -199,18 +192,23 @@ class Position:
 
         self._locked = False
         self.index = self._toindex(indexorcoordinateorvector)
-        self.tuple = self._totuple(indexorcoordinateorvector)
+        self.coordinate = self._tocoordinate(indexorcoordinateorvector)
         self.vector = self._tovector(indexorcoordinateorvector)
         self._locked = True
 
     def __setattr__(self, name, value):
-        if self._locked:
-            raise RuntimeError(
+        if name in ('index', 'coordinate', 'vector'):
+            if self._locked:
+                raise RuntimeError(
                 "You are not permitted to make this change. Make a new instance"
                 " of this class to change the postiion on the board."
-            )
+                )
+            else:
+                pass
         else:
-            self.__dict__[name] = value
+            pass
+        self.__dict__[name] = value
+        return None
 
     @staticmethod
     def _isindex(x):
@@ -224,8 +222,7 @@ class Position:
     def _isvector(x):
         return isinstance(x, Vector)
 
-    @staticmethod
-    def _toindex(x):
+    def _toindex(self, x):
         if self._isindex(x):
             return x
         elif self._isvector(x):
@@ -235,8 +232,7 @@ class Position:
             return x[0]*8 + x[1]
         return None
 
-    @staticmethod
-    def _tocoordinate(x):
+    def _tocoordinate(self, x):
         if self._isindex(x):
             return (x/8, x % 8)
         elif self._isvector(x):
@@ -245,8 +241,7 @@ class Position:
             return x
         return None
 
-    @staticmethod
-    def _tovector(x):
+    def _tovector(self, x):
         if self._isindex(x):
             return Vector(x/8, x % 8)
         elif self._iscoordinate(x):
@@ -463,7 +458,7 @@ class ColourError(TypeError):
     def __init__(self, errormsg=None):
         if errormsg == None:
             errormsg = "The colours of the players are either white or black."
-        TypeError.__init__(self, errormsg)
+        NameError.__init__(self, errormsg)
 
 class UnknownPieceError(TypeError):
     """The piece passed is unknown (not in 'RNBQK')."""
