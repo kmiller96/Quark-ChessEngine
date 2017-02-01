@@ -111,8 +111,8 @@ class TestCombineLists(unittest.TestCase):
         return None
 
 
-class TestConversions(unittest.TestCase):
-    """This suite, obviously, tests the way the script converts between ints,
+class TestConvertFunction(unittest.TestCase):
+    """This suite, obviously, tests the way the function converts between ints,
     tuples and vectors."""
 
     def setUp(self):
@@ -124,9 +124,7 @@ class TestConversions(unittest.TestCase):
         finalpos = core.convert(self.indexpos, toindex=True)
         self.assertEqual(
             finalpos, self.indexpos,
-            errormessage(
-                finalpos, self.indexpos
-            )
+            errormessage(finalpos, self.indexpos)
         )
         return None
 
@@ -134,9 +132,7 @@ class TestConversions(unittest.TestCase):
         finalpos = core.convert(self.indexpos, tocoordinate=True)
         self.assertEqual(
             finalpos, self.tuplepos,
-            errormessage(
-                finalpos, self.tuplepos
-            )
+            errormessage(finalpos, self.tuplepos)
         )
         return None
 
@@ -144,9 +140,7 @@ class TestConversions(unittest.TestCase):
         finalpos = core.convert(self.indexpos, tovector=True)
         self.assertEqual(
             finalpos, self.vectorpos,
-            errormessage(
-                finalpos, self.vectorpos
-            )
+            errormessage(finalpos, self.vectorpos)
         )
         return None
 
@@ -154,9 +148,7 @@ class TestConversions(unittest.TestCase):
         finalpos = core.convert(self.tuplepos, toindex=True)
         self.assertEqual(
             finalpos, self.indexpos,
-            errormessage(
-                finalpos, self.indexpos
-            )
+            errormessage(finalpos, self.indexpos)
         )
         return None
 
@@ -164,9 +156,7 @@ class TestConversions(unittest.TestCase):
         finalpos = core.convert(self.tuplepos, tocoordinate=True)
         self.assertEqual(
             finalpos, self.tuplepos,
-            errormessage(
-                finalpos, self.tuplepos
-            )
+            errormessage(finalpos, self.tuplepos)
         )
         return None
 
@@ -174,9 +164,7 @@ class TestConversions(unittest.TestCase):
         finalpos = core.convert(self.tuplepos, tovector=True)
         self.assertEqual(
             finalpos, self.vectorpos,
-            errormessage(
-                finalpos, self.vectorpos
-            )
+            errormessage(finalpos, self.vectorpos)
         )
         return None
 
@@ -184,9 +172,7 @@ class TestConversions(unittest.TestCase):
         finalpos = core.convert(self.vectorpos, toindex=True)
         self.assertEqual(
             finalpos, self.indexpos,
-            errormessage(
-                finalpos, self.indexpos
-            )
+            errormessage(finalpos, self.indexpos)
         )
         return None
 
@@ -194,9 +180,7 @@ class TestConversions(unittest.TestCase):
         finalpos = core.convert(self.vectorpos, tocoordinate=True)
         self.assertEqual(
             finalpos, self.tuplepos,
-            errormessage(
-                finalpos, self.tuplepos
-            )
+            errormessage(finalpos, self.tuplepos)
         )
         return None
 
@@ -204,11 +188,75 @@ class TestConversions(unittest.TestCase):
         finalpos = core.convert(self.vectorpos, tovector=True)
         self.assertEqual(
             finalpos, self.vectorpos,
-            errormessage(
-                finalpos, self.vectorpos
-            )
+            errormessage(finalpos, self.vectorpos)
         )
         return None
+
+
+class TestPositionClass(unittest.TestCase):
+    """Confirms that the position class behaves as expected."""
+
+    def setUp(self):
+        self.indexpos = 41
+        self.tuplepos = (5, 1)
+        self.vectorpos = core.Vector(5, 1)
+
+    def test_Positionclass_indexinput(self):
+        pos = core.Position(self.indexpos)
+        self.assertEqual(
+            pos.index, self.indexpos,
+            errormessage(pos.index, self.indexpos)
+        )
+        self.assertEqual(
+            pos.coordinate, self.tuplepos,
+            errormessage(pos.coordinate, self.tuplepos)
+        )
+        self.assertEqual(
+            pos.vector, self.vectorpos,
+            errormessage(pos.vector, self.vectorpos)
+        )
+        return None
+
+    def test_Positionclass_coordinateinput(self):
+        pos = core.Position(self.tuplepos)
+        self.assertEqual(
+            pos.index, self.indexpos,
+            errormessage(pos.index, self.indexpos)
+        )
+        self.assertEqual(
+            pos.coordinate, self.tuplepos,
+            errormessage(pos.coordinate, self.tuplepos)
+        )
+        self.assertEqual(
+            pos.vector, self.vectorpos,
+            errormessage(pos.vector, self.vectorpos)
+        )
+        return None
+
+    def test_Positionclass_vectorinput(self):
+        pos = core.Position(self.vectorpos)
+        self.assertEqual(
+            pos.index, self.indexpos,
+            errormessage(pos.index, self.indexpos)
+        )
+        self.assertEqual(
+            pos.coordinate, self.tuplepos,
+            errormessage(pos.coordinate, self.tuplepos)
+        )
+        self.assertEqual(
+            pos.vector, self.vectorpos,
+            errormessage(pos.vector, self.vectorpos)
+        )
+        return None
+
+    def test_alterprotectedattributes(self):
+        pos = core.Position(self.indexpos)
+        with self.assertRaises(RuntimeError):
+            pos.index = 10
+        with self.assertRaises(RuntimeError):
+            pos.coordinate = (1, 4)
+        with self.assertRaises(RuntimeError):
+            pos.index = core.Vector(1, 4)
 
 
 if __name__ == '__main__':
