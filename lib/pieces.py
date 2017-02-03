@@ -12,10 +12,17 @@ class BasePiece:
 
     def __init__(self, colour, notationsymbol, moveunitvectors, crawler=False):
         # Sanity checks.
-        assert isinstance(crawler, bool), \
-            "'crawler' parameter must be true or false."
-        assert colour.lower() in ('white', 'black'), \
-            "The colour of the piece must be 'white' or 'black'"
+        try:
+            assert isinstance(crawler, bool)
+        except AssertionError:
+            raise TypeError("'crawler' parameter must be true or false.")
+
+        try:
+            assert colour.lower() in ('white', 'black')
+        except AssertionError:
+            raise TypeError("The colour of the piece must be 'white' or 'black'")
+        except AttributeError:
+            raise TypeError("The colour must be a string of either 'white' or 'black'")
 
         # Assignment of attributes.
         self.colour = colour.lower()
