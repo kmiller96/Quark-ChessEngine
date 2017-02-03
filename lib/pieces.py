@@ -50,7 +50,7 @@ class BasePiece:
         try:
             assert isinstance(vector, core.Vector)
         except AssertionError:
-            raise AssertionError("The item %r isn't a vector." % item)
+            raise TypeError("The item %r isn't a vector." % vector)
 
     def type(self):
         """Returns the class of which this piece inherits from."""
