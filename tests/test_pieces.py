@@ -20,6 +20,45 @@ class BasePieceCalls(unittest.TestCase):
             'white', 'a', [core.Vector(0, 1)], crawler=True)
         return None
 
+    def test_nonbooloncrawler(self):
+        with self.assertRaises(TypeError):
+            pieces.BasePiece(
+            'white', 'a', [core.Vector(0, 1)], crawler=10
+            )
+        return None
+
+    def test_colournotvalid(self):
+        with self.assertRaises(TypeError):
+            pieces.BasePiece(
+            'w', 'a', [core.Vector(0, 1)], crawler=True)
+        with self.assertRaises(TypeError):
+            pieces.BasePiece(
+            10, 'a', [core.Vector(0, 1)], crawler=True)
+        with self.assertRaises(TypeError):
+            pieces.BasePiece(
+            int, 'a', [core.Vector(0, 1)], crawler=True)
+        return None
+
+    def test_colourrandomcapitalised(self):
+        pieces.BasePiece('WhItE', 'a', [core.Vector(0, 1)], crawler=True)
+        pieces.BasePiece('blACK', 'a', [core.Vector(0, 1)], crawler=True)
+        return None
+
+    def test_notationsymbol_white(self):
+        self.assertEqual(
+            self.piece.notationsymbol, 'A',
+            errormessage(self.piece.notationsymbol, 'A')
+        )
+        return None
+
+    def test_notationsymbol_black(self):
+        piece = pieces.BasePiece('black', 'a', [core.Vector(0, 1)], crawler=True)
+        self.assertEqual(
+            piece.notationsymbol, 'a',
+            errormessage(piece.notationsymbol, 'a')
+        )
+        return None
+
     def test_colourattribute(self):
         self.assertEqual(self.piece.colour, 'white')
         return None
