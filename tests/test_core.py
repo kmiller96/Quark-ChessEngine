@@ -152,7 +152,7 @@ class TestConvertFunction(unittest.TestCase):
         )
         return None
 
-    def test_convertfunction_coordinatetocoordinate(self):
+    def test_convertfunction_coordtocoord(self):
         finalpos = core.convert(self.tuplepos, tocoordinate=True)
         self.assertEqual(
             finalpos, self.tuplepos,
