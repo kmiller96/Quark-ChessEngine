@@ -73,10 +73,14 @@ class TestKnightPiece(unittest.TestCase):
         self.piece = pieces.KnightPiece('white')
         return None
 
-    def tearDown(self):
-        return None
-
-    def test_one(self):
+    def test_type(self):
+        self.assertTrue(
+            self.piece.type() is pieces.KnightPiece,
+            errormessage(
+                "%s is not %s" % (self.piece.type(), "KnightPiece"),
+                "%s is %s" % (self.piece.type(), "KnightPiece")
+            )
+        )
         return None
 
 
@@ -84,12 +88,20 @@ class TestBishopPiece(unittest.TestCase):
     """Make sure that the bishop is behaving correctly."""
 
     def setUp(self):
+        self.piece = pieces.BishopPiece('white')
         return None
 
     def tearDown(self):
         return None
 
-    def test_one(self):
+    def test_type(self):
+        self.assertTrue(
+            self.piece.type() is pieces.BishopPiece,
+            errormessage(
+                "%s is not %s" % (self.piece.type(), "BishopPiece"),
+                "%s is %s" % (self.piece.type(), "BishopPiece")
+            )
+        )
         return None
 
 
@@ -97,12 +109,20 @@ class TestQueenPiece(unittest.TestCase):
     """Make sure that the queen is behaving correctly."""
 
     def setUp(self):
+        self.piece = pieces.QueenPiece('white')
         return None
 
     def tearDown(self):
         return None
 
-    def test_one(self):
+    def test_type(self):
+        self.assertTrue(
+            self.piece.type() is pieces.QueenPiece,
+            errormessage(
+                "%s is not %s" % (self.piece.type(), "QueenPiece"),
+                "%s is %s" % (self.piece.type(), "QueenPiece")
+            )
+        )
         return None
 
 
@@ -110,12 +130,20 @@ class TestKingPiece(unittest.TestCase):
     """Make sure that the king is behaving correctly."""
 
     def setUp(self):
+        self.piece = pieces.KingPiece('white')
         return None
 
     def tearDown(self):
         return None
 
-    def test_one(self):
+    def test_type(self):
+        self.assertTrue(
+            self.piece.type() is pieces.KingPiece,
+            errormessage(
+                "%s is not %s" % (self.piece.type(), "KingPiece"),
+                "%s is %s" % (self.piece.type(), "KingPiece")
+            )
+        )
         return None
 
 
@@ -123,12 +151,20 @@ class TestRookPiece(unittest.TestCase):
     """Make sure that the rook is behaving correctly."""
 
     def setUp(self):
+        self.piece = pieces.RookPiece('white')
         return None
 
     def tearDown(self):
         return None
 
-    def test_one(self):
+    def test_type(self):
+        self.assertTrue(
+            self.piece.type() is pieces.RookPiece,
+            errormessage(
+                "%s is not %s" % (self.piece.type(), "RookPiece"),
+                "%s is %s" % (self.piece.type(), "RookPiece")
+            )
+        )
         return None
 
 
@@ -136,12 +172,20 @@ class TestPawnPiece(unittest.TestCase):
     """Make sure that the pawn is behaving correctly."""
 
     def setUp(self):
+        self.piece = pieces.PawnPiece('white')
         return None
 
     def tearDown(self):
         return None
 
-    def test_one(self):
+    def test_type(self):
+        self.assertTrue(
+            self.piece.type() is pieces.PawnPiece,
+            errormessage(
+                "%s is not %s" % (self.piece.type(), "PawnPiece"),
+                "%s is %s" % (self.piece.type(), "PawnPiece")
+            )
+        )
         return None
 
 
