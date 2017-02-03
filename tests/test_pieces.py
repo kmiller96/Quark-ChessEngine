@@ -65,6 +65,12 @@ class BasePieceCalls(unittest.TestCase):
         )
         return None
 
+    def test_assertisvector(self):
+        self.piece._assertisvector(core.Vector(1, 0))  # Do nothing if vector.
+        with self.assertRaises(TypeError):
+            self.piece._assertisvector((1, 4))
+        return None
+
 
 class TestKnightPiece(unittest.TestCase):
     """Make sure that the knight is behaving correctly."""
