@@ -17,7 +17,11 @@ class BasePieceCalls(unittest.TestCase):
 
     def setUp(self):
         self.piece = pieces.BasePiece(
-            'white', '?', [core.Vector(0, 1)], crawler=True)
+            'white', 'a', [core.Vector(0, 1)], crawler=True)
+        return None
+
+    def test_colourattribute(self):
+        self.assertEqual(self.piece.colour, 'white')
         return None
 
     def test_stringcall(self):
@@ -66,6 +70,7 @@ class TestKnightPiece(unittest.TestCase):
     """Make sure that the knight is behaving correctly."""
 
     def setUp(self):
+        self.piece = pieces.KnightPiece('white')
         return None
 
     def tearDown(self):
