@@ -13,6 +13,7 @@ from tests.test_core import errormessage
 
 class BasePieceCalls(unittest.TestCase):
     """Tests the base piece and its associated methods."""
+    # TODO: Finish fleshing this out.
 
     def setUp(self):
         self.piece = pieces.BasePiece(
@@ -46,6 +47,16 @@ class BasePieceCalls(unittest.TestCase):
             errormessage(
                 "%s == %s" % (self.piece, "BishopPiece"),
                 "%s =/= %s" % (self.piece, "BishopPiece")
+            )
+        )
+        return None
+
+    def test_type(self):
+        self.assertTrue(
+            self.piece.type() is pieces.BasePiece,
+            errormessage(
+                "%s is not BasePiece" % str(self.piece),
+                "%s is BasePiece" % str(self.piece)
             )
         )
         return None
