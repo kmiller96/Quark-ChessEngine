@@ -48,7 +48,7 @@ class BasePiece:
     def _assertisvector(vector):
         """A sanity check to make sure all items in vectorlist are vectors."""
         try:
-            assert isinstance(item, core.Vector)
+            assert isinstance(vector, core.Vector)
         except AssertionError:
             raise AssertionError("The item %r isn't a vector." % item)
 
@@ -68,7 +68,7 @@ class RookPiece(BasePiece):
     def __init__(self, colour):
         BasePiece.__init__(self, colour, 'R',
             moveunitvectors=(
-                Vector(1,0), Vector(0,1), Vector(-1, 0), Vector(0, -1))
+                core.Vector(1,0), core.Vector(0,1), core.Vector(-1, 0), core.Vector(0, -1))
         )
         return None
 
@@ -79,8 +79,8 @@ class KnightPiece(BasePiece):
     def __init__(self, colour):
         BasePiece.__init__(self, colour, 'N',
             moveunitvectors=(
-                Vector(2, 1), Vector(1, 2), Vector(2, -1), Vector (1, -2),
-                Vector(-2, -1), Vector(-1, -2), Vector(-2, 1), Vector (-1, 2)),
+                core.Vector(2, 1), core.Vector(1, 2), core.Vector(2, -1), core.Vector (1, -2),
+                core.Vector(-2, -1), core.Vector(-1, -2), core.Vector(-2, 1), core.Vector (-1, 2)),
             crawler=True
         )
         return None
@@ -92,7 +92,7 @@ class BishopPiece(BasePiece):
     def __init__(self, colour):
         BasePiece.__init__(self, colour, 'B',
             moveunitvectors=(
-                Vector(1, 1), Vector(1, -1), Vector(-1, -1), Vector(-1, 1))
+                core.Vector(1, 1), core.Vector(1, -1), core.Vector(-1, -1), core.Vector(-1, 1))
         )
         return None
 
@@ -102,8 +102,8 @@ class QueenPiece(BasePiece):
     def __init__(self, colour):
         BasePiece.__init__(self, colour, 'Q',
             moveunitvectors=(
-                Vector(1, 0), Vector(0, 1), Vector(1, 1), Vector(1, -1),
-                Vector(-1, 0), Vector(0, -1), Vector(-1, -1), Vector(-1, 1))
+                core.Vector(1, 0), core.Vector(0, 1), core.Vector(1, 1), core.Vector(1, -1),
+                core.Vector(-1, 0), core.Vector(0, -1), core.Vector(-1, -1), core.Vector(-1, 1))
         )
         return None
 
@@ -114,8 +114,8 @@ class KingPiece(BasePiece):
     def __init__(self, colour):
         BasePiece.__init__(self, colour, 'K',
             moveunitvectors=(
-                Vector(1, 0), Vector(0, 1), Vector(1, 1), Vector(1, -1),
-                Vector(-1, 0), Vector(0, -1), Vector(-1, -1), Vector(-1, 1)),
+                core.Vector(1, 0), core.Vector(0, 1), core.Vector(1, 1), core.Vector(1, -1),
+                core.Vector(-1, 0), core.Vector(0, -1), core.Vector(-1, -1), core.Vector(-1, 1)),
             crawler=True
         )
         return None
@@ -126,13 +126,13 @@ class PawnPiece(BasePiece):
 
     def __init__(self, colour):
         if colour == 'white':
-            movevector = Vector(1, 0)
-            self._captureleft = Vector(1, -1)
-            self._captureright = Vector(1, 1)
+            movevector = core.Vector(1, 0)
+            self._captureleft = core.Vector(1, -1)
+            self._captureright = core.Vector(1, 1)
         elif colour == 'black':
-            movevector = Vector(-1, 0)
-            self._captureleft = Vector(-1, -1)
-            self._captureright = Vector(-1, 1)
+            movevector = core.Vector(-1, 0)
+            self._captureleft = core.Vector(-1, -1)
+            self._captureright = core.Vector(-1, 1)
 
         BasePiece.__init__(self, colour, "P",
             moveunitvectors=(movevector,), crawler=True
