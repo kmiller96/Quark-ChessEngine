@@ -83,6 +83,18 @@ class TestKnightPiece(unittest.TestCase):
         )
         return None
 
+    def test_equality(self):
+        piece2 = pieces.KnightPiece('black')
+
+        self.assertEqual(
+            self.piece, piece2,
+            errormessage(
+                "%s =/= %s" % (self.piece, "KnightPiece"),
+                "%s == %s" % (self.piece, "KnightPiece")
+            )
+        )
+        return None
+
 
 class TestBishopPiece(unittest.TestCase):
     """Make sure that the bishop is behaving correctly."""
@@ -100,6 +112,18 @@ class TestBishopPiece(unittest.TestCase):
             errormessage(
                 "%s is not %s" % (self.piece.type(), "BishopPiece"),
                 "%s is %s" % (self.piece.type(), "BishopPiece")
+            )
+        )
+        return None
+
+    def test_equality(self):
+        piece2 = pieces.BishopPiece('black')
+
+        self.assertEqual(
+            self.piece, piece2,
+            errormessage(
+                "%s =/= %s" % (self.piece, "BishopPiece"),
+                "%s == %s" % (self.piece, "BishopPiece")
             )
         )
         return None
@@ -125,6 +149,18 @@ class TestQueenPiece(unittest.TestCase):
         )
         return None
 
+    def test_equality(self):
+        piece2 = pieces.QueenPiece('black')
+
+        self.assertEqual(
+            self.piece, piece2,
+            errormessage(
+                "%s =/= %s" % (self.piece, "QueenPiece"),
+                "%s == %s" % (self.piece, "QueenPiece")
+            )
+        )
+        return None
+
 
 class TestKingPiece(unittest.TestCase):
     """Make sure that the king is behaving correctly."""
@@ -142,6 +178,18 @@ class TestKingPiece(unittest.TestCase):
             errormessage(
                 "%s is not %s" % (self.piece.type(), "KingPiece"),
                 "%s is %s" % (self.piece.type(), "KingPiece")
+            )
+        )
+        return None
+
+    def test_equality(self):
+        piece2 = pieces.KingPiece('black')
+
+        self.assertEqual(
+            self.piece, piece2,
+            errormessage(
+                "%s =/= %s" % (self.piece, "KingPiece"),
+                "%s == %s" % (self.piece, "KingPiece")
             )
         )
         return None
@@ -167,6 +215,18 @@ class TestRookPiece(unittest.TestCase):
         )
         return None
 
+    def test_equality(self):
+        piece2 = pieces.RookPiece('black')
+
+        self.assertEqual(
+            self.piece, piece2,
+            errormessage(
+                "%s =/= %s" % (self.piece, "RookPiece"),
+                "%s == %s" % (self.piece, "RookPiece")
+            )
+        )
+        return None
+
 
 class TestPawnPiece(unittest.TestCase):
     """Make sure that the pawn is behaving correctly."""
@@ -188,6 +248,18 @@ class TestPawnPiece(unittest.TestCase):
         )
         return None
 
+    def test_equality(self):
+        piece2 = pieces.PawnPiece('black')
+
+        self.assertEqual(
+            self.piece, piece2,
+            errormessage(
+                "%s =/= %s" % (self.piece, "PawnPiece"),
+                "%s == %s" % (self.piece, "PawnPiece")
+            )
+        )
+        return None
+
 
 if __name__ == '__main__':
-    unittest.main(verbosity=1)
+    unittest.main(verbosity=2)
