@@ -165,5 +165,35 @@ class CoreMethods(unittest.TestCase):
             self.board.isplayercolour(1)
         return None
 
+    def test_positiononboard(self):
+        pos = core.Position(11)
+        index = pos.index
+        coordinate = pos.coordinate
+        vector = pos.vector
+
+        self.assertTrue(self.board.positiononboard(index))
+        self.assertTrue(self.board.positiononboard(coordinate))
+        self.assertTrue(self.board.positiononboard(vector))
+        return None
+
+    def test_positiononboard_string(self):
+        with self.assertRaises(TypeError):
+            self.board.positiononboard('hello there')
+        return None
+
+    def test_positiononboard_float(self):
+        with self.assertRaises(TypeError):
+            self.board.positiononboard(12.1)
+        return None
+
+    def test_assertPositionOnBoard(self):
+        indexonboard = 15
+        indexoffboard = 69
+
+        self.board.assertPositionOnBoard(indexonboard)
+        with self.assertRaises(AssertionError):
+            self.board.assertPositionOnBoard(indexoffboard)
+        return None
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
