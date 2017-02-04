@@ -83,9 +83,15 @@ class _ChessBoardCore:
 
     def isplayercolour(self, colour):
         """Determines if the colour passed is the player's colour or not."""
-        assert colour.lower() in ('white', 'black'), \
-            "The colour of the piece must be 'white' or 'black'"
-        return (colour.lower() == self.playercolour)
+        errormsg = "The colour of the piece must be 'white' or 'black'"
+        try:
+            assert colour.lower() in ('white', 'black')
+        except AssertionError:
+            raise NameError(errormsg)
+        except AttributeError:
+            raise TypeError(errormsg)
+        else:
+            return (colour.lower() == self.playercolour)
 
     def positiononboard(self, position):
         """Returns boolean depending on if the position is on the board."""
