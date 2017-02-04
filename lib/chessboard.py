@@ -151,7 +151,7 @@ class ChessBoard(_ChessBoardCore):
         for ii, square in enumerate(self._board):
             if square is None:
                 continue
-            elif ((piecetype is square.piecetype())
+            elif ((piecetype is square.type())
                     and square.colour == colour):
                 piecepositions.append(ii)
         return piecepositions
