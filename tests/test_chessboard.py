@@ -195,5 +195,25 @@ class CoreMethods(unittest.TestCase):
             self.board.assertPositionOnBoard(indexoffboard)
         return None
 
+    def test_assertIsUnoccupied(self):
+        indexoccupied = 15
+        indexunoccupied = 16
+        self.board[indexoccupied] = pieces.QueenPiece('white')
+
+        self.board.assertIsUnoccupied(indexunoccupied)
+        with self.assertRaises(AssertionError):
+            self.board.assertIsUnoccupied(indexoccupied)
+        return None
+
+    def test_assertIsOccupied(self):
+        indexoccupied = 15
+        indexunoccupied = 16
+        self.board[indexoccupied] = pieces.QueenPiece('white')
+
+        self.board.assertIsOccupied(indexoccupied)
+        with self.assertRaises(AssertionError):
+            self.board.assertIsOccupied(indexunoccupied)
+        return None
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
