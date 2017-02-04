@@ -103,11 +103,12 @@ class _ChessBoardCore:
 
     def positiononboard(self, position):
         """Returns boolean depending on if the position is on the board."""
-        pos = core.convert(position, tocoordinate=True)
-        if 0 <= pos[0] <= 7 and 0 <= pos[1] <= 7:
-            return True
+        try:
+            pos = core.convert(position, tocoordinate=True)
+        except TypeError:
+            raise TypeError("Position must be an index, coordinate or vector.")
         else:
-            return False
+            return (0 <= pos[0] <= 7 and 0 <= pos[1] <= 7)
 
     def assertPositionOnBoard(self, position):
         """Asserts that the position is valid."""
