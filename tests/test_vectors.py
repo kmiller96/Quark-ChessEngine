@@ -181,5 +181,65 @@ class BasicVectorMinusOperator(unittest.TestCase):
         )
         return None
 
+
+class BasicVectorMultiplyOperator(unittest.TestCase):
+    """Tests the multiply operator for the Vector class."""
+
+    def setUp(self):
+        self.vector1 = core.Vector(1, 2)
+        self.vector2 = core.Vector(3, 4)
+        self.scalar1 = 3
+
+        self.vectorans = 11
+        self.scalarans = core.Vector(3, 6)
+        return None
+
+    def test_privatemethod_scalar_multiply(self):
+        self.assertEqual(
+            tuple(self.vector1._scalar_multiply(self.scalar1)), self.scalarans.vector,
+            errormessage(
+                tuple(self.vector1._scalar_multiply(self.scalar1)),
+                self.scalarans.vector)
+        )
+        return None
+
+    def test_privatemethod_dot(self):
+        self.assertEqual(
+            self.vector1._dot(self.vector2), self.vectorans,
+            errormessage(self.vector1._dot(self.vector2), self.vectorans)
+        )
+        return None
+
+    def test_privatemethod_multiply(self):
+        self.assertEqual(
+            self.vector1._multiply(self.scalar1), self.scalarans,
+            errormessage(
+                self.vector1._multiply(self.scalar1),
+                self.scalarans)
+        )
+
+        self.assertEqual(
+            self.vector1._multiply(self.vector2), self.vectorans,
+            errormessage(self.vector1._multiply(self.vector2), self.vectorans)
+        )
+        return None
+
+    def test_dotvectors(self):
+        ans = self.vector1 * self.vector2
+
+        self.assertEqual(
+            ans, self.vectorans,
+            errormessage(ans, self.vectorans)
+        )
+        return None
+
+    def test_scalarmultiply(self):
+        ans = self.vector1 * self.scalar1
+
+        self.assertEqual(
+            ans, self.scalarans,
+            errormessage(ans, self.scalarans)
+        )
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
