@@ -103,5 +103,24 @@ class CoreMethods(unittest.TestCase):
         # TODO: How do I test this?
         return None
 
+    def test_duplicateboard(self):
+        piece = pieces.QueenPiece('black')
+        self.board[11] = piece
+
+        newboard = self.board.duplicateboard()
+        self.board[12] = piece
+
+        self.assertNotEqual(
+            newboard[12], self.board[12],
+            errormessage(
+                '%s == %s' % (newboard[12], self.board[12]),
+                '%s =/= %s' % (newboard[12], self.board[12])))
+        self.assertEqual(
+            newboard[11], self.board[11],
+            errormessage(
+                '%s =/= %s' % (newboard[11], self.board[11]),
+                '%s == %s' % (newboard[11], self.board[11])))
+        return None
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
