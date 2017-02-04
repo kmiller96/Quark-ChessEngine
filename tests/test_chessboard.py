@@ -48,6 +48,8 @@ class CoreMethods(unittest.TestCase):
             self.board[[1, 4, 5]]
         with self.assertRaises(TypeError):  # Too few elements
             self.board[(1,)]
+        with self.assertRaises(IndexError):  # Off the board.
+            self.board[91]
         return None
 
     def test__setitem__index(self):
@@ -76,6 +78,27 @@ class CoreMethods(unittest.TestCase):
             self.board._board[54], piece,
             errormessage(self.board._board[54], piece))
         return None
+
+    def test__setitem__nonpiece(self):
+        piece = 'X'  # Not a pieces.py piece.
+        with self.assertRaises(TypeError):
+            self.board[19] = piece
+        return None
+
+    def test__setitem__badposition(self):
+        piece = pieces.KnightPiece('black')
+        with self.assertRaises(TypeError):  # String input
+            self.board['string'] = piece
+        with self.assertRaises(TypeError):  # Float input
+            self.board[10.5] = piece
+        with self.assertRaises(TypeError):  # Too many elements
+            self.board[[1, 4, 5]] = piece
+        with self.assertRaises(TypeError):  # Too few elements
+            self.board[(1,)] = piece
+        with self.assertRaises(IndexError):  # Off the board.
+            self.board[91] = piece
+        return None
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
