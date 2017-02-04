@@ -99,6 +99,9 @@ class CoreMethods(unittest.TestCase):
             self.board[91] = piece
         return None
 
+    def test_iter(self):
+        # TODO: How do I test this?
+        return None
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
