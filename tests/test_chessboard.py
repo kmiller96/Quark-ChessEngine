@@ -7,7 +7,7 @@
 
 import unittest
 from tests.test_core import errormessage
-from lib import chessboard, core
+from lib import chessboard, core, pieces
 
 class CoreMethods(unittest.TestCase):
     """This testing suite looks at the core methods."""
@@ -48,6 +48,33 @@ class CoreMethods(unittest.TestCase):
             self.board[[1, 4, 5]]
         with self.assertRaises(TypeError):  # Too few elements
             self.board[(1,)]
+        return None
+
+    def test__setitem__index(self):
+        piece = pieces.KingPiece('white')
+        self.board[36] = piece
+
+        self.assertEqual(
+            self.board._board[36], piece,
+            errormessage(self.board._board[36], piece))
+        return None
+
+    def test__setitem__coordinate(self):
+        piece = pieces.BishopPiece('white')
+        self.board[(2, 1)] = piece
+
+        self.assertEqual(
+            self.board._board[17], piece,
+            errormessage(self.board._board[17], piece))
+        return None
+
+    def test__setitem__vector(self):
+        piece = pieces.QueenPiece('white')
+        self.board[core.Vector(6, 6)] = piece
+
+        self.assertEqual(
+            self.board._board[54], piece,
+            errormessage(self.board._board[54], piece))
         return None
 
 if __name__ == '__main__':
