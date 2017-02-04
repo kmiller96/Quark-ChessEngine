@@ -52,6 +52,8 @@ class _ChessBoardCore:
             assert isinstance(piece, pieces.BasePiece), errormsg
             position = core.convert(pos, toindex=True)
             self._board[position] = piece
+        except AssertionError:
+            raise TypeError(errormsg)
         except IndexError:
             raise IndexError(errormsg)
         except TypeError:
