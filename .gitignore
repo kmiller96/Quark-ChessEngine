@@ -96,3 +96,4 @@ tests/tests_chessboardbasic.py
 tests/tests_chesspieces.py
 docs/TODO_List
 docs/TODO_List.txt
+lib/core.pyc
