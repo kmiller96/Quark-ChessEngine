@@ -72,14 +72,22 @@ class _ChessBoardCore:
 
     def setplayercolour(self, colour):
         """Assigns a colour to the player."""
-        if colour.lower() == 'white':
-            self.playercolour = 'white'
-            self.computercolour = 'black'
-        elif colour.lower() == 'black':
-            self.playercolour = 'black'
-            self.computercolour = 'white'
-        else:
-            raise NameError("Colour of the piece must be 'white' or 'black'")
+        errormsg = "Colour of the piece must be 'white' or 'black'"
+        try:
+            assert colour.lower() in ('white', 'black')
+            if colour.lower() == 'white':
+                self.playercolour = 'white'
+                self.computercolour = 'black'
+            elif colour.lower() == 'black':
+                self.playercolour = 'black'
+                self.computercolour = 'white'
+            else:
+                raise RuntimeError("!!!UNKNOWN ERROR!!!")
+        except AssertionError:
+            raise NameError(errormsg)
+        except AttributeError:
+            raise TypeError(errormsg)
+        return None
 
     def isplayercolour(self, colour):
         """Determines if the colour passed is the player's colour or not."""
