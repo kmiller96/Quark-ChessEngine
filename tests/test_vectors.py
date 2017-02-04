@@ -57,6 +57,30 @@ class MiscellaneousVectorCalls(unittest.TestCase):
             self.vector.parallelto(5)
         return None
 
+    def test_unitvector_rankvector(self):
+        extendedvector = core.Vector(5, 0)
+
+        self.assertEqual(
+            extendedvector.unitvector(), core.Vector(1, 0),
+            errormessage(extendedvector.unitvector(), core.Vector(1, 0)))
+        return None
+
+    def test_unitvector_filevector(self):
+        extendedvector = core.Vector(0, 5)
+
+        self.assertEqual(
+            extendedvector.unitvector(), core.Vector(0, 1),
+            errormessage(extendedvector.unitvector(), core.Vector(0, 1)))
+        return None
+
+    def test_unitvector_diagonal(self):
+        extendedvector = core.Vector(5, 5)
+
+        self.assertEqual(
+            extendedvector.unitvector(), core.Vector(1, 1),
+            errormessage(extendedvector.unitvector(), core.Vector(1, 1)))
+        return None
+
 
 class BadInputVectorTests(unittest.TestCase):
     """Use bad inputs on the methods and see if they fail appropriately."""
