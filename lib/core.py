@@ -312,12 +312,14 @@ class Vector:
 
             # Now project the shorter vector onto the larger one.
             integers = map(lambda x, y: x / y, longestvector, shortestvector)
+            if integers[0] != integers[1]:
+                return False
             projectedvector = map(lambda x, y: x*y, integers, shortestvector)
 
             if tuple(projectedvector) == longestvector: return True
             else: return False
         except AttributeError:
-            raise AttributeError("Other must be a vector.")
+            raise TypeError("Other must be a vector.")
 
     def unitvector(self):
         """Fetches a quasi-unit vector of the current vector."""
