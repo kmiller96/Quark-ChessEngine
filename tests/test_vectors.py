@@ -81,6 +81,28 @@ class MiscellaneousVectorCalls(unittest.TestCase):
             errormessage(extendedvector.unitvector(), core.Vector(1, 1)))
         return None
 
+    def test_unitvector_badinput(self):
+        # TODO: This method.
+        return None
+
+    def test_privatemethod_mag(self):
+        pythagorianvector = core.Vector(3, 4)
+        self.assertEqual(
+            pythagorianvector._mag(), 5,
+            errormessage(pythagorianvector._mag(), 5))
+        return None
+
+    def test_abs_function(self):
+        pythagorianvector = core.Vector(3, 4)
+        self.assertEqual(
+            abs(pythagorianvector), 5,
+            errormessage(pythagorianvector._mag(), 5))
+        return None
+
+    def test_magnitudeofvector_badinput(self):
+        # TODO: This method.
+        return None
+
 
 class BadInputVectorTests(unittest.TestCase):
     """Use bad inputs on the methods and see if they fail appropriately."""
