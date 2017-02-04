@@ -50,7 +50,8 @@ class _ChessBoardCore:
                     "derives from BasePiece")
         try:
             assert isinstance(piece, pieces.BasePiece), errormsg
-            self._board[pos] = piece
+            position = core.convert(pos, toindex=True)
+            self._board[position] = piece
         except IndexError:
             raise IndexError(errormsg)
         except TypeError:
