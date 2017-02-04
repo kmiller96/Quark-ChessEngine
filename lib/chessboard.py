@@ -38,7 +38,7 @@ class _ChessBoardCore:
         "tuple/list that specifies the row and column index."
         try:
             position = core.convert(pos, toindex=True)
-            return self._board[pos]
+            return self._board[position]
         except IndexError:
             raise IndexError(errormsg)
         except TypeError:
