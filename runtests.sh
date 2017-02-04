@@ -22,8 +22,7 @@ echo "There is nothing here yet..."
 echo ""
 echo "CHESSBOARD TESTS"
 echo "==================================="
-#python -m tests/test_chessboard
-echo "There is nothing here yet..."
+python -m tests/test_chessboard
 
 echo ""
 echo "MOVEGEN TESTS"
