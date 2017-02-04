@@ -142,6 +142,13 @@ class CoreMethods(unittest.TestCase):
             errormessage(self.board.computercolour, 'white'))
         return None
 
+    def test_setplayercolour_badinput(self):
+        with self.assertRaises(NameError):
+            self.board.setplayercolour('blue')
+        with self.assertRaises(TypeError):
+            self.board.setplayercolour([22, 14])
+        return None
+
     def test_isplayercolour(self):
         self.board.setplayercolour('white')
         self.assertTrue(self.board.isplayercolour('white'))
@@ -150,6 +157,13 @@ class CoreMethods(unittest.TestCase):
         self.board.setplayercolour('black')
         self.assertTrue(self.board.isplayercolour('black'))
         self.assertFalse(self.board.isplayercolour('white'))
+
+    def test_isplayercolour_badinput(self):
+        with self.assertRaises(NameError):
+            self.board.isplayercolour('happy')
+        with self.assertRaises(TypeError):
+            self.board.isplayercolour(1)
+        return None
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
