@@ -122,5 +122,34 @@ class CoreMethods(unittest.TestCase):
                 '%s == %s' % (newboard[11], self.board[11])))
         return None
 
+    def test_setplayercolour_white(self):
+        self.board.setplayercolour('white')
+        self.assertEqual(
+            self.board.playercolour, 'white',
+            errormessage(self.board.playercolour, 'white'))
+        self.assertEqual(
+            self.board.computercolour, 'black',
+            errormessage(self.board.computercolour, 'black'))
+        return None
+
+    def test_setplayercolour_black(self):
+        self.board.setplayercolour('black')
+        self.assertEqual(
+            self.board.playercolour, 'black',
+            errormessage(self.board.playercolour, 'black'))
+        self.assertEqual(
+            self.board.computercolour, 'white',
+            errormessage(self.board.computercolour, 'white'))
+        return None
+
+    def test_isplayercolour(self):
+        self.board.setplayercolour('white')
+        self.assertTrue(self.board.isplayercolour('white'))
+        self.assertFalse(self.board.isplayercolour('black'))
+
+        self.board.setplayercolour('black')
+        self.assertTrue(self.board.isplayercolour('black'))
+        self.assertFalse(self.board.isplayercolour('white'))
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
