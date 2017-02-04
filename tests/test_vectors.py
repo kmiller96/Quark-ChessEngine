@@ -40,6 +40,23 @@ class MiscellaneousVectorCalls(unittest.TestCase):
         self.assertTrue(self.vector != core.Vector(0, 9))
         self.assertFalse(self.vector != core.Vector(1, 2))
 
+    def test_parallelto(self):
+        parallelvector = core.Vector(3, 6)
+        othervector = core.Vector(5, 2)
+
+        self.assertTrue(self.vector.parallelto(parallelvector))
+        self.assertFalse(self.vector.parallelto(othervector))
+        return None
+
+    def test_parallelto_nonvector(self):
+        with self.assertRaises(TypeError):
+            self.vector.parallelto((4, 8))
+        with self.assertRaises(TypeError):
+            self.vector.parallelto('hey ;)')
+        with self.assertRaises(TypeError):
+            self.vector.parallelto(5)
+        return None
+
 
 class BadInputVectorTests(unittest.TestCase):
     """Use bad inputs on the methods and see if they fail appropriately."""
@@ -240,6 +257,7 @@ class BasicVectorMultiplyOperator(unittest.TestCase):
             ans, self.scalarans,
             errormessage(ans, self.scalarans)
         )
+        return None
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
