@@ -113,16 +113,16 @@ class _ChessBoardCore:
     def assertPositionOnBoard(self, position):
         """Asserts that the position is valid."""
         try:
-            index = convert(position, toindex=True)
+            index = core.convert(position, toindex=True)
             self._board[index]
         except IndexError:  # If off board.
-            raise IndexError("The position %r is off the board." % position)
+            raise AssertionError("The position %r is off the board." % position)
         return None
 
     def assertIsUnoccupied(self, position):
         """Asserts that the square is free and unoccupied."""
         try:
-            index = convert(position, toindex=True)
+            index = core.convert(position, toindex=True)
             assert self._board[index] == None, "The target square is occupied."
         except IndexError:
             raise IndexError("The index used is off the board!")
@@ -131,7 +131,7 @@ class _ChessBoardCore:
     def assertIsOccupied(self, position):
         """Asserts that the square is occupied."""
         try:
-            index = convert(position, toindex=True)
+            index = core.convert(position, toindex=True)
             assert self._board[index] != None, "The target square is unoccupied."
         except IndexError:
             raise IndexError("The index used is off the board!")
