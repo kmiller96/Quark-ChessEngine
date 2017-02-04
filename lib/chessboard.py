@@ -70,6 +70,18 @@ class _ChessBoardCore:
         """Creates an instance of the chess board exactly as it is now."""
         return deepcopy(self)
 
+    def setplayercolour(self, colour):
+        """Assigns a colour to the player."""
+        if colour.lower() == 'white':
+            self.playercolour = 'white'
+            self.computercolour = 'black'
+        elif colour.lower() == 'black':
+            self.playercolour = 'black'
+            self.computercolour = 'white'
+        else:
+            raise NameError("Colour of the piece must be 'white' or 'black'")
+
+
     def isplayercolour(self, colour):
         """Determines if the colour passed is the player's colour or not."""
         assert colour.lower() in ('white', 'black'), \
