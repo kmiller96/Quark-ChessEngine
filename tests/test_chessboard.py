@@ -215,5 +215,36 @@ class CoreMethods(unittest.TestCase):
             self.board.assertIsOccupied(indexunoccupied)
         return None
 
+class TestChessBoard(unittest.TestCase):
+    """These tests are for the more exciting calls."""
+
+    def setUp(self):
+        self.board = chessboard.ChessBoard()
+        return None
+
+    def test_findpiece_white(self):
+        self.board[25] = pieces.KingPiece('white')
+
+        whitekingpos = self.board.findpiece(pieces.KingPiece, 'white')[0]
+        self.assertEqual(
+            whitekingpos, 25,
+            errormessage(
+                "The king is at %i" % whitekingpos, "The king is at %i" % 25))
+        return None
+
+    def test_findpiece_black(self):
+        self.board[22] = pieces.KingPiece('black')
+
+        blackkingpos = self.board.findpiece(pieces.KingPiece, 'black')[0]
+        self.assertEqual(
+            blackkingpos, 22,
+            errormessage(
+                "The king is at %i" % blackkingpos, "The king is at %i" % 22))
+        return None
+
+    def test_findpiece_nopieces(self):
+        self.assertFalse(self.board.findpiece(pieces.KnightPiece, 'white'))
+        return None
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
