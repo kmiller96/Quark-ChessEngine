@@ -349,8 +349,8 @@ class Vector:
     def _multiply(self, other):
         """Core for the multiplication."""
         try:
-            if isinstance(other, int):
-                return self._scalar_multiply(other)
+            if isinstance(other, (int, float)):
+                return Vector(*self._scalar_multiply(other))
             elif isinstance(other, Vector):
                 return self._dot(other)
             else:
@@ -419,14 +419,14 @@ class Vector:
     def __mul__(self, other):
         """Allows for dot product and scalar multiplication."""
         try:
-            return Vector(*self._multiply(other))
+            return self._multiply(other)
         except AttributeError:
             raise TypeError("Other must be a vector.")
 
     def __rmul__(self, other):
         """Reversed __mul__ method."""
         try:
-            return Vector(*self._multiply(other))
+            return self._multiply(other)
         except AttributeError:
             raise TypeError("Other must be a vector.")
 
