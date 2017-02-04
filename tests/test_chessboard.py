@@ -18,7 +18,6 @@ class CoreMethods(unittest.TestCase):
 
     def test__getitem__index(self):
         self.board._board[19] = 'X'  # Inject a piece at 19
-        self.board._board[23] = 'Y'  # Inject a piece at (2, 7)
 
         self.assertEqual(
             self.board[19], 'X',
@@ -38,6 +37,17 @@ class CoreMethods(unittest.TestCase):
         self.assertEqual(
             self.board[core.Vector(0, 0)], 'Z',
             errormessage(self.board[core.Vector(0, 0)], 'Z'))
+        return None
+
+    def test__getitem__badinput(self):
+        with self.assertRaises(TypeError):  # String input
+            self.board['string']
+        with self.assertRaises(TypeError):  # Float input
+            self.board[10.5]
+        with self.assertRaises(TypeError):  # Too many elements
+            self.board[[1, 4, 5]]
+        with self.assertRaises(TypeError):  # Too few elements
+            self.board[(1,)]
         return None
 
 if __name__ == '__main__':
