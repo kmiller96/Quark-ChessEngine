@@ -146,13 +146,13 @@ class EngineGUI:
         self.rightedgeborder = ' | \n'
         return None
 
-    def drawasciiboard(self, boardlist):
+    def drawasciiboard(self, board):
         """Draws the ascii board."""
         # Start by drawing an empty board.
         rankstrings = ['........'] * 8
 
         # Assign piece symbols to the undecorated board.
-        for ii, square in enumerate(boardlist):
+        for ii, square in enumerate(board):
             if square == None:
                 continue
             else:
@@ -163,7 +163,7 @@ class EngineGUI:
 
         # Now decorate board.
         board = reduce(lambda x, y: x+y, map(
-            lambda x: self.leftedgeborder + x self.rightedgeborder,
+            lambda x: self.leftedgeborder + x + self.rightedgeborder,
             rankstrings
         ))
         board = self.topborder + board + self.bottomborder
