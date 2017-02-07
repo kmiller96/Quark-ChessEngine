@@ -215,18 +215,21 @@ def main():
             result = whowon()
             gameover(result)
 
-        # Otherwise play normally.
+        # If it is the user's turn, play.
         if userturn:
+            # Print the board (but only once).
             if firstloop:
                 print GUI.generateasciiboard(chessboard, side=chessboard.playercolour)
 
-            command = promptuser(USER_OPTIONS)  # Get the user command.
+            # Get the user command.
+            command = promptuser(USER_OPTIONS)
 
-            if command == 'hist':  # Look at the game history.
+            # Look at the game history.
+            if command == 'hist':
                 printhistory(UI.history)
                 print ""
-
-            elif command == 'move':  # Make a move.
+            # Make a move.
+            elif command == 'move':
                 piece, movetuple, movestr = promptuserformove()
                 if islegalmove(piece, movetuple):
                     # Make move and add it to the history.
@@ -239,11 +242,12 @@ def main():
                     continue
                 else:
                     print "\nThat move is not valid."
-
-            elif command == 'exit':  # Quit out of the game.
+            # Quit out of the game.
+            elif command == 'exit':
                 resign()
                 break
 
+        # Otherwise if computer's turn, make the move.
         else:
             if not debug:
                 makebestmove(board=chessboard); firstloop = True
