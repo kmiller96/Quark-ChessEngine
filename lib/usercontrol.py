@@ -67,7 +67,7 @@ class EngineUI:
                 startvec = Vector(rankfunc(startpos), filefunc(startpos))
                 endvec = Vector(rankfunc(endpos), filefunc(endpos))
             except AssertionError:
-                raise Exception(
+                raise NameError(
                     "The notation string doesn't follow correct syntax rules.")
             else:
                 return startvec, endvec
@@ -146,7 +146,7 @@ class EngineGUI:
         self.rightedgeborder = ' | \n'
         return None
 
-    def drawasciiboard(self, board):
+    def generateasciiboard(self, board):
         """Draws the ascii board."""
         # Start by drawing an empty board.
         rankstrings = ['........'] * 8
