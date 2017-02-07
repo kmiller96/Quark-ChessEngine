@@ -77,7 +77,7 @@ class EngineUI:
         startvec, endvec = self.notationtopositions(userstring[1:])
         return piecetomove, (startvec, endvec)
 
-    def addmovetohistory(self, piecesymbol, startpos, endpos,
+    def addmovetohistory(self, piecesymbol=None, startpos=None, endpos=None,
                          capture=False, check=False, checkmate=False,
                          castlelong=False, castleshort=False, promotionto=False):
         """Add a move to the recorded history."""
@@ -146,8 +146,21 @@ class EngineGUI:
         self.rightedgeborder = ' | \n'
         return None
 
-    def generateasciiboard(self, board):
+    def generateasciiboard(self, board, side):
         """Draws the ascii board."""
+        def insertsymbolinrankstring(symbol, position, rankstr):
+            """Inserts the character into position."""
+            ranklist = list(rankstr)
+            ranklist[position] = symbol
+            rankstr = reduce(lambda x, y: x+y, ranklist)
+            return rankstr
+
+        # Sanity checks.
+        try:
+            assert side in ('white', 'black')
+        except AssertionError:
+            raise TypeError("The parameter 'side' must be either 'white' or 'black'")
+
         # Start by drawing an empty board.
         rankstrings = ['........'] * 8
 
@@ -159,12 +172,17 @@ class EngineGUI:
                 piece = square
                 symbol = piece.notationsymbol
                 (rank_, file_) = core.convert(ii, tocoordinate=True)
-                rankstrings[rank_][file_] = symbol
+
+                rankstrings[rank_] = \
+                    insertsymbolinrankstring(symbol, file_, rankstrings[rank_])
+
+        # Determine which way to print the board.
+        if side =='white': rankstrings = rankstrings[::-1]
+        else: pass
 
         # Now decorate board.
         board = reduce(lambda x, y: x+y, map(
             lambda x: self.leftedgeborder + x + self.rightedgeborder,
-            rankstrings
-        ))
+            rankstrings))
         board = self.topborder + board + self.bottomborder
         return board
