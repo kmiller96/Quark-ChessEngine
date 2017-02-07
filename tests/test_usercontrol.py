@@ -5,6 +5,8 @@
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# TODO: Finsih off these tests.
+
 import unittest
 from lib import core, chessboard, pieces, usercontrol
 from tests.test_core import errormessage
@@ -105,11 +107,47 @@ class BasicUICalls(unittest.TestCase):
             self.ui.processusermove(pieces.KingPiece)
         return None
 
+    def test_addmovetohistory_basicmove(self):
+        raise NotImplementedError
+        return None
+
+    def test_addmovetohistory_capture(self):
+        raise NotImplementedError
+        return None
+
+    def test_addmovetohistory_check(self):
+        raise NotImplementedError
+        return None
+
+    def test_addmovetohistory_checkmate(self):
+        raise NotImplementedError
+        return None
+
+    def test_addmovetohistory_castlelong(self):
+        raise NotImplementedError
+        return None
+
+    def test_addmovetohistory_castleshort(self):
+        raise NotImplementedError
+        return None
+
+    def test_addmovetohistory_promotionto(self):
+        raise NotImplementedError
+        return None
+
 
 class BasicGUICalls(unittest.TestCase):
     """Conducts tests on the GUI."""
 
     def setUp(self):
+        self.gui = usercontrol.EngineGUI()
+        self.board = chessboard.ChessBoard()
+        self.board.setupnormalboard()
+        return None
+
+    def test_generateasciiboard(self):
+        print "\n"
+        print self.gui.generateasciiboard(self.board, 'white')
         return None
 
 
