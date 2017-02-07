@@ -140,10 +140,12 @@ class EngineGUI:
     """
 
     def __init__(self):
-        self.topborder = ' + -------- + \n'
-        self.bottomborder = ' + -------- + \n'
-        self.leftedgeborder = ' | '
+        self.topborder = '  + -------- + \n'
+        self.bottomborder = '  + -------- + \n'
+        self.leftedgeborder = '| '
         self.rightedgeborder = ' | \n'
+        self.ranks = '12345678'
+        self.files = 'abcdefgh'
         return None
 
     def generateasciiboard(self, board, side):
@@ -177,12 +179,21 @@ class EngineGUI:
                     insertsymbolinrankstring(symbol, file_, rankstrings[rank_])
 
         # Determine which way to print the board.
-        if side =='white': rankstrings = rankstrings[::-1]
-        else: pass
+        if side =='white':
+            rankstrings = rankstrings[::-1]
+            rankcoordinates = self.ranks[::-1]
+            filecoordinates = self.files
+        elif side == 'black':
+            rankcoordinates = self.ranks
+            filecoordinates = self.files[::-1]
 
         # Now decorate board.
         board = reduce(lambda x, y: x+y, map(
-            lambda x: self.leftedgeborder + x + self.rightedgeborder,
-            rankstrings))
-        board = self.topborder + board + self.bottomborder
+            lambda rankstr, ranknotation: \
+                (' ' + ranknotation + self.leftedgeborder +
+                rankstr +
+                self.rightedgeborder),
+            rankstrings, rankcoordinates))
+        board = (self.topborder + board + self.bottomborder + '    ' +
+                 filecoordinates + '\n')
         return board
