@@ -7,6 +7,7 @@
 
 import unittest
 from lib import core, chessboard, pieces, usercontrol
+from tests.test_core import errormessage
 
 class BasicUICalls(unittest.TestCase):
     """Conducts the very basic tests on the UI."""
@@ -64,6 +65,17 @@ class BasicUICalls(unittest.TestCase):
         endpos = core.Vector(5, 0)
         piece = pieces.RookPiece
         string = 'Ra1>a6'
+        self.assertEqual(
+            self.ui.processusermove(string),
+            (piece, (startpos, endpos))
+        )
+        return None
+
+    def test_processusermove_Pawn(self):
+        startpos = core.Vector(1, 4)
+        endpos = core.Vector(3, 4)
+        piece = pieces.PawnPiece
+        string = 'Pe2>e4'
         self.assertEqual(
             self.ui.processusermove(string),
             (piece, (startpos, endpos))
