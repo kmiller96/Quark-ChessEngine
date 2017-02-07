@@ -52,6 +52,7 @@ class EngineUI:
         def notationtopositions(notationstring):
             try:
                 assert 'x' in notationstring or '>' in notationstring
+                assert len(notationstring) == 6
                 (startpos, endpos) = (notationstring[:2], notationstring[-2:])
 
                 filefunc = lambda x: self._filesymbols.index(x[0])
@@ -60,7 +61,10 @@ class EngineUI:
                 startvec = core.Vector(rankfunc(startpos), filefunc(startpos))
                 endvec = core.Vector(rankfunc(endpos), filefunc(endpos))
             except AssertionError:
-                raise NameError(
+                if notationstring == '0-0' or notationstring == '0-0-0':
+                    pass  # TODO: Castling code.
+                else:
+                    raise NameError(
                     "The notation string doesn't follow correct syntax rules.")
             else:
                 return startvec, endvec
