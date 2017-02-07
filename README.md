@@ -47,23 +47,24 @@ Don't expect this engine to ever beat anyone with half a brain in chess. I am ho
 
 The GUI currently looks like so:
 <!-- language: lang-none -->
-    +----------+
-    | rnbqkbnr |
-    | pppppppp |
-    | ........ |
-    | ........ |
-    | ........ |
-    | ........ |
-    | PPPPPPPP |
-    | RNBQKBNR |
-    +----------+
+      +----------+
+    8 | rnbqkbnr |
+    7 | pppppppp |
+    6 | ........ |
+    5 | ........ |
+    4 | ........ |
+    3 | ........ |
+    2 | PPPPPPPP |
+    1 | RNBQKBNR |
+      +----------+
+        abcdefgh
 
 where the capitalised pieces are on white while the lowercase pieces are on black.
 
-The notational rules follow a format similar to traditional chess notation but with a bit more detail. Two examples of moves under the special notation would be "Qd1->a4" or "Pe4xd5" if this helps to make a bit more sense. A concrete set of rules are as follows:
+The notational rules follow a format similar to traditional chess notation but with a bit more detail. Two examples of moves under the special notation would be "Qd1>a4" or "Pe4xd5" if this helps to make a bit more sense. A concrete set of rules are as follows:
   - Start with the symbol for the piece being moved. So the queen has "Q", the king has "K", the knight "N", the bishop "B", the rook "R" and the pawns have 'P'.
   - Add on the current position of the piece (e.g. e3)
-  - If just moving, write '->'. If capturing write 'x'
+  - If just moving, write '>'. If capturing write 'x'
   - Finish the notation with the final position.
 
 The special symbols being used are identical to traditional chess:
