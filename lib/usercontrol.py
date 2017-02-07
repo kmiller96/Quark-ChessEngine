@@ -52,7 +52,6 @@ class EngineUI:
         def notationtopositions(notationstring):
             try:
                 assert 'x' in notationstring or '>' in notationstring
-                assert len(notationstring) == 6
                 (startpos, endpos) = (notationstring[1:3], notationstring[-2:])
 
                 filefunc = lambda x: self._filesymbols.index(x[0])
@@ -70,6 +69,10 @@ class EngineUI:
                 return startvec, endvec
 
         # Now execute the process in order.
+        if not isinstance(userstring, str):
+            raise TypeError('Parameter must be a string.')
+        elif len(userstring) != 6:
+            raise NameError("%r is not syntaxically correct." % userstring)
         piecetomove = determinepiece(userstring[0])
         startvec, endvec = notationtopositions(userstring)
         return piecetomove, (startvec, endvec)
