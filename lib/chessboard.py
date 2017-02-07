@@ -145,6 +145,27 @@ class ChessBoard(_ChessBoardCore):
     checks in place for moves and it can't do anything special like make moves.
     """
 
+    def setupnormalboard(self):
+        """Set up the chess board by placing the pieces at the correct spots."""
+        backline = [
+            pieces.RookPiece, pieces.KnightPiece, pieces.BishopPiece,
+            pieces.QueenPiece, pieces.KingPiece, pieces.BishopPiece,
+            pieces.KnightPiece, pieces.RookPiece
+        ]
+
+        # Add the white pieces.
+        for index in range(0, 7+1):
+            self._board[index] = backline[index](colour='white')
+        for index in range(8, 15+1):
+            self._board[index] = pieces.PawnPiece(colour='white')
+
+        # Add the black pieces.
+        for index in range(48,55+1):
+            self._board[index] = pieces.PawnPiece(colour='black')
+        for index in range(56, 63+1):
+            self._board[index] = backline[index-56](colour='black')
+        return None
+
     def findpiece(self, piecetype, colour):
         """Finds all instances of piece on the board that belong to one side."""
         piecepositions = list()
