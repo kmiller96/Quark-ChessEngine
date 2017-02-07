@@ -14,7 +14,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from lib import core, chessboard, vectors, pieces
-from lib import chessboardrefactor
 
   #####  ####### ######  #######
  #     # #     # #     # #
