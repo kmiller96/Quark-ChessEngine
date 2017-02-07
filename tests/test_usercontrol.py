@@ -19,7 +19,7 @@ class BasicUICalls(unittest.TestCase):
         startpos = core.Vector(4, 4)
         endpos = core.Vector(5, 4)
         piece = pieces.KingPiece
-        string = 'Ke5>Ke6'
+        string = 'Ke5>e6'
         self.assertEqual(
             self.ui.processusermove(string),
             (piece, (startpos, endpos))
@@ -30,7 +30,40 @@ class BasicUICalls(unittest.TestCase):
         startpos = core.Vector(2, 3)
         endpos = core.Vector(3, 4)
         piece = pieces.QueenPiece
-        string = 'Qd3>Ke4'
+        string = 'Qd3>e4'
+        self.assertEqual(
+            self.ui.processusermove(string),
+            (piece, (startpos, endpos))
+        )
+        return None
+
+    def test_processusermove_Bishop(self):
+        startpos = core.Vector(0, 7)
+        endpos = core.Vector(1, 6)
+        piece = pieces.BishopPiece
+        string = 'Bh1>g2'
+        self.assertEqual(
+            self.ui.processusermove(string),
+            (piece, (startpos, endpos))
+        )
+        return None
+
+    def test_processusermove_Knight(self):
+        startpos = core.Vector(0, 5)
+        endpos = core.Vector(2, 4)
+        piece = pieces.KnightPiece
+        string = 'Nf1>e3'
+        self.assertEqual(
+            self.ui.processusermove(string),
+            (piece, (startpos, endpos))
+        )
+        return None
+
+    def test_processusermove_Rook(self):
+        startpos = core.Vector(0, 0)
+        endpos = core.Vector(5, 0)
+        piece = pieces.RookPiece
+        string = 'Ra1>a6'
         self.assertEqual(
             self.ui.processusermove(string),
             (piece, (startpos, endpos))
