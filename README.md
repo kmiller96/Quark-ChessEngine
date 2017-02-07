@@ -73,6 +73,9 @@ The special symbols being used are identical to traditional chess:
   - If castling, use either 0-0 for kingside or 0-0-0 for queenside.
   - Pawn promotions add to the end of the note '=?' where the ? symbol represents the symbol of the newly promoted piece.
 
+## How to Play
+To play with the engine in its current state, simply run the main execution script 'QuarkPlay.py' as a module. To do this, in your terminal of choice type 'python -m QuarkPlay' to run.
+
 ## API Reference
 
 Currently there is no API, but it will be added as the project progresses further.
