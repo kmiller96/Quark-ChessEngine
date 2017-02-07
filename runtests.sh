@@ -16,8 +16,7 @@ python -m tests/test_vectors
 echo ""
 echo "GUI & UI TESTS"
 echo "==================================="
-#python -m tests/test_usercontrol
-echo "There is nothing here yet..."
+python -m tests/test_usercontrol
 
 echo ""
 echo "CHESSBOARD TESTS"
