@@ -58,7 +58,7 @@ class EngineUI:
         # Convert the notation into a positon.
         def notationtopositions(notationstring):
             try:
-                assert 'x' in notationstring or '->' in notationstring
+                assert 'x' in notationstring or '>' in notationstring
                 (startpos, endpos) = (notationstring[:2], notationstring[-2:])
 
                 filefunc = lambda x: self._filesymbols.index(x[0])
@@ -90,7 +90,7 @@ class EngineUI:
             startnotation = getpositionstring(startpos)
             endnotation = getpositionstring(endpos)
             if capture: concat = 'x'
-            else: concat = '->'
+            else: concat = '>'
 
             movestring = piecesymbol + startnotation + concat + endnotation
 
@@ -184,6 +184,8 @@ class EngineGUI:
             rankcoordinates = self.ranks[::-1]
             filecoordinates = self.files
         elif side == 'black':
+            for ii in range(len(rankstrings)):  # HACK: Reverse ranks too.
+                rankstrings[ii] = rankstrings[ii][::-1]
             rankcoordinates = self.ranks
             filecoordinates = self.files[::-1]
 
