@@ -82,6 +82,30 @@ class BasicUICalls(unittest.TestCase):
         )
         return None
 
+    def test_processusermove_badstring(self):
+        with self.assertRaises(NameError):
+            self.ui.processusermove('hello there')
+        with self.assertRaises(NameError):
+            self.ui.processusermove('Kg1>Jd2')
+        return None
+
+    def test_processusermove_badnotation(self):
+        with self.assertRaises(core.UnknownPieceError):
+            self.ui.processusermove('Me4>e6')
+        return None
+
+    def test_processusermove_nonstring(self):
+        with self.assertRaises(TypeError):
+            self.ui.processusermove([5, 1])
+        with self.assertRaises(TypeError):
+            self.ui.processusermove(12)
+        with self.assertRaises(TypeError):
+            self.ui.processusermove(-5.22)
+        with self.assertRaises(TypeError):
+            self.ui.processusermove(pieces.KingPiece)
+        return None
+
+
 class BasicGUICalls(unittest.TestCase):
     """Conducts tests on the GUI."""
 
