@@ -64,8 +64,8 @@ class EngineUI:
                 filefunc = lambda x: self._filesymbols.index(x[0])
                 rankfunc = lambda x: self._ranksymbols.index(x[1])
 
-                startvec = Vector(rankfunc(startpos), filefunc(startpos))
-                endvec = Vector(rankfunc(endpos), filefunc(endpos))
+                startvec = core.Vector(rankfunc(startpos), filefunc(startpos))
+                endvec = core.Vector(rankfunc(endpos), filefunc(endpos))
             except AssertionError:
                 raise NameError(
                     "The notation string doesn't follow correct syntax rules.")
@@ -73,8 +73,8 @@ class EngineUI:
                 return startvec, endvec
 
         # Now execute the process in order.
-        piecetomove = self.determinepiece(userstring[0])
-        startvec, endvec = self.notationtopositions(userstring[1:])
+        piecetomove = determinepiece(userstring[0])
+        startvec, endvec = notationtopositions(userstring[1:])
         return piecetomove, (startvec, endvec)
 
     def addmovetohistory(self, piecesymbol=None, startpos=None, endpos=None,
@@ -108,7 +108,7 @@ class EngineUI:
             return movestring
 
         # Now add it to the history.
-        self.history.append(self.convertpositiontonotation())
+        self.history.append(convertpositiontonotation())
         return None
 
   #####  #     # ###
