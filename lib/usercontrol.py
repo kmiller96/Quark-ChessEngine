@@ -53,7 +53,7 @@ class EngineUI:
             try:
                 assert 'x' in notationstring or '>' in notationstring
                 assert len(notationstring) == 6
-                (startpos, endpos) = (notationstring[:2], notationstring[-2:])
+                (startpos, endpos) = (notationstring[1:3], notationstring[-2:])
 
                 filefunc = lambda x: self._filesymbols.index(x[0])
                 rankfunc = lambda x: self._ranksymbols.index(x[1])
@@ -71,7 +71,7 @@ class EngineUI:
 
         # Now execute the process in order.
         piecetomove = determinepiece(userstring[0])
-        startvec, endvec = notationtopositions(userstring[1:])
+        startvec, endvec = notationtopositions(userstring)
         return piecetomove, (startvec, endvec)
 
     def addmovetohistory(self, piecesymbol=None, startpos=None, endpos=None,
