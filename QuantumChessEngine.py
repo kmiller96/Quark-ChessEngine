@@ -28,7 +28,22 @@ from lib import core, chessboard, engine, movegenerator, pieces, usercontrol
 VERSION = 'alpha 1.00.00'
 SLEEP_TIME = 0.1
 USER_OPTIONS = ['hist', 'move', 'quit']
-HELPMESSAGE_NOTATION = "Uhhh... Sorry I can't help you at the moment."
+HELPMESSAGE_NOTATION = """
+Each move is written in the following format:
+    Symbol + position + movetype + position
+
+ - The symbol that starts the notation is the piece's symbol. This is similar to
+   traditional notation with K, Q, B, N, R and P representing the king, queen,
+   bishop, knight, rook and pawn respectively.
+ - Next is the start position, which is file then rank. For example, e5.
+ - To connect the start and end position either '>' is used if there is a move
+   or a 'x' if there is a capture.
+ - The last part is the final position, which is again file then rank.
+
+There is only two special formats which you need to be concerned with other then
+these basic moves. If you want to castle kingside use 0-0 and if if you wish to
+castle queenside use 0-0-0.
+"""
 
 # Initialise the components of the board.
 UI = usercontrol.EngineUI()
