@@ -47,6 +47,26 @@ class TestCoreMoveGenerator(unittest.TestCase):
             self.generator._piecesareonsameside(12, 15)
         return None
 
+    def test_piecesbetween_onepiece(self):
+        self.assertEqual(
+            len(self.generator._piecesbetween(18, 23)), 1,
+            errormessage(
+            '%s pieces' % len(self.generator._piecesbetween(18, 23)),
+            '1 piece'
+            )
+        )
+        return None
+
+    def test_piecesbetween_twopieces(self):
+        self.assertEqual(
+            len(self.generator._piecesbetween(16, 23)), 2,
+            errormessage(
+            '%s piece(s)' % len(self.generator._piecesbetween(16, 23)),
+            '2 pieces'
+            )
+        )
+        return None
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
