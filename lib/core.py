@@ -328,7 +328,7 @@ class Vector:
         elif abs(self.vector[0]) == abs(self.vector[1]):
             return Vector(*tuple(map(lambda i: int(i/abs(i)), self.vector)))
         else:
-            raise NotImplementedError(
+            raise BadVector(
                 "Currently this method only works on straight lines and diagonals.")
 
     def _scalar_multiply(self, intscalar):
