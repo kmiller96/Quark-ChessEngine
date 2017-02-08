@@ -108,8 +108,15 @@ class _CoreMoveGenerator:
             movelist.append(movepairs)
         return core.flattenlist(movelist)
 
-    def kingincheck(self, kingcolour, simulateboard=None):
+    def kingincheck(self, kingcolour):
         """Determine if the king of a certain colour is in check."""
+        if kingcolour == 'white':
+            oppositioncolour = 'black'
+        elif kingcolour == 'black':
+            oppositioncolour = 'white'
+        else:
+            raise core.ColourError()
+        
         basicoppositionmoves = self._basicmoves(oppositioncolour)
         oppositionendmoves = map(lambda x: x[1], basicoppositionmoves)
         kingpos = self.board.findpiece(pieces.KingPiece, kingcolour.lower())[0]
