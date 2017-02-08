@@ -75,6 +75,21 @@ class TestCoreMoveGenerator(unittest.TestCase):
             '2 pieces'
             )
         )
+        return None
+
+    def test_piecesbetween_nonpositions(self):
+        with self.assertRaises(TypeError):
+            self.generator._piecesbetween('string', 'pie')
+        return None
+
+    def test_piecesbetween_offboard(self):
+        with self.assertRaises(IndexError):
+            self.generator._piecesbetween((10, 10), (1, 1))
+        return None
+
+    def test_piecesbetween_weirdvector(self):
+        with self.assertRaises(core.BadVectorError):
+            self.generator._piecesbetween(28, 45)
 
 
 if __name__ == '__main__':
