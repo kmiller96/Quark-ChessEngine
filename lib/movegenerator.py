@@ -91,21 +91,22 @@ class _CoreMoveGenerator:
                     else: movetopos += unitvector
 
                 continue
-            return
+            return allowedmoves
 
         # Now apply that method to each piece on the board.
         movelist = list()
         for index, square in enumerate(self.board):
             if square == None:
                 continue
-            elif square.colour == colour:
+            elif square.colour != colour:
                 continue  # Skip over piece if it is different colour.
             startpos = index
             endposlist = core.convertlist(
                 movesforpiece(square, startpos), toindex=True
             )
             movepairs = map(lambda x: (startpos, x), endposlist)
-        return movepairs
+            movelist.append(movepairs)
+        return core.flattenlist(movelist)
 
     def kingincheck(self, kingcolour, simulateboard=None):
         """Determine if the king of a certain colour is in check."""
