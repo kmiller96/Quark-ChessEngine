@@ -42,6 +42,11 @@ class TestCoreMoveGenerator(unittest.TestCase):
         )
         return None
 
+    def test_piecesareonsameside_nonpieces(self):
+        with self.assertRaises(TypeError):
+            self.generator._piecesareonsameside(12, 15)
+        return None
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
