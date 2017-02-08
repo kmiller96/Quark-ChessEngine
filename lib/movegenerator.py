@@ -49,12 +49,16 @@ class _CoreMoveGenerator:
         except AttributeError:
             raise TypeError("You must pass pieces from the pieces script.")
 
-    def _piecesbetween(self, start, end):
+    def _piecesbetween(self, start, end, inclusive=False):
         """Find the pieces between the start and end positions, not inclusive."""
         startvec = core.convert(start, tovector=True)
         endvec = core.convert(end, tovector=True)
         unitrelvec = (endvec - startvec).unitvector()
-        currentposvec = startvec + unitrelvec
+        if inclusive:
+            currentposvec = startvec
+            endvec += unitrelvec  # HACK: Shift up if inclusive.
+        else:
+            currentposvec = startvec + unitrelvec
 
         pieceslist = list()
         while currentposvec != endvec:
