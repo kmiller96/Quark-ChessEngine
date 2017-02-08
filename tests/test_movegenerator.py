@@ -92,5 +92,56 @@ class TestCoreMoveGenerator(unittest.TestCase):
             self.generator._piecesbetween(28, 45)
 
 
+class BasicMoveTests(unittest.TestCase):
+    """A testing suite for only basic moves."""
+
+    def setUp(self):
+        self.board = chessboard.ChessBoard()
+        self.board[18] = pieces.QueenPiece('white')
+        self.board[19] = pieces.PawnPiece('white')
+        self.board[23] = pieces.RookPiece('black')
+        self.board[42] = pieces.KnightPiece('black')
+
+        self.generator = movegenerator.MoveGenerator(self.board)
+
+    def test_basicmoves_white(self):
+        movelist = self.generator._basicmoves('white')
+
+        # Make sure queen can't jump over white pawn.
+        self.assertNotIn(
+            (18, 19), movelist,
+            errormessage('Can capture white pawn', "Can't capture white pawn"))
+        self.assertNotIn(
+            (18, 20), movelist,
+            errormessage('Can move over pawn', 'Blocked by white pawn'))
+
+        # Make sure queen can't move past knight at 42.
+        self.assertIn(
+            (18, 42), movelist,
+            errormessage("Can't capture knight", 'Can capture black knight'))
+        self.assertNotIn(
+            (18, 50), movelist,
+            errormessage('Can move past black knight', 'Blocked by knight'))
+
+    def test_basicmoves_white(self):
+        movelist = self.generator._basicmoves('white')
+
+        # Make sure queen can't jump over white pawn.
+        self.assertNotIn(
+            (18, 19), movelist,
+            errormessage('Can capture white pawn', "Can't capture white pawn"))
+        self.assertNotIn(
+            (18, 20), movelist,
+            errormessage('Can move over pawn', 'Blocked by white pawn'))
+
+        # Make sure queen can't move past knight at 42.
+        self.assertIn(
+            (18, 42), movelist,
+            errormessage("Can't capture knight", 'Can capture black knight'))
+        self.assertNotIn(
+            (18, 50), movelist,
+            errormessage('Can move past black knight', 'Blocked by knight'))
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
