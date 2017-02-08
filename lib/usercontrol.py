@@ -87,6 +87,11 @@ class EngineUI:
                 (rank_, file_) = core.convert(pos, tocoordinate=True)
                 return self._filesymbols[file_] + self._ranksymbols[rank_]
 
+            if castlelong:
+                return '0-0-0'
+            elif castleshort:
+                return '0-0'
+
             startnotation = getpositionstring(startpos)
             endnotation = getpositionstring(endpos)
             if capture: concat = 'x'
@@ -98,10 +103,6 @@ class EngineUI:
                 movestring += '+'
             elif checkmate:
                 movestring += '#'
-            if castlelong:
-                movestring = '0-0-0'
-            elif castleshort:
-                movestring = '0-0'
             if promotionto:
                 movestring += '=' + promotionto
 
