@@ -134,7 +134,7 @@ class _CoreMoveGenerator:
   #####  ####### #     # ####### #     # #     #    #    ### ####### #     #
 
 
-class MoveGenerator:
+class MoveGenerator(_CoreMoveGenerator):
     """Generates the possible moves based off the rules of chess."""
 
     def _illegalmove(self, startpos, endpos, kingcolour):
