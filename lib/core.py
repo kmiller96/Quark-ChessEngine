@@ -46,6 +46,10 @@ def combinelists(*lists):
         raise TypeError("Only lists can be used in this function.")
     return [element for sublist in lists for element in sublist]
 
+def flattenlist(listoflists):
+    """Flattens a 2D list out."""
+    return [x for lst in listoflists for x in lst]
+
 def convert(indexorcoordinateorvector,
             tocoordinate=False, toindex=False, tovector=False):
     """Converts the input into a coordinate, vector or index.
