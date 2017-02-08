@@ -153,6 +153,13 @@ class BasicMoveTests(unittest.TestCase):
             (18, 50), movelist,
             errormessage('Can move past black knight', 'Blocked by knight'))
 
+    def test_basicmoves_wrongcolour(self):
+        with self.assertRaises(core.ColourError):
+            self.generator._basicmoves(10)
+        with self.assertRaises(core.ColourError):
+            self.generator._basicmoves('while')
+        return None
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
