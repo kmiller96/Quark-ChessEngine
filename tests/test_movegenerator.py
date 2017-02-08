@@ -67,6 +67,15 @@ class TestCoreMoveGenerator(unittest.TestCase):
         )
         return None
 
+    def test_piecesbetween_inclusive(self):
+        self.assertEqual(
+            len(self.generator._piecesbetween(18, 19, inclusive=True)), 2,
+            errormessage(
+            '%s piece(s)' % len(self.generator._piecesbetween(18, 19, inclusive=True)),
+            '2 pieces'
+            )
+        )
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
