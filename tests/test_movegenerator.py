@@ -91,6 +91,17 @@ class TestCoreMoveGenerator(unittest.TestCase):
         with self.assertRaises(core.BadVectorError):
             self.generator._piecesbetween(28, 45)
 
+    def test_kingincheck_true(self):
+        self.generator.board[34] = pieces.KingPiece('black')  # Add black king.
+        self.assertTrue(
+            self.generator.kingincheck('black'))
+        return None
+
+    def test_kingincheck_false(self):
+        self.generator.board[1] = pieces.KingPiece('black')
+        self.assertFalse(
+            self.generator.kingincheck('black'))
+
 
 class BasicMoveTests(unittest.TestCase):
     """A testing suite for only basic moves."""
