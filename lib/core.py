@@ -328,7 +328,7 @@ class Vector:
         elif abs(self.vector[0]) == abs(self.vector[1]):
             return Vector(*tuple(map(lambda i: int(i/abs(i)), self.vector)))
         else:
-            raise BadVector(
+            raise BadVectorError(
                 "Currently this method only works on straight lines and diagonals.")
 
     def _scalar_multiply(self, intscalar):
@@ -472,7 +472,7 @@ class UnknownPieceError(TypeError):
         TypeError.__init__(self, errormsg)
 
 
-class BadVector(NotImplementedError):
+class BadVectorError(NotImplementedError):
     """Called if the vector isn't valid (like being non-straight)"""
 
     def __init__(self, errormsg=None):
