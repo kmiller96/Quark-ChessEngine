@@ -34,17 +34,20 @@ class _CoreMoveGenerator:
     @staticmethod
     def _piecesareonsameside(*pieces):
         """Checks to see if the passed pieces are all on the same side."""
-        side = None
-        for piece in pieces:
-            if side is None:
-                side = piece.colour  # Use the first piece's colour as comparison.
-                continue
+        try:
+            side = None
+            for piece in pieces:
+                if side is None:
+                    side = piece.colour  # Use the first piece's colour as comparison.
+                    continue
 
-            if piece.colour == side:  # Same side is ok.
-                continue
-            else:  # Different sides are not.
-                return False
-        return True
+                if piece.colour == side:  # Same side is ok.
+                    continue
+                else:  # Different sides are not.
+                    return False
+            return True
+        except AttributeError:
+            raise TypeError("You must pass pieces from the pieces script.")
 
     def _piecesbetween(self, start, end):
         """Find the pieces between the start and end positions, not inclusive."""
