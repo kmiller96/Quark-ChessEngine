@@ -93,6 +93,10 @@ class _CoreMoveGenerator:
                 continue
             return allowedmoves
 
+        # Sanity checks.
+        if colour not in ('white', 'black'):
+            raise core.ColourError()
+
         # Now apply that method to each piece on the board.
         movelist = list()
         for index, square in enumerate(self.board):
@@ -116,7 +120,7 @@ class _CoreMoveGenerator:
             oppositioncolour = 'white'
         else:
             raise core.ColourError()
-        
+
         basicoppositionmoves = self._basicmoves(oppositioncolour)
         oppositionendmoves = map(lambda x: x[1], basicoppositionmoves)
         kingpos = self.board.findpiece(pieces.KingPiece, kingcolour.lower())[0]
