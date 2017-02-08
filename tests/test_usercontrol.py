@@ -108,31 +108,66 @@ class BasicUICalls(unittest.TestCase):
         return None
 
     def test_addmovetohistory_basicmove(self):
-        raise NotImplementedError
+        movestring = 'Pe2>e4'
+        self.ui.addmovetohistory('P', 12, 28)
+        self.assertEqual(
+            self.ui.history[-1], movestring,
+            errormessage(self.ui.history[-1], movestring)
+        )
         return None
 
     def test_addmovetohistory_capture(self):
-        raise NotImplementedError
+        movestring = 'Qe5xd5'
+        self.ui.addmovetohistory('Q', 36, 35, capture=True)
+        self.assertEqual(
+            self.ui.history[-1], movestring,
+            errormessage(self.ui.history[-1], movestring)
+        )
         return None
 
     def test_addmovetohistory_check(self):
-        raise NotImplementedError
+        movestring = 'Qe5>d5+'
+        self.ui.addmovetohistory('Q', 36, 35, check=True)
+        self.assertEqual(
+            self.ui.history[-1], movestring,
+            errormessage(self.ui.history[-1], movestring)
+        )
         return None
 
     def test_addmovetohistory_checkmate(self):
-        raise NotImplementedError
+        movestring = 'Bh7>f5#'
+        self.ui.addmovetohistory('B', 55, 37, checkmate=True)
+        self.assertEqual(
+            self.ui.history[-1], movestring,
+            errormessage(self.ui.history[-1], movestring)
+        )
         return None
 
     def test_addmovetohistory_castlelong(self):
-        raise NotImplementedError
+        movestring = '0-0-0'
+        self.ui.addmovetohistory(castlelong=True)
+        self.assertEqual(
+            self.ui.history[-1], movestring,
+            errormessage(self.ui.history[-1], movestring)
+        )
         return None
 
     def test_addmovetohistory_castleshort(self):
-        raise NotImplementedError
+        movestring = '0-0'
+        self.ui.addmovetohistory(castleshort=True)
+        self.assertEqual(
+            self.ui.history[-1], movestring,
+            errormessage(self.ui.history[-1], movestring)
+        )
         return None
 
     def test_addmovetohistory_promotionto(self):
-        raise NotImplementedError
+        movestring = 'Pa7>a8=Q'
+        self.ui.addmovetohistory('P', 48, 56, promotionto='Q')
+        self.assertEqual(
+            self.ui.history[-1], movestring,
+            errormessage(self.ui.history[-1], movestring)
+        )
         return None
 
 
