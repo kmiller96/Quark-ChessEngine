@@ -470,4 +470,13 @@ class UnknownPieceError(TypeError):
         if errormsg == None:
             errormsg = "I don't know the piece passed."
         TypeError.__init__(self, errormsg)
+
+
+class BadVector(NotImplementedError):
+    """Called if the vector isn't valid (like being non-straight)"""
+
+    def __init__(self, errormsg=None):
+        if errormsg == None:
+            errormsg = "The vector isn't valid."
+        NotImplementedError.__init__(self, errormsg)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
