@@ -26,8 +26,7 @@ python -m tests/test_chessboard
 echo ""
 echo "MOVEGEN TESTS"
 echo "==================================="
-#python -m tests/test_movegenerator
-echo "There is nothing here yet..."
+python -m tests/test_movegenerator
 
 echo ""
 echo "ENGINE TESTS"
