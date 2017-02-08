@@ -459,7 +459,7 @@ class IllegalMoveError(IndexError):
             errormsg = "The move supplied is not valid."
         IndexError.__init__(self, errormsg)
 
-class ColourError(TypeError):
+class ColourError(NameError):
     """Raised if the colour specified isn't either white or black."""
 
     def __init__(self, errormsg=None):
