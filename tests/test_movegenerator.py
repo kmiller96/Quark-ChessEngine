@@ -161,5 +161,12 @@ class BasicMoveTests(unittest.TestCase):
         return None
 
 
+class AdvancedMoveTests(unittest.TestCase):
+    """These tests are for the more advanced situations, like castling and check."""
+
+    def setUp(self):
+        return None
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
