@@ -170,7 +170,7 @@ class AdvancedMoveTests(unittest.TestCase):
         self.board[4] = pieces.KingPiece('white')
         self.board[13] = pieces.PawnPiece('white')
         self.board[31] = pieces.BishopPiece('black')
-        self.board[58] = pieces.RookPiece('black')
+        self.board[56] = pieces.RookPiece('black')
 
         self.generator = movegenerator.MoveGenerator(self.board)
         return None
@@ -178,8 +178,11 @@ class AdvancedMoveTests(unittest.TestCase):
     def test_allpossiblemoves_white(self):
         movelist = self.generator.generatemovelist('white')
         self.assertIn(
-            ((4, 2), (0, 3)), movelist
-        )
+            ((4, 2), (0, 3)), movelist)  # Make sure castling is an option.
+        self.assertIn(
+            (0, 56), movelist)  # Can the rook move normally?
+        self.assertNotIn(
+            (13, 21), movelist)  # Moving the pawn puts the king in check.
         return None
 
 
