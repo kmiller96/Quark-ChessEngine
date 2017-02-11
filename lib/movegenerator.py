@@ -13,7 +13,7 @@
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from lib import core, chessboard, vectors, pieces
+from lib import core, chessboard, vectors, pieces, usercontrol
 
   #####  ####### ######  #######
  #     # #     # #     # #
@@ -154,13 +154,17 @@ class MoveGenerator(_CoreMoveGenerator):
         elif kingcolour.lower() == 'black': oppositioncolour = 'white'
         else: raise TypeError("King is either white or black.")
 
-        simboard = self.board.duplicateboard()
+        # Make the move and see if the king is in check.
+        originalboard = self.board.duplicateboard()
         if isinstance(movepair[0],tuple) and isinstance(movepair[1],tuple):
             for move in movepair:
-                simboard.move(move[0], move[1])
+                self.board.move(move[0], move[1], force=True)
         else:
-            simboard.move(movepair[0], movepair[1], force=True)
-        return self.kingincheck(kingcolour)
+            self.board.move(movepair[0], movepair[1], force=True)
+        result = self.kingincheck(kingcolour)
+
+        self.board = originalboard  # Cleanup (restore actual board state)
+        return result
 
     def _onlylegalmoves(self, colour, movepairlist):
         """Filter a list, keeping only legal moves."""
