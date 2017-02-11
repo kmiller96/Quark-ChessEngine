@@ -22,7 +22,8 @@ class _ChessBoardCore:
         # Define initial states
         self.cancastleleft = True
         self.cancastleright = True
-        self.enpassant = None
+        self.enpassantforplayer = None
+        self.enpassantforcomputer = None
 
     def __getitem__(self, pos):
         """Controls calling the piece at a position on the board like a list."""
@@ -171,17 +172,37 @@ class ChessBoard(_ChessBoardCore):
                 piecepositions.append(ii)
         return piecepositions
 
+    def setenpassantfor(self, colour, whichfile):
+        """Sets enpassant for a colour"""
+        if colour not in ('white', 'black'):
+            raise core.ColourError()
+
+        if core.xnor(colour == 'white', self.playercolour == 'white'):
+            self.enpassantforplayer = whichfile
+        else:
+            self.enpassantforcomputer = whichfile
+        return None
+
     def move(self, startpos, endpos, force=False):
         """A clean way of moving pieces around on the board."""
         # Sanity checks and assertions.
         assert startpos != endpos, \
             "To move the piece, the start and end points must be different."
-        startindex = core.convert(startpos, toindex=True)
-        endindex = core.convert(endpos, toindex=True)
-        self.assertPositionOnBoard(startindex)
-        self.assertPositionOnBoard(endindex)
-        self.assertIsOccupied(startindex)
-        if not force: self.assertIsUnoccupied(endindex)
+        start = core.Position(startpos)
+        end = core.Position(endpos)
+        self.assertPositionOnBoard(start.index)
+        self.assertPositionOnBoard(end.index)
+        self.assertIsOccupied(start.index)
+        if not force: self.assertIsUnoccupied(end.index)
+
+        # See if en passant is in play.
+        if (
+            (self._board[start.index].type() == pieces.PawnPiece)  # Is pawn and...
+            and (start.coordinate[0] == 1 or start.coordinate[0] == 6)
+            and (abs(start.coordinate[0] - end.coordinate[0]) == 2)  # ..is pushing
+            ):
+            self.setenpassantfor(
+                self._board[start.index].colour, start.coordinate[1])
 
         # Movement code.
         if startindex == endindex:
