@@ -202,13 +202,14 @@ class ChessBoard(_ChessBoardCore):
             and (abs(start.coordinate[0] - end.coordinate[0]) == 2)  # ..is pushing
             ):
             self.setenpassantfor(
-                self._board[start.index].colour, start.coordinate[1])
+                core.oppositecolour(self._board[start.index].colour),
+                start.coordinate[1])
 
         # Movement code.
-        if startindex == endindex:
+        if start.index == end.index:
             return None  # HACK: Prevents deleting the piece from the board.
-        self._board[endindex] = self._board[startindex]
-        self._board[startindex] = None
+        self._board[end.index] = self._board[start.index]
+        self._board[start.index] = None
         return None
 
     def promotepawn(self, position, promoteto):
