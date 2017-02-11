@@ -13,7 +13,7 @@
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from lib import core, chessboard, vectors, pieces, usercontrol
+from lib import core, chessboard, vectors, pieces
 
   #####  ####### ######  #######
  #     # #     # #     # #
@@ -265,7 +265,9 @@ class MoveGenerator(_CoreMoveGenerator):
             else: capturerank = 2
 
             square = self.board[pos]
-            if square == pieces.PawnPiece:
+            if square == None:
+                return thelist
+            elif square.type() == pieces.PawnPiece:
                 if square.colour == colour:
                     startindex = core.convert(pos, toindex=True)
                     endindex = core.convert((capturerank, file_), toindex=True)
@@ -273,8 +275,13 @@ class MoveGenerator(_CoreMoveGenerator):
             return thelist
 
         # Determine if there are any en passant moves present.
-        if self.board.enpassant == None: return list()
-        else: file_ = self.board.enpassant
+        if self.board.isplayercolour(colour):
+            enpassant = self.board.enpassantforplayer
+        else:
+            enpassant = self.board.enpassantforcomputer
+
+        if enpassant == None: return list()
+        else: file_ = enpassant
 
         # See if there are pawns of correct colour on either side.
         if colour == 'white': rank_ = 4
@@ -284,7 +291,7 @@ class MoveGenerator(_CoreMoveGenerator):
         if self.board.positiononboard(enpassantleft):
             movelist = addtomovesifcanenpassant(enpassantleft, movelist)
         if self.board.positiononboard(enpassantright):
-            movelist = addtomovesifcanenpassant(enpassantright)
+            movelist = addtomovesifcanenpassant(enpassantright, movelist)
         return movelist
 
     def generatemovelist(self, colour):
