@@ -40,6 +40,15 @@ def onlyone(iterable):
             continue
     return True
 
+def oppositecolour(colour):
+    """Gets the opposite colour."""
+    if colour == 'white':
+        return 'black'
+    elif colour == 'black':
+        return 'white'
+    else:
+        raise ColourError()
+
 def combinelists(*lists):
     """Combine lists together into a single list (i.e. unflatten lists)."""
     if any([not isinstance(x, list) for x in lists]):
