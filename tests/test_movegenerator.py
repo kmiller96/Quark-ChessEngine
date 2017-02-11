@@ -167,10 +167,12 @@ class AdvancedMoveTests(unittest.TestCase):
     def setUp(self):
         self.board = chessboard.ChessBoard()
         self.board[0] = pieces.RookPiece('white')
+        self.board[55] = pieces.RookPiece('white')
         self.board[4] = pieces.KingPiece('white')
         self.board[13] = pieces.PawnPiece('white')
         self.board[31] = pieces.BishopPiece('black')
         self.board[56] = pieces.RookPiece('black')
+        self.board[60] = pieces.KingPiece('black')
 
         self.generator = movegenerator.MoveGenerator(self.board)
         return None
@@ -185,11 +187,28 @@ class AdvancedMoveTests(unittest.TestCase):
             (13, 21), movelist)  # Moving the pawn puts the king in check.
         return None
 
-    def test_cantmoveoutofcheck_white(self):
+    def test_allpossiblemoves_black(self):
+        movelist = self.generator.generatemovelist('black')
+        self.assertNotIn(
+            (60,52), movelist)  # King can't move into check.
+        self.assertIn(
+            (31, 13), movelist)  # Bishop can take pawn...
+        self.assertNotIn(
+            (31, 4), movelist)  # ...but can't take king.
+        return None
+
+    def test_cantcastleoutofcheck_white(self):
         self.board[13] = None  # Remove the shielding pawn.
         movelist = self.generator.generatemovelist('white')
         self.assertNotIn(
             ((4, 2), (0, 3)), movelist)
+        return None
+
+    def test_cantcastleoutofcheck_black(self):
+        self.board.move(55, 63)  # Put king in check.
+        movelist = self.generator.generatemovelist('black')
+        self.assertNotIn(
+            ((60, 58), (56, 59)), movelist)
         return None
 
     def test_cantcastlethroughcheck_white(self):
@@ -197,6 +216,13 @@ class AdvancedMoveTests(unittest.TestCase):
         movelist = self.generator.generatemovelist('white')
         self.assertNotIn(
             ((4, 2), (0, 3)), movelist)
+        return None
+
+    def test_cantcastlethroughcheck_black(self):
+        self.board.move(55, 51)
+        movelist = self.generator.generatemovelist('black')
+        self.assertNotIn(
+            ((60, 58), (56, 59)), movelist)
         return None
 
 
