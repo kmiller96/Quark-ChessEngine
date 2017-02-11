@@ -226,5 +226,51 @@ class AdvancedMoveTests(unittest.TestCase):
         return None
 
 
+class EnPassantMovesTest(unittest.TestCase):
+    """These tests are soley for the en passant rule, which is bloody complicated."""
+
+    def setUp(self):
+        self.board = chessboard.ChessBoard()
+        self.board[60] = pieces.KingPiece('black')
+        self.board[4] = pieces.KingPiece('white')
+
+        self.board[51] = pieces.PawnPiece('black')
+        self.board[52] = pieces.PawnPiece('black')
+        self.board[53] = pieces.PawnPiece('black')
+        self.board[49] = pieces.PawnPiece('black')
+
+        self.board[36] = pieces.PawnPiece('white')
+        self.board[34] = pieces.PawnPiece('white')
+
+        self.generator = movegenerator.MoveGenerator(self.board)
+        return None
+
+    def test_enpassantright_white(self):
+        self.generator.board.move(53, 37)
+        movelist = self.generator.generatemovelist('white')
+
+        self.assertIn(
+            (36, 45), movelist)
+        return None
+
+    def test_enpassantleft_white(self):
+        self.generator.board.move(49, 33)
+        movelist = self.generator.generatemovelist('white')
+
+        self.assertIn(
+            (34, 41), movelist)
+        return None
+
+    def test_enpassantboth_white(self):
+        self.generator.board.move(51, 35)
+        movelist = self.generator.generatemovelist('white')
+
+        self.assertIn(
+            (34, 43), movelist)
+        self.assertIn(
+            (36, 43), movelist)
+        return None
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
