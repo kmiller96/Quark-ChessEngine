@@ -166,7 +166,10 @@ def makebestmove(board):
 def switchcolours(board):
     """A debugging method that allows for the player to change sides."""
     colours = (board.playercolour, board.computercolour)
+    enpassants = (board.enpassantforplayer, board.enpassantforcomputer)
+
     (board.playercolour, board.computercolour) = colours[::-1]
+    (board.enpassantforplayer, board.enpassantforcomputer) = enpassants[::-1]
     return None
 
 
@@ -238,7 +241,8 @@ def main():
                         piece('white').notationsymbol,
                         movetuple[0], movetuple[1])
                     # Cleanup.
-                    userturn = False; firstloop = True
+                    userturn = False; firstloop = True;
+                    chessboard.enpassantforplayer = None
                     continue
                 else:
                     print "\nThat move is not valid."
@@ -251,6 +255,7 @@ def main():
         else:
             if not debug:
                 makebestmove(board=chessboard); firstloop = True
+                chessboard.enpassantforcomputer = None
                 continue
             else:
                 switchcolours(chessboard)
