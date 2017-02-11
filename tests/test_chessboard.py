@@ -246,5 +246,10 @@ class TestChessBoard(unittest.TestCase):
         self.assertFalse(self.board.findpiece(pieces.KnightPiece, 'white'))
         return None
 
+    def test_enpassant(self):
+        self.board[51] = pieces.PawnPiece('black')
+        self.board.move(51, 35)
+        self.assertTrue(self.board.enpassantforplayer != None)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
