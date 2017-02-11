@@ -165,6 +165,21 @@ class AdvancedMoveTests(unittest.TestCase):
     """These tests are for the more advanced situations, like castling and check."""
 
     def setUp(self):
+        self.board = chessboard.ChessBoard()
+        self.board[0] = pieces.RookPiece('white')
+        self.board[4] = pieces.KingPiece('white')
+        self.board[13] = pieces.PawnPiece('white')
+        self.board[31] = pieces.BishopPiece('black')
+        self.board[58] = pieces.RookPiece('black')
+
+        self.generator = movegenerator.MoveGenerator(self.board)
+        return None
+
+    def test_allpossiblemoves_white(self):
+        movelist = self.generator.generatemovelist('white')
+        self.assertIn(
+            ((4, 2), (0, 3)), movelist
+        )
         return None
 
 
