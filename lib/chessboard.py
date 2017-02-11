@@ -42,7 +42,8 @@ class _ChessBoardCore:
         errormsg = ("Please pass a position on the board and a piece that "
                     "derives from BasePiece")
         try:
-            assert isinstance(piece, pieces.BasePiece), errormsg
+            if piece != None:
+                assert isinstance(piece, pieces.BasePiece), errormsg
             position = core.convert(pos, toindex=True)
             self._board[position] = piece
         except AssertionError:
