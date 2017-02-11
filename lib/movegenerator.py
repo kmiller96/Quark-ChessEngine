@@ -148,22 +148,26 @@ class _CoreMoveGenerator:
 class MoveGenerator(_CoreMoveGenerator):
     """Generates the possible moves based off the rules of chess."""
 
-    def _illegalmove(self, startpos, endpos, kingcolour):
+    def illegalmove(self, movepair, kingcolour):
         """Checks to see if the supplied move if illegal."""
         if kingcolour.lower() == 'white': oppositioncolour = 'black'
         elif kingcolour.lower() == 'black': oppositioncolour = 'white'
         else: raise TypeError("King is either white or black.")
 
         simboard = self.board.duplicateboard()
-        simboard.move(startpos, endpos, force=True)
-        return self.kingincheck(kingcolour)  # REVIEW: This makes no sense right now.
+        if isinstance(movepair[0],tuple) and isinstance(movepair[1],tuple):
+            for move in movepair:
+                simboard.move(move[0], move[1])
+        else:
+            simboard.move(movepair[0], movepair[1], force=True)
+        return self.kingincheck(kingcolour)
 
     def _onlylegalmoves(self, colour, movepairlist):
         """Filter a list, keeping only legal moves."""
         ii = 0
         while ii < len(movepairlist):
-            start, end = movepairlist[ii]
-            if self._illegalmove(start, end, colour):
+            movepairlist[ii]
+            if self.illegalmove(movepairlist[ii], colour):
                 del movepairlist[ii]
             else:
                 ii += 1
@@ -171,40 +175,64 @@ class MoveGenerator(_CoreMoveGenerator):
 
     def _castlemoves(self, colour):
         """Get the caslting moves."""
+        # ---------------------------------------------------------------------
+        def isking(position):
+            """Determine if the piece at position is a king."""
+            try:
+                result = (self.board[position].type() == pieces.KingPiece)
+            except AttributeError:
+                result = False  # If position is empty, return false.
+            return result
+
+        def isrook(position):
+            """Determine if the piece at position is a rook."""
+            try:
+                result = (self.board[position].type() == pieces.RookPiece)
+            except AttributeError:
+                result = False  # If position is empty, return false.
+            return result
+        # ---------------------------------------------------------------------
         castlemoves = list(); castleleft = True; castleright = True
+
         # See if allowed to castle at all.
-        if not self.cancastleleft: castleleft = False
-        if not self.cancastleright: castleright = False
+        if not self.board.cancastleleft: castleleft = False
+        if not self.board.cancastleright: castleright = False
 
         if not castleleft and not castleright:
-            return castlemoves  # Early exit to reduce overhead on move gen.
+            return castlemoves  # Early exit to reduce overhead.
+
+        # Determine where the king and rook are.
+        if colour == 'white': kingpos, rookleftpos, rookrightpos = 4, 0, 7
+        elif colour == 'black': kingpos, rookleftpos, rookrightpos = 60, 56, 63
+        else:
+            raise core.ColourError('%r is neither white nor black' % colour)
 
         # See if king or rook out of place.
-        if self.board[king] != pieces.KingPiece:
+        if not isking(kingpos):
             self.board.cancastleleft = False; self.board.cancastleright = False
             castleleft = False; castleright = False
         else:
-            if self.board[rookleft] != pieces.RookPiece:
+            if not isrook(rookleftpos):
                 castleleft = False; self.board.cancastleleft = False
-            if self.board[rookright] != pieces.RookPiece:
+            if not isrook(rookrightpos):
                 castleright = False; self.board.cancastleright = False
 
         # See if there are pieces between the rook and king.
-        if self._piecesbetween(rookleft, king):
+        if self._piecesbetween(rookleftpos, kingpos):
             castleleft = False
-        if self._piecesbetween(rookright, king):
+        if self._piecesbetween(rookrightpos, kingpos):
             castleright = False
 
         # See if the castle start/end/during puts the king in check.
-        castleleftsteps = range(king, king - 3, -1)
-        castlerightsteps = range(king, king + 3)
+        castleleftsteps = range(kingpos-1, kingpos - 3, -1)
         for step in castleleftsteps:
-            if self._illegalmove(king, step, colour):
+            if self.illegalmove((kingpos, step), colour):
                 castleleft = False
             else:
                 continue
+        castlerightsteps = range(kingpos+1, kingpos + 3)
         for step in castlerightsteps:
-            if self._illegalmove(king, step, colour):
+            if self.illegalmove((kingpos, step), colour):
                 castleright = False
             else:
                 continue
@@ -212,11 +240,11 @@ class MoveGenerator(_CoreMoveGenerator):
         # Then see what if castle moves can be added.
         if castleleft:
             castlemoves.append(
-                ((rookleft, rookleft+3), (king, king-2))
+                ((kingpos, kingpos-2), (rookleftpos, rookleftpos+3))
             )
         if castleright:
             castlemoves.append(
-                ((rookleft, rookleft-2), (king, king+2))
+                ((kingpos, kingpos+2), (rookleftpos, rookleftpos-2))
             )
         return castlemoves
 
