@@ -185,6 +185,20 @@ class AdvancedMoveTests(unittest.TestCase):
             (13, 21), movelist)  # Moving the pawn puts the king in check.
         return None
 
+    def test_cantmoveoutofcheck_white(self):
+        self.board[13] = None  # Remove the shielding pawn.
+        movelist = self.generator.generatemovelist('white')
+        self.assertNotIn(
+            ((4, 2), (0, 3)), movelist)
+        return None
+
+    def test_cantcastlethroughcheck_white(self):
+        self.board.move(56, 58)
+        movelist = self.generator.generatemovelist('white')
+        self.assertNotIn(
+            ((4, 2), (0, 3)), movelist)
+        return None
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
