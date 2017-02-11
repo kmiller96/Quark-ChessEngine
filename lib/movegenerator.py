@@ -221,6 +221,10 @@ class MoveGenerator(_CoreMoveGenerator):
             if not isrook(rookrightpos):
                 castleright = False; self.board.cancastleright = False
 
+        # Confirm that the king isn't already in check.
+        if self.kingincheck(colour):
+            castleleft = False; castleright = False
+
         # See if there are pieces between the rook and king.
         if self._piecesbetween(rookleftpos, kingpos):
             castleleft = False
