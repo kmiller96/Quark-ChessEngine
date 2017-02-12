@@ -134,7 +134,7 @@ class BasicMoveTests(unittest.TestCase):
             (18, 50), movelist,
             errormessage('Can move past black knight', 'Blocked by knight'))
 
-    def test_basicmoves_white(self):
+    def test_basicmoves_black(self):
         movelist = self.generator._basicmoves('white')
 
         # Make sure queen can't jump over white pawn.
@@ -169,10 +169,13 @@ class AdvancedMoveTests(unittest.TestCase):
         self.board[0] = pieces.RookPiece('white')
         self.board[55] = pieces.RookPiece('white')
         self.board[4] = pieces.KingPiece('white')
+        self.board[10] = pieces.PawnPiece('white')
         self.board[13] = pieces.PawnPiece('white')
+        self.board[15] = pieces.PawnPiece('white')
         self.board[31] = pieces.BishopPiece('black')
         self.board[56] = pieces.RookPiece('black')
         self.board[60] = pieces.KingPiece('black')
+        self.board[49] = pieces.PawnPiece('black')
 
         self.generator = movegenerator.MoveGenerator(self.board)
         return None
@@ -185,6 +188,12 @@ class AdvancedMoveTests(unittest.TestCase):
             (0, 56), movelist)  # Can the rook move normally?
         self.assertNotIn(
             (13, 21), movelist)  # Moving the pawn puts the king in check.
+        self.assertIn(
+            (10, 26), movelist)  # c-pawn can push.
+        self.assertNotIn(
+            (15, 31), movelist)  # h-pawn can't push...
+        self.assertIn(
+            (15, 23), movelist)  # ..but can move once.
         return None
 
     def test_allpossiblemoves_black(self):
@@ -195,31 +204,33 @@ class AdvancedMoveTests(unittest.TestCase):
             (31, 13), movelist)  # Bishop can take pawn...
         self.assertNotIn(
             (31, 4), movelist)  # ...but can't take king.
+        self.assertIn(
+            (49, 33), movelist)  # Can pawn push.
         return None
 
     def test_cantcastleoutofcheck_white(self):
-        self.board[13] = None  # Remove the shielding pawn.
+        self.generator.board[13] = None  # Remove the shielding pawn.
         movelist = self.generator.generatemovelist('white')
         self.assertNotIn(
             ((4, 2), (0, 3)), movelist)
         return None
 
     def test_cantcastleoutofcheck_black(self):
-        self.board.move(55, 63)  # Put king in check.
+        self.generator.board.move(55, 63)  # Put king in check.
         movelist = self.generator.generatemovelist('black')
         self.assertNotIn(
             ((60, 58), (56, 59)), movelist)
         return None
 
     def test_cantcastlethroughcheck_white(self):
-        self.board.move(56, 58)
+        self.generator.board.move(56, 59)
         movelist = self.generator.generatemovelist('white')
         self.assertNotIn(
             ((4, 2), (0, 3)), movelist)
         return None
 
     def test_cantcastlethroughcheck_black(self):
-        self.board.move(55, 51)
+        self.generator.board.move(55, 51)
         movelist = self.generator.generatemovelist('black')
         self.assertNotIn(
             ((60, 58), (56, 59)), movelist)
@@ -274,3 +285,7 @@ class EnPassantMovesTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
+    # suite = unittest.TestSuite()
+    # suite.addTest(AdvancedMoveTests('test_cantcastleoutofcheck_white'))
+    # runner = unittest.TextTestRunner()
+    # runner.run(suite)
