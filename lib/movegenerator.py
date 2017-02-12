@@ -13,6 +13,7 @@
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from copy import deepcopy
 from lib import core, chessboard, vectors, pieces
 
   #####  ####### ######  #######
@@ -28,7 +29,7 @@ class _CoreMoveGenerator:
     """Contains the core methods that are used in the move generation."""
 
     def __init__(self, currentboardstate):
-        self.board = currentboardstate
+        self.board = deepcopy(currentboardstate)
         return
 
     @staticmethod
@@ -56,7 +57,7 @@ class _CoreMoveGenerator:
         unitrelvec = (endvec - startvec).unitvector()
         if inclusive:
             currentposvec = startvec
-            endvec += unitrelvec  # HACK: Shift up if inclusive.
+            endvec += unitrelvec  # HACK: Shift up end point if inclusive.
         else:
             currentposvec = startvec + unitrelvec
 
@@ -121,9 +122,12 @@ class _CoreMoveGenerator:
         else:
             raise core.ColourError()
 
-        basicoppositionmoves = self._basicmoves(oppositioncolour)
-        oppositionendmoves = map(lambda x: x[1], basicoppositionmoves)
-        kingpos = self.board.findpiece(pieces.KingPiece, kingcolour.lower())[0]
+        try:
+            basicoppositionmoves = self._basicmoves(oppositioncolour)
+            oppositionendmoves = map(lambda x: x[1], basicoppositionmoves)
+            kingpos = self.board.findpiece(pieces.KingPiece, kingcolour.lower())[0]
+        except IndexError:
+            raise RuntimeError("We can't find the %s king!" % kingcolour)
         return (kingpos in oppositionendmoves)
 
 
@@ -176,6 +180,31 @@ class MoveGenerator(_CoreMoveGenerator):
             else:
                 ii += 1
         return movepairlist
+
+    def _pawnpushmoves(self, colour):
+        """Gets the moves allowed for pawn pushing."""
+        # Determine where the frontline is.
+        if colour == 'white':
+            frontline = range(8, 15+1); push = 16
+        elif colour == 'black':
+            frontline = range(48, 55+1); push = -16
+        else:
+            raise core.ColourError()
+
+        movelist = list()
+        for ii in frontline:  # Iterate over frontline.
+            square = self.board[ii]
+            if square == None:
+                continue
+            elif square.type() == pieces.PawnPiece:
+                # Make sure only pawn is on frontline and up to push.
+                if len(self._piecesbetween(ii, ii + push, inclusive=True)) != 1:
+                    continue
+                else:
+                    movelist.append((ii, ii + push))
+            else:
+                continue
+        return movelist
 
     def _castlemoves(self, colour):
         """Get the caslting moves."""
@@ -297,9 +326,11 @@ class MoveGenerator(_CoreMoveGenerator):
     def generatemovelist(self, colour):
         """Generate all of the possible moves for colour."""
         basicmoves = self._basicmoves(colour)
+        pawnpushmoves = self._pawnpushmoves(colour)
         castlemoves = self._castlemoves(colour)
         enpassantmoves = self._enpassantmoves(colour)
-        allmoves = core.combinelists(basicmoves, castlemoves, enpassantmoves)
+        allmoves = core.combinelists(
+            basicmoves, pawnpushmoves, castlemoves, enpassantmoves)
 
         allmoves = self._onlylegalmoves(colour, allmoves)
         return allmoves
