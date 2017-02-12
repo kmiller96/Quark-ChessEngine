@@ -66,7 +66,7 @@ class EngineUI:
                     raise NameError(
                     "The notation string doesn't follow correct syntax rules.")
             else:
-                return startvec, endvec
+                return core.convertlist([startvec, endvec], toindex=True)
 
         # Now execute the process in order.
         if not isinstance(userstring, str):
@@ -74,8 +74,8 @@ class EngineUI:
         elif len(userstring) != 6:
             raise NameError("%r is not syntaxically correct." % userstring)
         piecetomove = determinepiece(userstring[0])
-        startvec, endvec = notationtopositions(userstring)
-        return piecetomove, (startvec, endvec)
+        startindex, endindex = notationtopositions(userstring)
+        return piecetomove, (startindex, endindex)
 
     def addmovetohistory(self, piecesymbol=None, startpos=None, endpos=None,
                          capture=False, check=False, checkmate=False,
