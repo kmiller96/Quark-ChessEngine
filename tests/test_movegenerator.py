@@ -296,6 +296,14 @@ class PawnMoveCaptureTests(unittest.TestCase):
         self.assertNotIn((14, 30), movelist)
         return None
 
+    def test_cantcaptureforward(self):
+        self.generator.board.move(14, 22)  # Put g-pawn behind rook.
+        movelist = self.generator.generatemovelist('white')
+
+        self.assertNotIn((9, 17), movelist)  # Make sure b-pawn can't capture.
+        self.assertNotIn((14, 22), movelist)  # Make sure g-pawn can't capture
+        return None
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
