@@ -67,14 +67,14 @@ The notational rules follow a format similar to traditional chess notation but w
   - If just moving, write '>'. If capturing write 'x'
   - Finish the notation with the final position.
 
-The special symbols being used are identical to traditional chess:
+The special symbols being used are identical to traditional chess. You are only required to specify the castling notation: the engine does the notation for checks, checkmates and promotions. So the rules are:
   - If the piece has caused check, end the move with '+'
   - If the piece has caused checkmate, end the move with '#'
   - If castling, use either 0-0 for kingside or 0-0-0 for queenside.
   - Pawn promotions add to the end of the note '=?' where the ? symbol represents the symbol of the newly promoted piece.
 
 ## How to Play
-To play with the engine in its current state, simply run the main execution script 'QuarkPlay.py' as a module. To do this, in your terminal of choice type 'python -m QuarkPlay' to run.
+To play with the engine in its current state, simply run the main execution script 'QuarkPlay.py' as a module or script. To do this, in your terminal of choice type 'python -m QuarkPlay' or 'python QuarkPlay.py' while having the terminal's working directory in the repository to run.
 
 ## API Reference
 
