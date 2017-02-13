@@ -132,6 +132,24 @@ class _CoreMoveGenerator:
             raise RuntimeError("We can't find the %s king!" % kingcolour)
         return (kingpos in oppositionendmoves)
 
+    def pawnonendline(self, colour):
+        """Determine if a pawn has reached the backline."""
+        if colour == 'white':
+            backline = range(56, 64)
+        elif colour == 'black':
+            backline = range(0, 8)
+        else:
+            raise core.ColourError()
+
+        for ii in backline:
+            square = self.board[ii]
+            if square == None:
+                continue
+            elif square.type() == pieces.PawnPiece and square.colour == colour:
+                return True  # NOTE: There should only ever be one pawn on backline.
+        return False
+
+
 
 
  #     # ####### #     # #######
