@@ -198,7 +198,9 @@ def switchcolours(board):
     return None
 
 
-def whowon():
+def winner(colour):
+    """Handles game winning."""
+    print "%s is the winner!" % colour.title()
     pass
 
 
@@ -264,11 +266,15 @@ def main():
                     if castlingmove(movetuple):
                         UI.addmovetohistory(castletuples=movetuple)
                     else:
+                        specialsym = specialsymbol(colour, chessboard)
                         UI.addmovetohistory(
                             piece('white').notationsymbol, # HACK.
                             movetuple[0], movetuple[1],
-                            specialsymbol=specialsymbol(colour, chessboard)
+                            specialsymbol=specialsym
                         )
+                        if specialsym[0] == '#':  # This is checkmate.
+                            winner(colour)
+                            break
                     # Cleanup.
                     userturn = False; firstloop = True;
                     chessboard.enpassantforplayer = None
