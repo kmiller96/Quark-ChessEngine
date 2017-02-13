@@ -145,6 +145,27 @@ def islegalmove(colour, movetuple, board):
     print allallowedmoves
     return movetuple in allallowedmoves
 
+def castlingmove(movetuples):
+    """Determine if we have a tuple of tuples or just a simple move."""
+    if isinstance(movetuples[0], tuple) and isinstance(movetuples[1], tuple):
+        return True
+    else:
+        return False
+
+def specialsymbol(colour, board):
+    """Determines if the move requires a special symbol."""
+    generator = movegenerator.MoveGenerator(board)
+    oppositecolour = core.oppositecolour(colour)
+    specialsymbol = ''
+    if generator.kingincheck(oppositecolour):
+        if len(generator.generatemovelist(oppositecolour)) == 0:  # Checkmate!
+            specialsymbol += '#'
+        else:  # Else just check.
+            specialsymbol += '+'
+    if generator.pawnonendline(colour):
+        specialsymbol += '='
+    return specialsymbol
+
 
 def makemove(movetuple, board):
     """Make the move passed on board."""
@@ -240,9 +261,14 @@ def main():
                 if islegalmove(chessboard.playercolour, movetuple, chessboard):
                     # Make move and add it to the history.
                     makemove(movetuple, board=chessboard)
-                    UI.addmovetohistory(
-                        piece('white').notationsymbol,
-                        movetuple[0], movetuple[1])
+                    if castlingmove(movetuple):
+                        UI.addmovetohistory(castletuples=movetuple)
+                    else:
+                        UI.addmovetohistory(
+                            piece('white').notationsymbol, # HACK.
+                            movetuple[0], movetuple[1],
+                            specialsymbol=specialsymbol(colour, chessboard)
+                        )
                     # Cleanup.
                     userturn = False; firstloop = True;
                     chessboard.enpassantforplayer = None
