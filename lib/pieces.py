@@ -132,6 +132,13 @@ class PawnPiece(BasePiece):
     """The very special class for the pawn."""
 
     def __init__(self, colour):
+        if colour == 'white':
+            movevector = core.Vector(1, 0)
+        elif colour == 'black':
+            movevector = core.Vector(-1, 0)
+        else:
+            raise core.ColourError()
+
         BasePiece.__init__(self, colour, "P",
             moveunitvectors=(movevector,), crawler=True
         )
