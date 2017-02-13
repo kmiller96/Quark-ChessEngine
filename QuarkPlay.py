@@ -197,9 +197,11 @@ def switchcolours(board):
     return None
 
 
-def winner(colour):
+def winner(colour, gamehistory):
     """Handles game winning."""
     print "%s is the winner!" % colour.title()
+    print "Here is the history of the game."
+    print gamehistory
     pass
 
 
@@ -241,11 +243,11 @@ def main():
     while True:
         # See if the user won the game.
         if gameisover:
-            # HACK: Because the loop ends by swapping whose turn it is, the result
-            # in here is actually opposite.
+            # HACK: the result here is actually opposite.
             if userturn: colour = 'black'
             else: colour = 'white'
-            winner(colour)
+            print GUI.generateasciiboard(chessboard, side=chessboard.playercolour)
+            winner(colour, UI.history)
             break
 
         # If it is the user's turn, play.
