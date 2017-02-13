@@ -79,37 +79,39 @@ class EngineUI:
 
     def addmovetohistory(self, piecesymbol=None, startpos=None, endpos=None,
                          capture=False, check=False, checkmate=False,
-                         castlelong=False, castleshort=False, promotionto=False):
+                         castletuples=None, promotionto=False):
         """Add a move to the recorded history."""
         # First turn the position into a notation string.
-        def convertpositiontonotation():
-            def getpositionstring(pos):
-                (rank_, file_) = core.convert(pos, tocoordinate=True)
-                return self._filesymbols[file_] + self._ranksymbols[rank_]
+        def getpositionstring(pos):
+            (rank_, file_) = core.convert(pos, tocoordinate=True)
+            return self._filesymbols[file_] + self._ranksymbols[rank_]
 
-            if castlelong:
-                return '0-0-0'
-            elif castleshort:
+        # Determine if castling.
+        if castletuples != None:
+            kingmove = castletuples[0]
+            if kingmove[1] - kingmove[0] > 0:
                 return '0-0'
+            else:
+                return '0-0-0'
 
-            startnotation = getpositionstring(startpos)
-            endnotation = getpositionstring(endpos)
-            if capture: concat = 'x'
-            else: concat = '>'
+        # Else make a normal notation string.
+        startnotation = getpositionstring(startpos)
+        endnotation = getpositionstring(endpos)
+        if capture: concat = 'x'
+        else: concat = '>'
 
-            movestring = piecesymbol + startnotation + concat + endnotation
+        movestring = piecesymbol + startnotation + concat + endnotation
 
-            if check:
-                movestring += '+'
-            elif checkmate:
-                movestring += '#'
-            if promotionto:
-                movestring += '=' + promotionto
-
-            return movestring
+        # Add special symbols if needed.
+        if check:
+            movestring += '+'
+        elif checkmate:
+            movestring += '#'
+        if promotionto:
+            movestring += '=' + promotionto
 
         # Now add it to the history.
-        self.history.append(convertpositiontonotation())
+        self.history.append(movestring)
         return None
 
   #####  #     # ###
