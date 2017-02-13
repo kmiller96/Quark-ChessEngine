@@ -82,6 +82,8 @@ class _CoreMoveGenerator:
                     if endsquare != None:
                         if self._piecesareonsameside(piece, endsquare):
                             break
+                        elif piece.type() == pieces.PawnPiece:
+                            break
                         else:  # If opposition piece.
                             allowedmoves.append(movetopos)
                             break  # Can't go further then capture.
