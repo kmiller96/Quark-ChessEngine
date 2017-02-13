@@ -182,58 +182,44 @@ class AdvancedMoveTests(unittest.TestCase):
 
     def test_allpossiblemoves_white(self):
         movelist = self.generator.generatemovelist('white')
-        self.assertIn(
-            ((4, 2), (0, 3)), movelist)  # Make sure castling is an option.
-        self.assertIn(
-            (0, 56), movelist)  # Can the rook move normally?
-        self.assertNotIn(
-            (13, 21), movelist)  # Moving the pawn puts the king in check.
-        self.assertIn(
-            (10, 26), movelist)  # c-pawn can push.
-        self.assertNotIn(
-            (15, 31), movelist)  # h-pawn can't push...
-        self.assertIn(
-            (15, 23), movelist)  # ..but can move once.
+        self.assertIn(((4, 2), (0, 3)), movelist)  # Make sure castling is an option.
+        self.assertIn((0, 56), movelist)  # Can the rook move normally?
+        self.assertNotIn((13, 21), movelist)  # Moving the pawn puts the king in check.
+        self.assertIn((10, 26), movelist)  # c-pawn can push.
+        self.assertNotIn((15, 31), movelist)  # h-pawn can't push...
+        self.assertIn((15, 23), movelist)  # ..but can move once.
         return None
 
     def test_allpossiblemoves_black(self):
         movelist = self.generator.generatemovelist('black')
-        self.assertNotIn(
-            (60,52), movelist)  # King can't move into check.
-        self.assertIn(
-            (31, 13), movelist)  # Bishop can take pawn...
-        self.assertNotIn(
-            (31, 4), movelist)  # ...but can't take king.
-        self.assertIn(
-            (49, 33), movelist)  # Can pawn push.
+        self.assertNotIn((60,52), movelist)  # King can't move into check.
+        self.assertIn((31, 13), movelist)  # Bishop can take pawn...
+        self.assertNotIn((31, 4), movelist)  # ...but can't take king.
+        self.assertIn((49, 33), movelist)  # Can pawn push.
         return None
 
     def test_cantcastleoutofcheck_white(self):
         self.generator.board[13] = None  # Remove the shielding pawn.
         movelist = self.generator.generatemovelist('white')
-        self.assertNotIn(
-            ((4, 2), (0, 3)), movelist)
+        self.assertNotIn(((4, 2), (0, 3)), movelist)
         return None
 
     def test_cantcastleoutofcheck_black(self):
         self.generator.board.move(55, 63)  # Put king in check.
         movelist = self.generator.generatemovelist('black')
-        self.assertNotIn(
-            ((60, 58), (56, 59)), movelist)
+        self.assertNotIn(((60, 58), (56, 59)), movelist)
         return None
 
     def test_cantcastlethroughcheck_white(self):
         self.generator.board.move(56, 59)
         movelist = self.generator.generatemovelist('white')
-        self.assertNotIn(
-            ((4, 2), (0, 3)), movelist)
+        self.assertNotIn(((4, 2), (0, 3)), movelist)
         return None
 
     def test_cantcastlethroughcheck_black(self):
         self.generator.board.move(55, 51)
         movelist = self.generator.generatemovelist('black')
-        self.assertNotIn(
-            ((60, 58), (56, 59)), movelist)
+        self.assertNotIn(((60, 58), (56, 59)), movelist)
         return None
 
 
@@ -260,26 +246,54 @@ class EnPassantMovesTest(unittest.TestCase):
         self.generator.board.move(53, 37)
         movelist = self.generator.generatemovelist('white')
 
-        self.assertIn(
-            (36, 45), movelist)
+        self.assertIn((36, 45), movelist)
         return None
 
     def test_enpassantleft_white(self):
         self.generator.board.move(49, 33)
         movelist = self.generator.generatemovelist('white')
 
-        self.assertIn(
-            (34, 41), movelist)
+        self.assertIn((34, 41), movelist)
         return None
 
     def test_enpassantboth_white(self):
         self.generator.board.move(51, 35)
         movelist = self.generator.generatemovelist('white')
 
-        self.assertIn(
-            (34, 43), movelist)
-        self.assertIn(
-            (36, 43), movelist)
+        self.assertIn((34, 43), movelist)
+        self.assertIn((36, 43), movelist)
+        return None
+
+
+class PawnMoveCaptureTests(unittest.TestCase):
+    """These tests are only concerned with the pawn's weird capture and movement
+    rules."""
+
+    def setUp(self):
+        board = chessboard.ChessBoard()
+        board[4] = pieces.KingPiece('white')
+        board[8] = pieces.PawnPiece('white')
+        board[9] = pieces.PawnPiece('white')
+        board[13] = pieces.PawnPiece('white')
+        board[14] = pieces.PawnPiece('white')
+
+        board[60] = pieces.KingPiece('black')
+        board[17] = pieces.RookPiece('black')
+        board[30] = pieces.RookPiece('black')
+
+        self.generator = movegenerator.MoveGenerator(board)
+        return None
+
+    def test_blockedpawnpush(self):
+        movelist = self.generator.generatemovelist('white')
+
+        # Check b-pawn is completely blocked.
+        self.assertNotIn((9, 25), movelist)
+        self.assertNotIn((9, 17), movelist)
+
+        # Check g-pawn is partially blocked.
+        self.assertIn((14, 22), movelist)
+        self.assertNotIn((14, 30), movelist)
         return None
 
 
