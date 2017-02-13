@@ -208,6 +208,48 @@ class MoveGenerator(_CoreMoveGenerator):
                 continue
         return movelist
 
+    def _pawncapturemoves(self, colour):
+        """Finds where pawns are able to capture normally."""
+        def capturemoveat(endvec):
+            """Determines if there is a capture move at endvec."""
+            try:
+                square = self.board[endvec]
+                if square == None:
+                    return False
+                elif square.colour != colour:
+                    return True
+                else:  # Can't capture same colour.
+                    return False
+            except IndexError:
+                return False  # Position isn't on the board.
+            return -1
+
+        if colour == 'white':
+            captureleft = core.Vector(1, -1)
+            captureright = core.Vector(1, 1)
+        elif colour == 'black':
+            captureleft = core.Vector(-1, -1)
+            captureright = core.Vector(-1, 1)
+        else:
+            raise core.ColourError()
+
+        pawnsonboard = self.board.findpiece(pieces.PawnPiece, colour)
+        capturelist = list()
+        for pawnindex in pawnsonboard:
+            pawnvec = core.convert(pawnindex, tovector=True)
+            vecleft = pawnvec + captureleft
+            vecright = pawnvec + captureright
+
+            if capturemoveat(vecleft):
+                capturelist.append(
+                    (pawnindex, core.convert(vecleft, toindex=True))
+                )
+            if capturemoveat(vecright):
+                capturelist.append(
+                    (pawnindex, core.convert(vecright, toindex=True))
+                )
+        return capturelist
+
     def _castlemoves(self, colour):
         """Get the caslting moves."""
         # ---------------------------------------------------------------------
@@ -329,10 +371,16 @@ class MoveGenerator(_CoreMoveGenerator):
         """Generate all of the possible moves for colour."""
         basicmoves = self._basicmoves(colour)
         pawnpushmoves = self._pawnpushmoves(colour)
+        pawncapturemoves = self._pawncapturemoves(colour)
         castlemoves = self._castlemoves(colour)
         enpassantmoves = self._enpassantmoves(colour)
         allmoves = core.combinelists(
-            basicmoves, pawnpushmoves, castlemoves, enpassantmoves)
+            basicmoves,
+            pawnpushmoves,
+            pawncapturemoves,
+            castlemoves,
+            enpassantmoves
+        )
 
         allmoves = self._onlylegalmoves(colour, allmoves)
         return allmoves
