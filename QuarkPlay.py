@@ -137,9 +137,13 @@ def promptuserformove():
     return piecetomove, movetuple, movestring
 
 
-def islegalmove(piece, movetuple):
+def islegalmove(colour, movetuple, board):
     """Determine if the move is legal."""
-    return True
+    generator = movegenerator.MoveGenerator(board)
+    allallowedmoves = generator.generatemovelist(colour)
+    print movetuple
+    print allallowedmoves
+    return movetuple in allallowedmoves
 
 
 def makemove(movetuple, board):
@@ -220,8 +224,7 @@ def main():
 
         # If it is the user's turn, play.
         if userturn:
-            # Print the board (but only once).
-            if firstloop:
+            if firstloop:  # Print the board (but only once).
                 print GUI.generateasciiboard(chessboard, side=chessboard.playercolour)
 
             # Get the user command.
@@ -234,7 +237,7 @@ def main():
             # Make a move.
             elif command == 'move':
                 piece, movetuple, movestr = promptuserformove()
-                if islegalmove(piece, movetuple):
+                if islegalmove(chessboard.playercolour, movetuple, chessboard):
                     # Make move and add it to the history.
                     makemove(movetuple, board=chessboard)
                     UI.addmovetohistory(
