@@ -324,17 +324,23 @@ class MoveGenerator(_CoreMoveGenerator):
 
         # See if the castle start/end/during puts the king in check.
         castleleftsteps = range(kingpos-1, kingpos - 3, -1)
-        for step in castleleftsteps:
-            if self.illegalmove((kingpos, step), colour):
-                castleleft = False
-            else:
-                continue
+        if not castleleft:
+            pass
+        else:
+            for step in castleleftsteps:
+                if self.illegalmove((kingpos, step), colour):
+                    castleleft = False
+                else:
+                    continue
         castlerightsteps = range(kingpos+1, kingpos + 3)
-        for step in castlerightsteps:
-            if self.illegalmove((kingpos, step), colour):
-                castleright = False
-            else:
-                continue
+        if not castleright:
+            pass
+        else:
+            for step in castlerightsteps:
+                if self.illegalmove((kingpos, step), colour):
+                    castleright = False
+                else:
+                    continue
 
         # Then see what if castle moves can be added.
         if castleleft:
