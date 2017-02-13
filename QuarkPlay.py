@@ -238,12 +238,16 @@ def main():
     print ""
 
     # Now play the game.
-    userturn = whogoesfirst(); firstloop = True
+    userturn = whogoesfirst(); firstloop = True; gameisover = False
     while True:
         # See if the user won the game.
-        if gameover:
-            result = whowon()
-            gameover(result)
+        if gameisover:
+            # HACK: Because the loop ends by swapping whose turn it is, the result
+            # in here is actually opposite.
+            if userturn: colour = 'black'
+            else: colour = 'white'
+            winner(colour)
+            break
 
         # If it is the user's turn, play.
         if userturn:
@@ -266,15 +270,14 @@ def main():
                     if castlingmove(movetuple):
                         UI.addmovetohistory(castletuples=movetuple)
                     else:
-                        specialsym = specialsymbol(colour, chessboard)
+                        specialsym = specialsymbol(chessboard.playercolour, chessboard)
                         UI.addmovetohistory(
                             piece('white').notationsymbol, # HACK.
                             movetuple[0], movetuple[1],
                             specialsymbol=specialsym
                         )
                         if specialsym[0] == '#':  # This is checkmate.
-                            winner(colour)
-                            break
+                            gameisover = True
                     # Cleanup.
                     userturn = False; firstloop = True;
                     chessboard.enpassantforplayer = None
