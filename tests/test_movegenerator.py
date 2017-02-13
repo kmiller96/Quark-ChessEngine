@@ -276,6 +276,7 @@ class PawnMoveCaptureTests(unittest.TestCase):
         board[9] = pieces.PawnPiece('white')
         board[13] = pieces.PawnPiece('white')
         board[14] = pieces.PawnPiece('white')
+        board[23] = pieces.PawnPiece('white')
 
         board[60] = pieces.KingPiece('black')
         board[17] = pieces.RookPiece('black')
@@ -302,6 +303,15 @@ class PawnMoveCaptureTests(unittest.TestCase):
 
         self.assertNotIn((9, 17), movelist)  # Make sure b-pawn can't capture.
         self.assertNotIn((14, 22), movelist)  # Make sure g-pawn can't capture
+        return None
+
+    def test_capturediagonally(self):
+        self.generator.board.move(13, 21)
+        movelist = self.generator.generatemovelist('white')
+
+        self.assertIn((21, 30), movelist)
+        self.assertIn((8, 17), movelist)
+        self.assertIn((23, 30), movelist)
         return None
 
 
