@@ -78,8 +78,7 @@ class EngineUI:
         return piecetomove, (startindex, endindex)
 
     def addmovetohistory(self, piecesymbol=None, startpos=None, endpos=None,
-                         capture=False, check=False, checkmate=False,
-                         castletuples=None, promotionto=False):
+                         capture=False, castletuples=None, specialsym=None):
         """Add a move to the recorded history."""
         # First turn the position into a notation string.
         def getpositionstring(pos):
@@ -103,12 +102,8 @@ class EngineUI:
         movestring = piecesymbol + startnotation + concat + endnotation
 
         # Add special symbols if needed.
-        if check:
-            movestring += '+'
-        elif checkmate:
-            movestring += '#'
-        if promotionto:
-            movestring += '=' + promotionto
+        if specialsym:
+            movestring += specialsym
 
         # Now add it to the history.
         self.history.append(movestring)
