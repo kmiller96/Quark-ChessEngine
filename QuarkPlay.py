@@ -127,6 +127,7 @@ def promptuserformove():
         try:
             if movestring.lower() == 'help':
                 print HELPMESSAGE_NOTATION
+                continue
             else:
                 piecetomove, movetuple = UI.processusermove(movestring)
         except (NameError, core.UnknownPieceError) as e:
@@ -261,27 +262,31 @@ def main():
                 print ""
             # Make a move.
             elif command == 'move':
-                piece, movetuple, movestr = promptuserformove()
-                if islegalmove(chessboard.playercolour, movetuple, chessboard):
-                    # Make move and add it to the history.
-                    makemove(movetuple, board=chessboard)
-                    if castlingmove(movetuple):
-                        UI.addmovetohistory(castletuples=movetuple)
+                while True:
+                    piece, movetuple, movestr = promptuserformove()
+                    if islegalmove(chessboard.playercolour, movetuple, chessboard):
+                        break
                     else:
-                        specialsym = specialsymbol(chessboard.playercolour, chessboard)
-                        UI.addmovetohistory(
-                            piece('white').notationsymbol, # HACK.
-                            movetuple[0], movetuple[1],
-                            specialsymbol=specialsym
-                        )
+                        print "\nThat move is not valid."
+                        continue
+                # Make move and add it to the history.
+                makemove(movetuple, board=chessboard)
+                if castlingmove(movetuple):
+                    UI.addmovetohistory(castletuples=movetuple)
+                else:
+                    specialsym = specialsymbol(chessboard.playercolour, chessboard)
+                    UI.addmovetohistory(
+                        piece('white').notationsymbol, # HACK.
+                        movetuple[0], movetuple[1],
+                        specialsym=specialsym
+                    )
+                    if specialsym:
                         if specialsym[0] == '#':  # This is checkmate.
                             gameisover = True
                     # Cleanup.
                     userturn = False; firstloop = True;
                     chessboard.enpassantforplayer = None
                     continue
-                else:
-                    print "\nThat move is not valid."
             # Quit out of the game.
             elif command == 'exit':
                 resign()
