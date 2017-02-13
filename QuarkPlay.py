@@ -141,8 +141,6 @@ def islegalmove(colour, movetuple, board):
     """Determine if the move is legal."""
     generator = movegenerator.MoveGenerator(board)
     allallowedmoves = generator.generatemovelist(colour)
-    print movetuple
-    print allallowedmoves
     return movetuple in allallowedmoves
 
 def castlingmove(movetuples):
