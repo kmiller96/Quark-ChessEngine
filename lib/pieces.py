@@ -132,23 +132,7 @@ class PawnPiece(BasePiece):
     """The very special class for the pawn."""
 
     def __init__(self, colour):
-        if colour == 'white':
-            movevector = core.Vector(1, 0)
-            self._captureleft = core.Vector(1, -1)
-            self._captureright = core.Vector(1, 1)
-        elif colour == 'black':
-            movevector = core.Vector(-1, 0)
-            self._captureleft = core.Vector(-1, -1)
-            self._captureright = core.Vector(-1, 1)
-
         BasePiece.__init__(self, colour, "P",
             moveunitvectors=(movevector,), crawler=True
         )
         return None
-
-    def isvalidcapture(self, movetopos):
-        """Pawns capture in a strange fashion. This method controls that."""
-        # REVIEW: Do I ever call this method?
-        diffvec = self.distancefromselfto(movetopos)
-        capturemoves = (self._captureleft, self._captureright)
-        return (diffvec in self._validcapturemoves)
