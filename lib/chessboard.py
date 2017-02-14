@@ -183,7 +183,7 @@ class ChessBoard(_ChessBoardCore):
             self.enpassantforcomputer = whichfile
         return None
 
-    def move(self, startpos, endpos, force=False):
+    def move(self, startpos, endpos, force=True):
         """A clean way of moving pieces around on the board."""
         # Sanity checks and assertions.
         assert startpos != endpos, \
