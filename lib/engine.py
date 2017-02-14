@@ -77,6 +77,50 @@ class EngineEvaluation:
             whitepieces = len(self.board.findpiece(piecetype, 'white'))
             blackpieces = len(self.board.findpiece(piecetype, 'black'))
             return whitepieces - blackpieces
+
+        def pawnstructurevalue(pawnpositions, colour):
+            """Gets the value of the pawn structure."""
+            if colour == 'white':
+                multiplier = 1
+            elif colour == 'black':
+                multiplier = -1
+            else:
+                raise core.ColourError()
+
+            value = 0
+            pawnvectors = core.convertlist(pawnpositions, tovector=True)
+            pawnranks, pawnfiles = zip(*map(lambda x: x.vector, pawnvectors))
+            for pos, posvec in zip(pawnpositions, pawnvectors):
+                # Look for pair pawns.
+                if (pos+1) in pawnpositions:
+                    value += 200
+
+                # Look for isolated and protected pawns.
+                posrank, posfile = posvec.vector
+                if posfile-1 in pawnranks and posfile+1 in pawnranks:
+                    value += 150
+                elif posfile-1 in pawnranks or posfile+1 in pawnranks:
+                    value += 50
+                else:
+                    value -= 400
+
+                # Look for doubled or trippled pawns.
+                if pawnfiles.count(posfile) == 2:
+                    value -= 250/2  # Because it will be counted twice.
+                elif pawnfiles.count(posfile) >= 3:
+                    value -= 200  # Lose 200 everytime it is counted.
+
+                # Determine if the pawn is proteced.
+                if (posvec-core.Vector(1, 1)) in pawnvectors:
+                    value += 75
+                if (posvec-core.Vector(1, -1)) in pawnvectors:
+                    value += 75
+
+            # Look for (2 or less) backward pawns.
+            if pawnranks.count(min(pawnranks)) <= 2:
+                value -= 75
+            return value
+
         # Initalise variables.
         whitepawns = self.board.findpiece(pieces.PawnPiece, 'white')
         blackpawns = self.board.findpiece(pieces.PawnPiece, 'black')
@@ -97,71 +141,11 @@ class EngineEvaluation:
 
         # >> Get a value based on pawn structure for white. <<
         if whitepawns:
-            whitepawnvectors = core.convertlist(whitepawns, tovector=True)
-            whitepawnranks, whitepawnfiles = zip(*map(lambda x: x.vector, whitepawnvectors))
-            for pos, posvec in zip(whitepawns, whitepawnvectors):
-                # Look for pair pawns.
-                if (pos+1) in whitepawns:
-                    positionvalue += 200
-
-                # Look for isolated and protected pawns.
-                posrank, posfile = posvec.vector
-                if posfile-1 in whitepawnranks and posfile+1 in whitepawnranks:
-                    positionvalue += 150
-                elif posfile-1 in whitepawnranks or posfile+1 in whitepawnranks:
-                    positionvalue += 50
-                else:
-                    positionvalue -= 400
-
-                # Look for doubled or trippled pawns.
-                if whitepawnfiles.count(posfile) == 2:
-                    positionvalue -= 250/2  # Because it will be counted twice.
-                elif whitepawnfiles.count(posfile) >= 3:
-                    positionvalue -= 200  # Lose 200 everytime it is counted.
-
-                # Determine if the pawn is proteced.
-                if (posvec-core.Vector(1, 1)) in whitepawnvectors:
-                    positionvalue += 75
-                if (posvec-core.Vector(1, -1)) in whitepawnvectors:
-                    positionvalue += 75
-
-            # Look for (2 or less) backward pawns.
-            if whitepawnranks.count(min(whitepawnranks)) <= 2:
-                positionvalue -= 75
+            positionvalue += pawnstructurevalue(whitepawns, 'white')
 
         # >> Get a value based on pawn structure for black. <<
         if blackpawns:
-            blackpawnvectors = core.convertlist(blackpawns, tovector=True)
-            blackpawnranks, blackpawnfiles = zip(*map(lambda x: x.vector, blackpawnvectors))
-            for pos, posvec in zip(blackpawns, blackpawnvectors):
-                # Look for pair pawns.
-                if (pos+1) in blackpawns:
-                    positionvalue += -200
-
-                # Look for isolated and protected pawns.
-                posrank, posfile = posvec.vector
-                if posfile-1 in blackpawnranks and posfile+1 in blackpawnranks:
-                    positionvalue += -150
-                elif posfile-1 in blackpawnranks or posfile+1 in blackpawnranks:
-                    positionvalue += -50
-                else:
-                    positionvalue -= -400
-
-                # Look for doubled or trippled pawns.
-                if blackpawnfiles.count(posfile) == 2:
-                    positionvalue -= -250/2  # Because it will be counted twice.
-                elif blackpawnfiles.count(posfile) >= 3:
-                    positionvalue -= -200  # Lose 200 everytime it is counted.
-
-                # Determine if the pawn is proteced.
-                if (posvec-core.Vector(-1, 1)) in blackpawnvectors:
-                    positionvalue += -75
-                if (posvec-core.Vector(-1, -1)) in blackpawnvectors:
-                    positionvalue += -75
-
-            # Look for (2 or less) backward pawns.
-            if blackpawnranks.count(min(blackpawnranks)) <= 2:
-                positionvalue -= -75
+            positionvalue += pawnstructurevalue(blackpawns, 'black')
 
         # >> Finally, return the value but divided by 1000 <<
         return positionvalue/1000.0
