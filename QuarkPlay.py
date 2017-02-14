@@ -88,7 +88,11 @@ def letuserpickgametype():
 def initialisethisboard(boardtype):
     """Creates the board to play on. Just calls the class to initalise it."""
     board = boardtype()
-    board.setupnormalboard()
+    board[53] = pieces.PawnPiece('white')
+
+    board[56] = pieces.KingPiece('black')
+    board[45] = pieces.KingPiece('white')
+    # board.setupnormalboard()
     return board
 
 
@@ -138,11 +142,38 @@ def promptuserformove():
     return piecetomove, movetuple, movestring
 
 
+def promptuserforpawnpromotion():
+    """Gets the piece the pawn will be promoted to."""
+    print ("\nWhat would you like to promote the pawn too? Use the notation "
+           "symbol, not the full name of the piece (Q, N, B, R).")
+    while True:
+        promotepiece = raw_input('> ')
+        if promotepiece not in ('Q', 'N', 'B', 'R'):
+            print "Not a valid piece. It must be any of (Q, N, B, R)."
+        else:
+            if promotepiece == 'Q': return pieces.QueenPiece
+            elif promotepiece == 'B': return pieces.BishopPiece
+            elif promotepiece == 'N': return pieces.KnightPiece
+            elif promotepiece == 'R': return pieces.RookPiece
+    return None
+
+
 def islegalmove(colour, movetuple, board):
     """Determine if the move is legal."""
     generator = movegenerator.MoveGenerator(board)
     allallowedmoves = generator.generatemovelist(colour)
     return movetuple in allallowedmoves
+
+
+def pawnpromotion(movetuple, colour):
+    """Determines if the move was a promotion move."""
+    finalcoord = core.convert(movetuple[1], tocoordinate=True)
+    finalrank = finalcoord[0]
+
+    if colour == 'white' and finalrank == 7: return True
+    elif colour == 'black' and finalrank == 0: return True
+    else: return False
+
 
 def castlingmove(movetuples):
     """Determine if we have a tuple of tuples or just a simple move."""
@@ -151,7 +182,7 @@ def castlingmove(movetuples):
     else:
         return False
 
-def specialsymbol(colour, board):
+def checkorcheckmatesymbol(colour, board):
     """Determines if the move requires a special symbol."""
     generator = movegenerator.MoveGenerator(board)
     oppositecolour = core.oppositecolour(colour)
@@ -161,14 +192,16 @@ def specialsymbol(colour, board):
             specialsymbol += '#'
         else:  # Else just check.
             specialsymbol += '+'
-    if generator.pawnonendline(colour):
-        specialsymbol += '='
     return specialsymbol
 
 
 def makemove(movetuple, board):
     """Make the move passed on board."""
-    board.move(movetuple[0], movetuple[1], force=True)
+    if isinstance(movetuple[0], tuple) and isinstance(movetuple[1], tuple):
+        board.move(movetuple[0][0], movetuple[0][1], force=True)
+        board.move(movetuple[1][0], movetuple[1][1], force=True)
+    else:
+        board.move(movetuple[0], movetuple[1], force=True)
     return None
 
 
@@ -202,10 +235,6 @@ def winner(colour, gamehistory):
     print "%s is the winner!" % colour.title()
     print "Here is the history of the game."
     print gamehistory
-    pass
-
-
-def gameover(gameresult):
     pass
 
 
@@ -276,7 +305,19 @@ def main():
                 if castlingmove(movetuple):
                     UI.addmovetohistory(castletuples=movetuple)
                 else:
-                    specialsym = specialsymbol(chessboard.playercolour, chessboard)
+                    # Promote the pawn if required.
+                    if pawnpromotion(movetuple, chessboard.playercolour):
+                        piece = promptuserforpawnpromotion()
+                        initpiece = piece(chessboard.playercolour)
+                        chessboard[movetuple[1]] = initpiece
+                        promotetonotation = initpiece.notationsymbol
+
+                    # Then add the move to history.
+                    # REVIEW: Make these few lines neater.
+                    specialsym = checkorcheckmatesymbol(
+                                    chessboard.playercolour, chessboard)
+                    if pawnpromotion(movetuple, chessboard.playercolour):
+                        specialsym += '=' + promotetonotation
                     UI.addmovetohistory(
                         piece('white').notationsymbol, # HACK.
                         movetuple[0], movetuple[1],
