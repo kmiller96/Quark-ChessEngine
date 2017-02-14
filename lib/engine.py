@@ -4,11 +4,32 @@
 # 737369626c65207461736b20696e746f207365766572616c207665727920736d616c6c20706f73
 # 7369626c65207461736b732e
 
-# NOTE:
-# ================
-# This file is currently a work in progress. The original chessboard.py file has
-# become overly bloated and is detrimental to the moral of the project. This new
-# script is aimed at taking only the methods that pertain to the engine, while
-# separating the other components into their own scrips
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from copy import deepcopy
+from lib import chessboard, core, movegenerator, pieces
+
+class EngineSearch:
+    """This is the search part of the engine, that finds moves to make."""
+
+    def __init__(self, boardstate):
+        self.board = deepcopy(boardstate)
+        return None
+
+
+class EngineEvaluation:
+    """This is the evaluation part of the engine, which determines if the move
+    is any good."""
+
+    def __init__(self, boardstate):
+        self.board = deepcopy(boardstate)
+        return None
+
+
+class ChessEngine:
+    """The class that combines the two separate components to work together."""
+
+    def __init__(self, boardstate):
+        self.search = EngineSearch(boardstate)
+        self.evaluate = EngineEvaluation(boardstate)
+        return NOne
