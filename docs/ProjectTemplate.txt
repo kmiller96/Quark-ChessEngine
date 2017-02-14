@@ -177,24 +177,24 @@ anything between. Below I've listed some of the requirements that the engine
 should fulfil:
 
 BASIC MOVEMENT & RULES:
-    [ ] All pawns should be able to behave correctly, including moves for en
+    [X] All pawns should be able to behave correctly, including moves for en
     passant, capturing, promoting and pawn pushing.
-    [ ] Each backline piece should obey its own movement rules, like jumping
+    [X] Each backline piece should obey its own movement rules, like jumping
     over pieces.
-    [ ] Pins should be identified and should make certain rules illegal.
-    [ ] Checks should be identified and handled appropriately.
-    [ ] Checkmates should be identified and handled appropriately.
+    [X] Pins should be identified and should make certain rules illegal.
+    [X] Checks should be identified and handled appropriately.
+    [X] Checkmates should be identified and handled appropriately.
 
 GUI:
-    [ ] The board should be legible, with each piece being easily distingushed
+    [X] The board should be legible, with each piece being easily distingushed
     from the others.
-    [ ] The individual squares should be easily resolved, much like a physical
+    [X] The individual squares should be easily resolved, much like a physical
     board.
-    [ ] Making a move should update the interface.
+    [X] Making a move should update the interface.
 
 BASIC ENGINE CHARACTERISTICS:
-    [ ] The engine must be able to hold all of the pieces on the board.
-    [ ] It must be able to make a move and update the board.
+    [X] The engine must be able to hold all of the pieces on the board.
+    [X] It must be able to make a move and update the board.
 
 SEARCH-AND-EVALUATION:
     [ ] The engine should be able to instantly identify moves where a piece is
