@@ -9,31 +9,79 @@
 from copy import deepcopy
 from lib import chessboard, core, movegenerator, pieces
 
+class Node:
+    """Represents a node in the tree search."""
+
+    def __init__(self, parent, move, state):
+        self.parent = parent
+        self.move = move
+        self.state = state
+        return None
+
+
+class TreeStructure:
+    """Represents the entire tree for the search algorithm."""
+
+    def __init__(self):
+        self.tree = list()
+        return None
+
+    def addnode(self, node, parent=None):
+        """Adds a new node into the tree."""
+        self.tree.append(node)
+        return None
+
+
 class EngineSearch:
     """This is the search part of the engine, that finds moves to make."""
 
     def __init__(self, boardstate):
         self.board = deepcopy(boardstate)
-        self.generator = movegenerator.MoveGenerator(self.board)
+        self.generator = movegenerator.MoveGenerator
+        self.tree = TreeStructure()
         return None
 
-    def makemoves(self, board, startcolour):
-        """Iterates over movelist and finds the set of moves one level deeper."""
-        # First get all possible moves for startcolour.
-        oldgen = movegenerator.MoveGenerator(board)
-        movelist = oldgen.generatemovelist(startcolour)
+    def fetchmoves(self, state, colour):
+        """Gets the move list for colour in state, but cleaner."""
+        return movegenerator.MoveGenerator(state).generatemovelist(colour)
 
-        # Now iterate over them, find next level of moves and add to dict.
-        movedboards = list()
-        for themove in movelist:
-            simboard = board.duplicateboard()
-            simboard.move(*themove)
-            movedboards.append(simboard)
-        return movedboards
-
-    def brutesearch(self, movesdeep, startcolour):
+    def brutesearch(self, movesdeep, startcolour, board=None, parent=None):
         """Searchs so many moves 'deep' and returns a list of possible moves."""
-        return None
+        # Sanity checking.
+        if startcolour not in ('white', 'black'):
+            raise core.ColourError()
+
+        # Determine if you are in middle of recursive call or at the start.
+        if board == None:
+            board = self.board
+        movelist = self.fetchmoves(board, startcolour)
+
+        if movesdeep == 0:  # If you are deep enough:
+            return None  # Exit this part of the tree.
+        if not movelist:  # If there are no legal moves:
+            return None
+
+        for move in movelist:
+            # Make the move on a simulated board.
+            simboard = board.duplicateboard()
+            simboard.move(*move)
+
+            # Make a node of the position and add it to the tree.
+            movenode = Node(parent, move, simboard)
+            self.tree.addnode(movenode)
+
+            nodemovelist = self.fetchmoves(
+                movenode.state,
+                core.oppositecolour(startcolour)
+            )
+            if nodemovelist:
+                self.brutesearch(
+                    movesdeep-1,
+                    core.oppositecolour(startcolour),
+                    board=simboard,
+                    parent=movenode
+                )
+        return self.tree
 
 
 class EngineEvaluation:
