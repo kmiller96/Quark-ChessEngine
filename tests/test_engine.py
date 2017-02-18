@@ -8,6 +8,32 @@
 import unittest
 from lib import chessboard, core, engine, movegenerator, pieces, usercontrol
 
+class TestSearch(unittest.TestCase):
+    """Does tests on the search algorithm, especially making sure that it can
+    find and note all of the legal moves irregardless of how good they are."""
+
+    def setUp(self):
+        self.board = chessboard.ChessBoard()
+        self.search = engine.EngineSearch
+        return None
+
+    def test_brutesearch_onlykings(self):
+        self.board[0] = pieces.KingPiece('white')
+        self.board[56] = pieces.KingPiece('black')
+
+        search = self.search(self.board)
+
+        tree = search.brutesearch(2, 'white')
+        for x in tree.tree:
+            try:
+                x.parent.move
+            except AttributeError:
+                print x.move, x.parent
+            else:
+                print x.move, x.parent.move
+        return None
+
+
 class TestEvaluation(unittest.TestCase):
     """Does basic tests on the evaluation algorithm, making sure that the values
     it assigns are accurate based on the position."""
@@ -42,7 +68,6 @@ class TestEvaluation(unittest.TestCase):
         self.board[20] = pieces.PawnPiece('white')
 
         evaluator = self.eval(self.board)
-        print evaluator.evaluateposition()
         self.assertLess(evaluator.evaluateposition(), 0)
         return None
 
