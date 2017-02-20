@@ -22,15 +22,23 @@ class TestSearch(unittest.TestCase):
         self.board[56] = pieces.KingPiece('black')
 
         search = self.search(self.board)
+        tree = search.brutesearch(4, 'white')
 
-        tree = search.brutesearch(2, 'white')
-        for x in tree.tree:
-            try:
-                x.parent.move
-            except AttributeError:
-                print x.move, x.parent
-            else:
-                print x.move, x.parent.move
+        # See if following boards in tree.
+        simboard = chessboard.ChessBoard()
+        simboard[18] = pieces.KingPiece('white')
+        simboard[42] = pieces.KingPiece('black')
+        self.assertIn(simboard, tree.treeboardstates)
+
+        simboard = chessboard.ChessBoard()
+        simboard[0] = pieces.KingPiece('white')
+        simboard[56] = pieces.KingPiece('black')
+        self.assertIn(simboard, tree.treeboardstates)
+
+        simboard = chessboard.ChessBoard()
+        simboard[9] = pieces.KingPiece('white')
+        simboard[40] = pieces.KingPiece('black')
+        self.assertIn(simboard, tree.treeboardstates)
         return None
 
 
