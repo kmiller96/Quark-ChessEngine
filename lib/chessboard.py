@@ -61,6 +61,24 @@ class _ChessBoardCore:
         for square in self._board:
             yield square
 
+    def _equality(self, other):
+        """Handles the equality of two chessboards."""
+        return self._board == other._board
+
+    def __eq__(self, other):
+        try:
+            return self._equality(other)
+        except AttributeError:
+            if other == None: return False
+            else: raise TypeError("Other must be chessboard.")
+
+    def __ne__(self, other):
+        try:
+            return not self._equality(other)
+        except AttributeError:
+            if other == None: return True
+            else: raise TypeError("Other must be chessboard.")
+
     def duplicateboard(self):
         """Creates an instance of the chess board exactly as it is now."""
         return deepcopy(self)
