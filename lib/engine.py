@@ -6,17 +6,27 @@
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from copy import deepcopy
+from copy import copy, deepcopy
 from lib import chessboard, core, movegenerator, pieces
 
 class Node:
     """Represents a node in the tree search."""
 
-    def __init__(self, parent, move, state):
+    def __init__(self, parent, move, state):\
+        # Initialise the node attributes.
         self.parent = parent
         self.move = move
         self.state = state
+
+        # Add the move history.
+        if self.parent == None: self.history = list()
+        else: self.history = copy(self.parent.history)
+        self.history.append(self.move)
         return None
+
+    def __str__(self):
+        return (str(self.parent) + ' -> ' + str(self.move)
+                if self.parent != None else str(self.move))
 
 
 class TreeStructure:
@@ -24,11 +34,16 @@ class TreeStructure:
 
     def __init__(self):
         self.tree = list()
+        self.treeboardstates = list()
         return None
 
-    def addnode(self, node, parent=None):
+    def addnode(self, node):
         """Adds a new node into the tree."""
-        self.tree.append(node)
+        # REVIEW - How much overhead is the if statement adding?
+        if node.state in self.treeboardstates: pass
+        else:
+            self.tree.append(node)
+            self.treeboardstates.append(node.state)
         return None
 
 
@@ -38,7 +53,7 @@ class EngineSearch:
     def __init__(self, boardstate):
         self.board = deepcopy(boardstate)
         self.generator = movegenerator.MoveGenerator
-        self.tree = TreeStructure()
+        self.finalpositions = TreeStructure()
         return None
 
     def fetchmoves(self, state, colour):
@@ -66,9 +81,10 @@ class EngineSearch:
             simboard = board.duplicateboard()
             simboard.move(*move)
 
-            # Make a node of the position and add it to the tree.
+            # Make a node of the position and add it to the tree if correct depth.
             movenode = Node(parent, move, simboard)
-            self.tree.addnode(movenode)
+            if movesdeep == 1:
+                self.finalpositions.addnode(movenode)
 
             nodemovelist = self.fetchmoves(
                 movenode.state,
@@ -81,7 +97,7 @@ class EngineSearch:
                     board=simboard,
                     parent=movenode
                 )
-        return self.tree
+        return self.finalpositions
 
 
 class EngineEvaluation:
