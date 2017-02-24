@@ -32,6 +32,13 @@ class TestMoveGenerator(unittest.TestCase):
         self.generator = movegenerator.MoveGenerator(self.board)
         return None
 
+    def test_basicmoves(self):
+        with Timer() as t:
+            for x in xrange(10000):
+                self.generator._basicmoves('white')
+        print '\n\t=> elapsed time for 10000 loops: %s s' % t.secs
+        return None
+
     def test_generatemovelist(self):
         with Timer() as t:
             for x in xrange(10000):
