@@ -95,8 +95,6 @@ class _CoreMoveGenerator:
 
     def _basicmoves(self, colour):
         """Get the most basic moves, such as simple captures and movement."""
-        # Define the method that finds the alllowed moves for each piece.
-
         # Sanity checks.
         if colour not in ('white', 'black'):
             raise core.ColourError()
@@ -118,14 +116,25 @@ class _CoreMoveGenerator:
 
     def kingincheck(self, kingcolour):
         """Determine if the king of a certain colour is in check."""
+        # Find the king first.
         try:
             oppositioncolour = core.oppositecolour(kingcolour)
-            basicoppositionmoves = self._basicmoves(oppositioncolour)
-            oppositionendmoves = map(lambda x: x[1], basicoppositionmoves)
             kingpos = self.board.findpiece(pieces.KingPiece, kingcolour.lower())[0]
         except IndexError:
             raise RuntimeError("We can't find the %s king!" % kingcolour)
-        return (kingpos in oppositionendmoves)
+
+        # Then look for any square that is attacking.
+        for index, square in enumerate(self.board):
+            if square == None:
+                continue
+            elif square.colour == kingcolour:
+                continue  # Skip over piece if it is same colour.
+            endposlist = core.convertlist(
+                self._movesforpiece(square, index), toindex=True)
+
+            if kingpos in endposlist: return True
+            else: continue
+        return False
 
     def pawnonendline(self, colour):
         """Determine if a pawn has reached the backline."""
@@ -187,9 +196,9 @@ class MoveGenerator(_CoreMoveGenerator):
         if colour.lower() == 'white': oppositioncolour = 'black'
         elif colour.lower() == 'black': oppositioncolour = 'white'
         else: raise core.ColourError()
+
         ii = 0
         while ii < len(movepairlist):
-            movepairlist[ii]
             if self.illegalmove(movepairlist[ii], colour):
                 del movepairlist[ii]
             else:
