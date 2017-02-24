@@ -118,6 +118,7 @@ class _CoreMoveGenerator:
     def kingincheck(self, kingcolour):
         """Determine if the king of a certain colour is in check."""
         try:
+            oppositioncolour = core.oppositecolour(kingcolour)
             basicoppositionmoves = self._basicmoves(oppositioncolour)
             oppositionendmoves = map(lambda x: x[1], basicoppositionmoves)
             kingpos = self.board.findpiece(pieces.KingPiece, kingcolour.lower())[0]
@@ -168,15 +169,16 @@ class MoveGenerator(_CoreMoveGenerator):
     def illegalmove(self, movepair, kingcolour):
         """Checks to see if the supplied move if illegal."""
         # Make the move and see if the king is in check.
-        originalboard = self.board.duplicateboard()
         if isinstance(movepair[0],tuple) and isinstance(movepair[1],tuple):
             for move in movepair:
-                self.board.move(move[0], move[1], force=True)
+                self.board.move(move[0], move[1])
+            result = self.kingincheck(kingcolour)
+            for move in movepair:
+                self.board.move(move[1], move[0])
         else:
-            self.board.move(movepair[0], movepair[1], force=True)
-        result = self.kingincheck(kingcolour)
-
-        self.board = originalboard  # Cleanup (restore actual board state)
+            self.board.move(movepair[0], movepair[1])
+            result = self.kingincheck(kingcolour)
+            self.board.move(movepair[1], movepair[0])
         return result
 
     def _onlylegalmoves(self, colour, movepairlist):
