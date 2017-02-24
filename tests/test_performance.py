@@ -27,7 +27,7 @@ class TestMoveGenerator(unittest.TestCase):
 
     def setUp(self):
         self.board = chessboard.ChessBoard()
-        self.board[19] = pieces.KingPiece('white')
+        self.board[27] = pieces.KingPiece('white')
         self.board[45] = pieces.KingPiece('black')
         self.generator = movegenerator.MoveGenerator(self.board)
         return None
@@ -64,6 +64,14 @@ class TestMoveGenerator(unittest.TestCase):
         with Timer() as t:
             for x in xrange(10000):
                 self.generator._enpassantmoves('white')
+        print '\n\t=> elapsed time for 10000 loops: %s s' % t.secs
+        return None
+
+    def test_onlylegalmoves(self):
+        moves = self.generator._basicmoves('white')
+        with Timer() as t:
+            for x in xrange(10000):
+                self.generator._onlylegalmoves('white', moves)
         print '\n\t=> elapsed time for 10000 loops: %s s' % t.secs
         return None
 
