@@ -190,5 +190,19 @@ class TestNodeAndTree(unittest.TestCase):
         return None
 
 
+class TestEngine(unittest.TestCase):
+    """Looks at the search and evaluate of the engine and how fast it is."""
+
+    def setUp(self):
+        self.search = engine.EngineSearch()
+        return None
+
+    def test_search(self):
+        return None
+
+    def test_evaluate(self):
+        return None
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
