@@ -60,6 +60,13 @@ class TestMoveGenerator(unittest.TestCase):
         print '\n\t=> elapsed time for 10000 loops: %s s' % t.secs
         return None
 
+    def test_enpassantmoves(self):
+        with Timer() as t:
+            for x in xrange(10000):
+                self.generator._enpassantmoves('white')
+        print '\n\t=> elapsed time for 10000 loops: %s s' % t.secs
+        return None
+
     def test_generatemovelist(self):
         with Timer() as t:
             for x in xrange(10000):
