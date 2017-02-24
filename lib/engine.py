@@ -12,7 +12,7 @@ from lib import chessboard, core, movegenerator, pieces
 class Node:
     """Represents a node in the tree search."""
 
-    def __init__(self, parent, move, state):\
+    def __init__(self, parent, move, state):
         # Initialise the node attributes.
         self.parent = parent
         self.move = move
@@ -52,7 +52,7 @@ class EngineSearch:
 
     def __init__(self, boardstate):
         self.board = deepcopy(boardstate)
-        self.generator = movegenerator.MoveGenerator
+        self.generator = movegenerator.MoveGenerator(self.board)
         self.finalpositions = TreeStructure()
         return None
 
@@ -98,6 +98,11 @@ class EngineSearch:
                     parent=movenode
                 )
         return self.finalpositions
+
+    def selectivesearch(self, movesdeep, startcolour, board=None, parent=None):
+        """Does a selective search, which is far more efficient then brute
+        search methods."""
+        return None
 
 
 class EngineEvaluation:
