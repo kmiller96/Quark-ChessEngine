@@ -68,33 +68,34 @@ class _CoreMoveGenerator:
             currentposvec += unitrelvec
         return pieceslist
 
+    def _movesforpiece(self, piece, pos):
+        """Get the moves for the piece at position 'pos'."""
+        allowedmoves = list()
+        for unitvector in piece.moveunitvectors:
+            movetopos = core.convert(pos, tovector=True) + unitvector
+
+            while self.board.positiononboard(movetopos):
+                endsquare = self.board[movetopos]
+                if endsquare != None:
+                    if self._piecesareonsameside(piece, endsquare):
+                        break
+                    elif piece.type() == pieces.PawnPiece:
+                        break
+                    else:  # If opposition piece.
+                        allowedmoves.append(movetopos)
+                        break  # Can't go further then capture.
+                else:
+                    allowedmoves.append(movetopos)
+
+                if piece.crawler: break
+                else: movetopos += unitvector
+
+            continue
+        return allowedmoves
+
     def _basicmoves(self, colour):
         """Get the most basic moves, such as simple captures and movement."""
         # Define the method that finds the alllowed moves for each piece.
-        def movesforpiece(piece, pos):
-            """Get the moves for the piece at position 'pos'."""
-            allowedmoves = list()
-            for unitvector in piece.moveunitvectors:
-                movetopos = core.convert(pos, tovector=True) + unitvector
-
-                while self.board.positiononboard(movetopos):
-                    endsquare = self.board[movetopos]
-                    if endsquare != None:
-                        if self._piecesareonsameside(piece, endsquare):
-                            break
-                        elif piece.type() == pieces.PawnPiece:
-                            break
-                        else:  # If opposition piece.
-                            allowedmoves.append(movetopos)
-                            break  # Can't go further then capture.
-                    else:
-                        allowedmoves.append(movetopos)
-
-                    if piece.crawler: break
-                    else: movetopos += unitvector
-
-                continue
-            return allowedmoves
 
         # Sanity checks.
         if colour not in ('white', 'black'):
@@ -109,7 +110,7 @@ class _CoreMoveGenerator:
                 continue  # Skip over piece if it is different colour.
             startpos = index
             endposlist = core.convertlist(
-                movesforpiece(square, startpos), toindex=True
+                self._movesforpiece(square, startpos), toindex=True
             )
             movepairs = map(lambda x: (startpos, x), endposlist)
             movelist.append(movepairs)
