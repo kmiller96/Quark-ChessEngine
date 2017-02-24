@@ -174,10 +174,6 @@ class MoveGenerator(_CoreMoveGenerator):
 
     def illegalmove(self, movepair, kingcolour):
         """Checks to see if the supplied move if illegal."""
-        if kingcolour.lower() == 'white': oppositioncolour = 'black'
-        elif kingcolour.lower() == 'black': oppositioncolour = 'white'
-        else: raise TypeError("King is either white or black.")
-
         # Make the move and see if the king is in check.
         originalboard = self.board.duplicateboard()
         if isinstance(movepair[0],tuple) and isinstance(movepair[1],tuple):
@@ -192,6 +188,9 @@ class MoveGenerator(_CoreMoveGenerator):
 
     def _onlylegalmoves(self, colour, movepairlist):
         """Filter a list, keeping only legal moves."""
+        if colour.lower() == 'white': oppositioncolour = 'black'
+        elif colour.lower() == 'black': oppositioncolour = 'white'
+        else: raise core.ColourError()
         ii = 0
         while ii < len(movepairlist):
             movepairlist[ii]
