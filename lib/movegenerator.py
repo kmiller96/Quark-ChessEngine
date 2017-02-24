@@ -117,13 +117,6 @@ class _CoreMoveGenerator:
 
     def kingincheck(self, kingcolour):
         """Determine if the king of a certain colour is in check."""
-        if kingcolour == 'white':
-            oppositioncolour = 'black'
-        elif kingcolour == 'black':
-            oppositioncolour = 'white'
-        else:
-            raise core.ColourError()
-
         try:
             basicoppositionmoves = self._basicmoves(oppositioncolour)
             oppositionendmoves = map(lambda x: x[1], basicoppositionmoves)
