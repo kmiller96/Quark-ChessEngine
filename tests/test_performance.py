@@ -42,7 +42,14 @@ class TestMoveGenerator(unittest.TestCase):
     def test_pawnpushmoves(self):
         with Timer() as t:
             for x in xrange(10000):
-                self.generator._basicmoves('white')
+                self.generator._pawnpushmoves('white')
+        print '\n\t=> elapsed time for 10000 loops: %s s' % t.secs
+        return None
+
+    def test_pawncapturemoves(self):
+        with Timer() as t:
+            for x in xrange(10000):
+                self.generator._pawncapturemoves('white')
         print '\n\t=> elapsed time for 10000 loops: %s s' % t.secs
         return None
 
