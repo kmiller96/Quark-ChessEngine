@@ -97,3 +97,4 @@ tests/tests_chesspieces.py
 docs/TODO_List
 docs/TODO_List.txt
 lib/core.pyc
+lib/engine_old.py
