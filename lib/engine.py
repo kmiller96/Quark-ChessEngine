@@ -44,14 +44,14 @@ class Evaluator:
         netscore = 0
         netscore += self.materialscore(board)
         netscore += self.mobilityscore(board)
-        return None
+        return netscore
 
 
 class ChessEngine:
     """The brains of the computer. It searches and evaluates positions."""
 
     def __init__(self):
-        self.movegenerator = movegenerator.MoveGenerator()
+        self.movegenerator = movegenerator.MoveGenerator
         self.evaluate = Evaluator.evaluate
         return None
 
@@ -64,11 +64,10 @@ class ChessEngine:
             raise core.EmptySquareError(position)
 
         endmoves = lambda l: map(lambda x: x[1], l)
+        movegen = self.movegenerator(board)
 
         defenderendmoves = endmoves(
-            self.movegenerator.basicmoves(piececolour, defendingmoves=True)
-        )
+            movegen.basicmoves(piececolour, defendingmoves=True))
         attackerendmoves = endmoves(
-            self.movegenerator.basicmoves(core.oppositecolour(piececolour))
-        )
+            movegen.basicmoves(core.oppositecolour(piececolour)))
         return attackerendmoves.count(position) - defenderendmoves.count(position)
