@@ -51,5 +51,24 @@ class ChessEngine:
     """The brains of the computer. It searches and evaluates positions."""
 
     def __init__(self):
+        self.movegenerator = movegenerator.MoveGenerator()
         self.evaluate = Evaluator.evaluate
         return None
+
+    def netattackers(self, board, position):
+        """Looks at the position on the board and sees the number of attackers
+        and defenders. This is used to see if there is a possibiliy of exchange."""
+        try:
+            piececolour = board[position].colour
+        except AttributeError:
+            raise core.EmptySquareError(position)
+
+        endmoves = lambda l: map(lambda x: x[1], l)
+
+        defenderendmoves = endmoves(
+            self.movegenerator.basicmoves(piececolour, defendingmoves=True)
+        )
+        attackerendmoves = endmoves(
+            self.movegenerator.basicmoves(core.oppositecolour(piececolour))
+        )
+        return attackerendmoves.count(position) - defenderendmoves.count(position)
