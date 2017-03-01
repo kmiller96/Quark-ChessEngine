@@ -32,6 +32,60 @@ class Evaluator:
         )
         return positionvalue
 
+    def pawnstructurescore(self, board):
+        """Looks at the pawn structure and gives a net score."""
+        # Define the pawn structure calculator (to remove duplicate code.)
+        def pawnstructurevalue(pawnpositions, colour):
+            """Gets the value of the pawn structure."""
+            if colour == 'white': multiplier = 1
+            elif colour == 'black': multiplier = -1
+            else: raise core.ColourError()
+
+            value = 0
+            pawnvectors = core.convertlist(pawnpositions, tovector=True)
+            pawnranks, pawnfiles = zip(*map(lambda x: x.vector, pawnvectors))
+            for pos, posvec in zip(pawnpositions, pawnvectors):
+                # Look for pair pawns.
+                if (pos+1) in pawnpositions:
+                    value += 200
+
+                # Look for isolated and protected pawns.
+                posrank, posfile = posvec.vector
+                if posfile-1 in pawnranks and posfile+1 in pawnranks:
+                    value += 150
+                elif posfile-1 in pawnranks or posfile+1 in pawnranks:
+                    value += 50
+                else:
+                    value -= 400
+
+                # Look for doubled or trippled pawns.
+                if pawnfiles.count(posfile) == 2:
+                    value -= 250/2  # Because it will be counted twice.
+                elif pawnfiles.count(posfile) >= 3:
+                    value -= 200  # Lose 200 everytime it is counted.
+
+                # Determine if the pawn is proteced.
+                if (posvec-core.Vector(1, 1)) in pawnvectors:
+                    value += 75
+                if (posvec-core.Vector(1, -1)) in pawnvectors:
+                    value += 75
+
+            # Look for (2 or less) backward pawns.
+            if pawnranks.count(min(pawnranks)) <= 2:
+                value -= 75
+            return value
+
+        # Then execute the code for both white and black pawns.
+        whitepawns = board.findpiece(pieces.PawnPiece, 'white')
+        blackpawns = board.findpiece(pieces.PawnPiece, 'black')
+
+        netscore = 0
+        if whitepawns:
+            netscore += pawnstructurevalue(whitepawns, 'white')
+        if blackpawns:
+            netscore += pawnstructurevalue(blackpawns, 'black')
+        return netscore
+
     def mobilityscore(self, board):
         """Determines how mobile each side is and returns a net score."""
         generator = movegenerator.MoveGenerator(board)
