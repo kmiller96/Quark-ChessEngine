@@ -47,74 +47,22 @@ class TreeStructure:
         return None
 
 
-class EngineSearch:
-    """This is the search part of the engine, that finds moves to make."""
+class ChessEngine:
+    """The class that combines the two separate components to work together."""
 
-    def __init__(self, boardstate):
-        self.board = deepcopy(boardstate)
-        self.generator = movegenerator.MoveGenerator(self.board)
+    def __init__(self):
+        self.generator = movegenerator.MoveGenerator
         self.finalpositions = TreeStructure()
         return None
 
     def fetchmoves(self, state, colour):
         """Gets the move list for colour in state, but cleaner."""
-        return movegenerator.MoveGenerator(state).generatemovelist(colour)
+        # XXX - It is this method that is slowing the engine down. Find a better
+        # way of doing it!
+        return self.generator(state).generatemovelist(colour)
 
-    def brutesearch(self, movesdeep, startcolour, board=None, parent=None):
-        """Searchs so many moves 'deep' and returns a list of possible moves."""
-        # Sanity checking.
-        if startcolour not in ('white', 'black'):
-            raise core.ColourError()
-
-        # Determine if you are in middle of recursive call or at the start.
-        if board == None:
-            board = self.board
-        movelist = self.fetchmoves(board, startcolour)
-
-        if movesdeep == 0:  # If you are deep enough:
-            return None  # Exit this part of the tree.
-        if not movelist:  # If there are no legal moves:
-            return None
-
-        for move in movelist:
-            # Make the move on a simulated board.
-            simboard = board.duplicateboard()
-            simboard.move(*move)
-
-            # Make a node of the position and add it to the tree if correct depth.
-            movenode = Node(parent, move, simboard)
-            if movesdeep == 1:
-                self.finalpositions.addnode(movenode)
-
-            nodemovelist = self.fetchmoves(
-                movenode.state,
-                core.oppositecolour(startcolour)
-            )
-            if nodemovelist:
-                self.brutesearch(
-                    movesdeep-1,
-                    core.oppositecolour(startcolour),
-                    board=simboard,
-                    parent=movenode
-                )
-        return self.finalpositions
-
-    def selectivesearch(self, movesdeep, startcolour, board=None, parent=None):
-        """Does a selective search, which is far more efficient then brute
-        search methods."""
-        return None
-
-
-class EngineEvaluation:
-    """This is the evaluation part of the engine, which determines if the move
-    is any good."""
-
-    def __init__(self, boardstate):
-        self.board = deepcopy(boardstate)
-        self.generator = movegenerator.MoveGenerator(boardstate)
-        return None
-
-    def evaluateposition(self):
+    # ------------ THE EVALUATOR ---------------
+    def evaluateposition(self, board):
         """Looks at the board conditions and returns a number based on how good
         the position is.
 
@@ -143,8 +91,8 @@ class EngineEvaluation:
         """
         def piecediff(piecetype):
             """Find if one side is up pieces (+ for white, - for black)"""
-            whitepieces = len(self.board.findpiece(piecetype, 'white'))
-            blackpieces = len(self.board.findpiece(piecetype, 'black'))
+            whitepieces = len(board.findpiece(piecetype, 'white'))
+            blackpieces = len(board.findpiece(piecetype, 'black'))
             return whitepieces - blackpieces
 
         def pawnstructurevalue(pawnpositions, colour):
@@ -191,8 +139,8 @@ class EngineEvaluation:
             return value
 
         # Initalise variables.
-        whitepawns = self.board.findpiece(pieces.PawnPiece, 'white')
-        blackpawns = self.board.findpiece(pieces.PawnPiece, 'black')
+        whitepawns = board.findpiece(pieces.PawnPiece, 'white')
+        blackpawns = board.findpiece(pieces.PawnPiece, 'black')
 
         # >> First find the value based on piece value. <<
         positionvalue = (
@@ -205,8 +153,9 @@ class EngineEvaluation:
         )
 
         # >> Next find value based on mobility. <<
-        positionvalue += len(self.generator.generatemovelist('white'))*100
-        positionvalue -= len(self.generator.generatemovelist('black'))*100
+        generator = self.generator(board)
+        positionvalue += len(generator.generatemovelist('white'))*100
+        positionvalue -= len(generator.generatemovelist('black'))*100
 
         # >> Get a value based on pawn structure for white. <<
         if whitepawns:
@@ -219,12 +168,46 @@ class EngineEvaluation:
         # >> Finally, return the value but divided by 1000 <<
         return positionvalue/1000.0
 
+    # ------------------- THE SEARCHER ------------------
+    def brutesearch(self, chessboard, movesdeep, startcolour, parent=None):
+        """Searchs so many moves 'deep' and returns a list of possible moves."""
+        # Sanity checking.
+        if startcolour not in ('white', 'black'):
+            raise core.ColourError()
 
+        # Determine if you are in middle of recursive call or at the start.
+        board = deepcopy(chessboard)
+        movelist = self.fetchmoves(board, startcolour)
 
-class ChessEngine:
-    """The class that combines the two separate components to work together."""
+        if movesdeep == 0:  # If you are deep enough:
+            return None  # Exit this part of the tree.
+        if not movelist:  # If there are no legal moves:
+            return None
 
-    def __init__(self, boardstate):
-        self.search = EngineSearch(boardstate)
-        self.evaluate = EngineEvaluation(boardstate)
+        for move in movelist:
+            # Make the move on a simulated board.
+            simboard = board.duplicateboard()
+            simboard.move(*move)
+
+            # Make a node of the position and add it to the tree if correct depth.
+            movenode = Node(parent, move, simboard)
+            if movesdeep == 1:
+                self.finalpositions.addnode(movenode)
+
+            nodemovelist = self.fetchmoves(
+                movenode.state,
+                core.oppositecolour(startcolour)
+            )
+            if nodemovelist:
+                self.brutesearch(
+                    simboard,
+                    movesdeep-1,
+                    core.oppositecolour(startcolour),
+                    parent=movenode
+                )
+        return self.finalpositions
+
+    def selectivesearch(self, movesdeep, startcolour, board=None, parent=None):
+        """Does a selective search, which is far more efficient then brute
+        search methods."""
         return None

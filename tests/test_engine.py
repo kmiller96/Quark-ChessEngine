@@ -14,15 +14,14 @@ class TestSearch(unittest.TestCase):
 
     def setUp(self):
         self.board = chessboard.ChessBoard()
-        self.search = engine.EngineSearch
+        self.search = engine.ChessEngine()
         return None
 
     def test_brutesearch_onlykings(self):
         self.board[0] = pieces.KingPiece('white')
         self.board[56] = pieces.KingPiece('black')
 
-        search = self.search(self.board)
-        tree = search.brutesearch(4, 'white')
+        tree = self.search.brutesearch(self.board, 4, 'white')
 
         # See if following boards in tree.
         simboard = chessboard.ChessBoard()
@@ -51,19 +50,17 @@ class TestEvaluation(unittest.TestCase):
         self.board[60] = pieces.KingPiece('black')
         self.board[4] = pieces.KingPiece('white')
 
-        self.eval = engine.EngineEvaluation
+        self.evaluator = engine.ChessEngine()
         return None
 
     def test_uppiece_white(self):
         self.board[55] = pieces.QueenPiece('white')
-        evaluator = self.eval(self.board)
-        self.assertGreaterEqual(evaluator.evaluateposition(), 9)
+        self.assertGreaterEqual(self.evaluator.evaluateposition(self.board), 9)
         return None
 
     def test_uppiece_black(self):
         self.board[55] = pieces.QueenPiece('black')
-        evaluator = self.eval(self.board)
-        self.assertLessEqual(evaluator.evaluateposition(), -9)
+        self.assertLessEqual(self.evaluator.evaluateposition(self.board), -9)
         return None
 
     def test_equalpawns_whitedoubled(self):
@@ -75,8 +72,7 @@ class TestEvaluation(unittest.TestCase):
         self.board[12] = pieces.PawnPiece('white')
         self.board[20] = pieces.PawnPiece('white')
 
-        evaluator = self.eval(self.board)
-        self.assertLess(evaluator.evaluateposition(), 0)
+        self.assertLess(self.evaluator.evaluateposition(self.board), 0)
         return None
 
 if __name__ == '__main__':
