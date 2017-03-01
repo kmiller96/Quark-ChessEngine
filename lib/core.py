@@ -492,4 +492,14 @@ class BadVectorError(NotImplementedError):
         if errormsg == None:
             errormsg = "The vector isn't valid."
         NotImplementedError.__init__(self, errormsg)
+
+
+class EmptySquareError(IndexError):
+    """Called if the square is empty when it should be occupied."""
+
+    def __init__(self, position, errormsg=None):
+        if errormsg == None:
+            errormsg = "The square at %i isn't occupied!" % \
+                convert(position, toindex=True)
+        IndexError.__init__(self, errormsg)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
