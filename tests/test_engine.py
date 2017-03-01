@@ -17,29 +17,6 @@ class TestSearch(unittest.TestCase):
         self.search = engine.ChessEngine()
         return None
 
-    def test_brutesearch_onlykings(self):
-        self.board[0] = pieces.KingPiece('white')
-        self.board[56] = pieces.KingPiece('black')
-
-        tree = self.search.brutesearch(self.board, 4, 'white')
-
-        # See if following boards in tree.
-        simboard = chessboard.ChessBoard()
-        simboard[18] = pieces.KingPiece('white')
-        simboard[42] = pieces.KingPiece('black')
-        self.assertIn(simboard, tree.treeboardstates)
-
-        simboard = chessboard.ChessBoard()
-        simboard[0] = pieces.KingPiece('white')
-        simboard[56] = pieces.KingPiece('black')
-        self.assertIn(simboard, tree.treeboardstates)
-
-        simboard = chessboard.ChessBoard()
-        simboard[9] = pieces.KingPiece('white')
-        simboard[40] = pieces.KingPiece('black')
-        self.assertIn(simboard, tree.treeboardstates)
-        return None
-
 
 class TestEvaluation(unittest.TestCase):
     """Does basic tests on the evaluation algorithm, making sure that the values
@@ -50,17 +27,17 @@ class TestEvaluation(unittest.TestCase):
         self.board[60] = pieces.KingPiece('black')
         self.board[4] = pieces.KingPiece('white')
 
-        self.evaluator = engine.ChessEngine()
+        self.evaluate = engine.Evaluator().evaluate
         return None
 
     def test_uppiece_white(self):
         self.board[55] = pieces.QueenPiece('white')
-        self.assertGreaterEqual(self.evaluator.evaluateposition(self.board), 9)
+        self.assertGreaterEqual(self.evaluate(self.board), 9)
         return None
 
     def test_uppiece_black(self):
         self.board[55] = pieces.QueenPiece('black')
-        self.assertLessEqual(self.evaluator.evaluateposition(self.board), -9)
+        self.assertLessEqual(self.evaluate(self.board), -9)
         return None
 
     def test_equalpawns_whitedoubled(self):
@@ -72,7 +49,7 @@ class TestEvaluation(unittest.TestCase):
         self.board[12] = pieces.PawnPiece('white')
         self.board[20] = pieces.PawnPiece('white')
 
-        self.assertLess(self.evaluator.evaluateposition(self.board), 0)
+        self.assertLess(self.evaluate(self.board), 0)
         return None
 
 if __name__ == '__main__':
