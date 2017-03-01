@@ -135,6 +135,7 @@ class BasicMoveTests(unittest.TestCase):
             errormessage('Can move past black knight', 'Blocked by knight'))
 
     def test_basicmoves_black(self):
+        # XXX - This is the *exact* same method as for white. I forgot to change it.
         movelist = self.generator.basicmoves('white')
 
         # Make sure queen can't jump over white pawn.
@@ -152,6 +153,15 @@ class BasicMoveTests(unittest.TestCase):
         self.assertNotIn(
             (18, 50), movelist,
             errormessage('Can move past black knight', 'Blocked by knight'))
+
+    def test_basicmoves_defendingmoves(self):
+        movelist = self.generator.basicmoves('white', defendingmoves=True)
+
+        self.assertIn(
+            (18, 19), movelist,
+            "The Queen should be defending the pawn"
+        )
+        return None
 
     def test_basicmoves_wrongcolour(self):
         with self.assertRaises(core.ColourError):
