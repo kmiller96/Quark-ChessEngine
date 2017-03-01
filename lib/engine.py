@@ -43,4 +43,13 @@ class Evaluator:
         """Evaluates the board passed, considering lots of factors."""
         netscore = 0
         netscore += self.materialscore(board)
+        netscore += self.mobilityscore(board)
+        return None
+
+
+class ChessEngine:
+    """The brains of the computer. It searches and evaluates positions."""
+
+    def __init__(self):
+        self.evaluate = Evaluator.evaluate
         return None
