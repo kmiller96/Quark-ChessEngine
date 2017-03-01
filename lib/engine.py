@@ -32,6 +32,15 @@ class Evaluator:
         )
         return positionvalue
 
+    def mobilityscore(self, board):
+        """Determines how mobile each side is and returns a net score."""
+        generator = movegenerator.MoveGenerator(board)
+        whitemobility = len(generator.generatemovelist('white'))*100
+        blackmobility = len(generator.generatemovelist('black'))*100
+        return whitemobility - blackmobility
+
     def evaluate(self, board):
         """Evaluates the board passed, considering lots of factors."""
+        netscore = 0
+        netscore += self.materialscore(board)
         return None
