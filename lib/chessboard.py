@@ -145,9 +145,11 @@ class _ChessBoardCore:
         """Asserts that the square is occupied."""
         try:
             index = core.convert(position, toindex=True)
-            assert self._board[index] != None, "The target square is unoccupied."
+            assert self._board[index] != None
         except IndexError:
             raise IndexError("The index used is off the board!")
+        except AssertionError:
+            raise core.EmptySquareError(position)
         return None
 
 class ChessBoard(_ChessBoardCore):
