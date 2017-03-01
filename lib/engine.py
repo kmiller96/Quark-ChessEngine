@@ -33,7 +33,22 @@ class Evaluator:
         return positionvalue
 
     def pawnstructurescore(self, board):
-        """Looks at the pawn structure and gives a net score."""
+        """Looks at the pawn structure and gives a net score.
+
+        Refer to the list below which states the specific scores allocated to
+        a side based on their pawn structure. Note that the values are for white
+        thus black's values would simply be the negative.
+
+        PAWN STRUCTURE
+        ================
+            Pair pawns = +200
+            Backward pawn = -75
+            Isolated pawn = -400
+            Doubled pawns = -250
+            Trippled pawns = -600
+            Protected by two pawns = +150
+            Protected by one pawn = +75
+        """
         # Define the pawn structure calculator (to remove duplicate code.)
         def pawnstructurevalue(pawnpositions, colour):
             """Gets the value of the pawn structure."""
