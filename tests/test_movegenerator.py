@@ -116,7 +116,7 @@ class BasicMoveTests(unittest.TestCase):
         self.generator = movegenerator.MoveGenerator(self.board)
 
     def test_basicmoves_white(self):
-        movelist = self.generator._basicmoves('white')
+        movelist = self.generator.basicmoves('white')
 
         # Make sure queen can't jump over white pawn.
         self.assertNotIn(
@@ -135,7 +135,7 @@ class BasicMoveTests(unittest.TestCase):
             errormessage('Can move past black knight', 'Blocked by knight'))
 
     def test_basicmoves_black(self):
-        movelist = self.generator._basicmoves('white')
+        movelist = self.generator.basicmoves('white')
 
         # Make sure queen can't jump over white pawn.
         self.assertNotIn(
@@ -155,9 +155,9 @@ class BasicMoveTests(unittest.TestCase):
 
     def test_basicmoves_wrongcolour(self):
         with self.assertRaises(core.ColourError):
-            self.generator._basicmoves(10)
+            self.generator.basicmoves(10)
         with self.assertRaises(core.ColourError):
-            self.generator._basicmoves('while')
+            self.generator.basicmoves('while')
         return None
 
 

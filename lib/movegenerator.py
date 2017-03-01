@@ -68,7 +68,7 @@ class _CoreMoveGenerator:
             currentposvec += unitrelvec
         return pieceslist
 
-    def _movesforpiece(self, piece, pos):
+    def _movesforpiece(self, piece, pos, defendingmoves=False):
         """Get the moves for the piece at position 'pos'."""
         allowedmoves = list()
         for unitvector in piece.moveunitvectors:
@@ -78,6 +78,8 @@ class _CoreMoveGenerator:
                 endsquare = self.board[movetopos]
                 if endsquare != None:
                     if self._piecesareonsameside(piece, endsquare):
+                        if defendingmoves:
+                            allowedmoves.append(movetopos)
                         break
                     elif piece.type() == pieces.PawnPiece:
                         break
@@ -93,7 +95,7 @@ class _CoreMoveGenerator:
             continue
         return allowedmoves
 
-    def _basicmoves(self, colour):
+    def basicmoves(self, colour, defendingmoves=False):
         """Get the most basic moves, such as simple captures and movement."""
         # Sanity checks.
         if colour not in ('white', 'black'):
@@ -108,7 +110,7 @@ class _CoreMoveGenerator:
                 continue  # Skip over piece if it is different colour.
             startpos = index
             endposlist = core.convertlist(
-                self._movesforpiece(square, startpos), toindex=True
+                self._movesforpiece(square, startpos, defendingmoves), toindex=True
             )
             movepairs = map(lambda x: (startpos, x), endposlist)
             movelist.append(movepairs)
@@ -191,7 +193,7 @@ class MoveGenerator(_CoreMoveGenerator):
             self.board.move(movepair[1], movepair[0])
         return result
 
-    def _onlylegalmoves(self, colour, movepairlist):
+    def onlylegalmoves(self, colour, movepairlist):
         """Filter a list, keeping only legal moves."""
         if colour.lower() == 'white': oppositioncolour = 'black'
         elif colour.lower() == 'black': oppositioncolour = 'white'
@@ -205,7 +207,7 @@ class MoveGenerator(_CoreMoveGenerator):
                 ii += 1
         return movepairlist
 
-    def _pawnpushmoves(self, colour):
+    def pawnpushmoves(self, colour):
         """Gets the moves allowed for pawn pushing."""
         # Determine where the frontline is.
         if colour == 'white':
@@ -230,7 +232,7 @@ class MoveGenerator(_CoreMoveGenerator):
                 continue
         return movelist
 
-    def _pawncapturemoves(self, colour):
+    def pawncapturemoves(self, colour):
         """Finds where pawns are able to capture normally."""
         def capturemoveat(endvec):
             """Determines if there is a capture move at endvec."""
@@ -272,7 +274,7 @@ class MoveGenerator(_CoreMoveGenerator):
                 )
         return capturelist
 
-    def _castlemoves(self, colour):
+    def castlemoves(self, colour):
         """Get the caslting moves."""
         # ---------------------------------------------------------------------
         def isking(position):
@@ -358,7 +360,7 @@ class MoveGenerator(_CoreMoveGenerator):
         return castlemoves
 
 
-    def _enpassantmoves(self, colour):
+    def enpassantmoves(self, colour):
         """Get the en passant moves."""
         def addtomovesifcanenpassant(pos, thelist):
             """Determines if the piece at pos can en passant."""
@@ -397,11 +399,11 @@ class MoveGenerator(_CoreMoveGenerator):
 
     def generatemovelist(self, colour):
         """Generate all of the possible moves for colour."""
-        basicmoves = self._basicmoves(colour)
-        pawnpushmoves = self._pawnpushmoves(colour)
-        pawncapturemoves = self._pawncapturemoves(colour)
-        castlemoves = self._castlemoves(colour)
-        enpassantmoves = self._enpassantmoves(colour)
+        basicmoves = self.basicmoves(colour)
+        pawnpushmoves = self.pawnpushmoves(colour)
+        pawncapturemoves = self.pawncapturemoves(colour)
+        castlemoves = self.castlemoves(colour)
+        enpassantmoves = self.enpassantmoves(colour)
         allmoves = core.combinelists(
             basicmoves,
             pawnpushmoves,
@@ -410,5 +412,5 @@ class MoveGenerator(_CoreMoveGenerator):
             enpassantmoves
         )
 
-        allmoves = self._onlylegalmoves(colour, allmoves)
+        allmoves = self.onlylegalmoves(colour, allmoves)
         return allmoves
