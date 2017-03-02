@@ -5,10 +5,6 @@ Welcome! This is a chess engine built completely in python as an exercise in
 building fully fledged programs. I'll try my very best to make my work clear,
 concise and bug-free but bare with me: I'm a complete amateur at this stuff.
 
-PLEASE NOTE: Lots of this text file is written in present tense for things that
-currently don't exist. This is for me to read and follow, so treat these sections
-as an insight into what is planned.
-
 "You can use an eraser on the drafting table or a sledgehammer on the
 construction site" - Frank Lloyd Wright
 "Beauty of style and harmony and grace and good rhythm depends on simplicity."
@@ -32,7 +28,9 @@ TABLE OF CONTENTS
 SCOPE
 =========
 The engine has two main parts: the front-end and the back-end. The front-end
-handles all of the GUI and user inputs. It is what is 'visible' to the users.
+handles all of the GUI and user inputs along with making each individual
+component of the engine work together. It is what is 'visible' to the users.
+
 The back-end is the heavy lifting of the program. It handles all of the search-
 and-evaluation of the board along with storing all of the information. We will
 look into these two sections separately.
@@ -54,32 +52,35 @@ rules for each note is as follows:
 
     1. The move is prepended with the symbol for the chess piece.
     2. Add the current algebraic position (e.g. 'e6').
-    3. If just moving, the current position is followed by the '->' symbol. If
+    3. If just moving, the current position is followed by the '>' symbol. If
        capturing, the position is instead followed by the 'x' symbol.
     4. Add the final algebraic position.
-    5. Castling, check and checkmate notation is consistent.
+    5. Castling is consistent with kingside as 0-0 and queenside as 0-0-0.
+    6. The engine handles the checks and checkmates on its own.
 
 So as an example, if the King were to move from e1 to f1 the notation for this
-move would be "Ke1->f1". Another example, if a pawn moved from e2 to e4 it would
-use "e2->e4". As a final example, a knight is capturing a piece on a2 from b1
+move would be "Ke1>f1". Another example, if a pawn moved from e2 to e4 it would
+use "e2>e4". As a final example, a knight is capturing a piece on a2 from b1
 which has notation "Na2xb1".
 
 BACK-END
 ---------
-The back end is currently under heavy development and is hard to discuss in any
-significant detail. Please come back later.
-
-Most of the control of the engine is done by the chessboard. It controls when
-the pieces move and if they are allowed to move as well as when to call the
-engine to calculate a move. The chess pieces each are an individual type of
-class, but have very little control. They mainly store information more then do
-any of the heavy lifting of the program.
+The back-end works as individual components that are completely isolated from
+one another. They are interfaced together on the front-end. The components that
+are individually constructed are:
+    1. Core: contains vectors which control relative movement of pieces.
+    2. Chessboard: Stores the logic behind the chessboard and piece storage.
+    3. Pieces: Has the movement of each piece plus any special rules it may have.
+    4. Usercontrol: Handles the GUI and UI of the engine.
+    5. Movegenerator: Finds all of the legal moves on a turn and handles all of
+                      the rules.
+    6. Engine: The brains. Handles the computer's move-making logic.
 
 DEPENDANCY
 -----------
-On a most basic level there is little dependancy on other modules. The testing
-suite only relies on importing default modules while the core library currently
-has no dependancy.
+There is no dependancy on any other modules outside of this repository and the
+basic install of python. It only uses the unittest, time and copy modules in
+the entire code base.
 
 ASCII BOARD LAYOUT
 -------------------
@@ -128,10 +129,9 @@ Design 4: Unicode representation.
 ——╚═══════════════
 —— a b c d e f g h
 
-To start with the board will be rendered with design 1 as it is the simplist to
-create.However I like the look of design 2 and 3 the most, purely because it is
-large enough to read and contains enough information about the board. If I can
-get it to work, design 4 also looks quite nice (albeit a tad small).
+For the moment we are using the first design as it is the simplest to implement
+however design 3 might come in later.
+
 
 FEATURES
 ==========
@@ -139,17 +139,19 @@ Here are the current features along with the future features I wish to
 implement in the engine.
 
 CURRENT FEATURES
-    - A semi-working chess board.
-    - Framework on backline pieces
+    - A playable chessboard for multiple players.
+    - Basic GUI.
+    - Basic UI.
+    - Position evaluator.
 
 FUTURE FEATURES (CURRENT WORKS IN PROGRESS)
-    - A working user interface.
-    - Castling rules.
-    - Check and checkmate rules.
+    - Move-search algorithm.
+    - The engine itself (i.e. single-player mode).
 
 POSSIBLE FEATURES
     - A real GUI using packages like pygame. A collection of simple sprites and
     squares, nothing fancy or animated.
+
 
 ABSTRACTION
 ===============
@@ -206,14 +208,19 @@ SEARCH-AND-EVALUATION:
     [ ] If there are no obvious moves, it should be able to determine the best
     move that maximises its position.
 
+
 PERFORMANCE
 ============
-Other than bug testing there should also be performance testing to see where the
-software chokes. This section is probably more optional since most programs
-created wont be worrying about speed. Anyway, here is an example:
+This section has identified the worst bottlenecks in the program and has timed
+them so that alternative algorithms can be tested and compared against.
 
-- Compounding interest 1000 times:
-    - Via old method  ->  2.113s
-    - Via new method  ->  1.566s
-    - Using lists     ->  2.778s
-    - Using tuples    ->  2.619s
+- MoveGenerator methods (10,000 loop execution time, two kings):
+    - basicmoves                     -> 0.99419593811s
+    - generatemovelist               -> 14.155023098s
+    - illegalmove                    -> 1.649132967s
+    - initalise and generatemovelist -> 18.5522060394s
+    - kingincheck                    -> 1.16838288307s
+    - onlylegalmoves                 -> 11.1083350182s
+
+- Chessboard methods (10,000 loop execution time, no pieces):
+    - duplicateboard -> 15.3806021214s
