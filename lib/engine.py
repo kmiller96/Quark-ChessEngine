@@ -113,6 +113,7 @@ class Evaluator:
         netscore = 0
         netscore += self.materialscore(board)
         netscore += self.mobilityscore(board)
+        netscore += self.pawnstructurescore(board)
         return netscore
 
 
