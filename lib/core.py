@@ -5,6 +5,8 @@
 # 737369626c65207461736b20696e746f207365766572616c207665727920736d616c6c20706f73
 # 7369626c65207461736b732e
 
+# TODO: Figure out whether to use convert function or position class!
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from copy import deepcopy
 
@@ -45,8 +47,8 @@ def oppositecolour(colour):
 
 def combinelists(*lists):
     """Combine lists together into a single list (i.e. unflatten lists)."""
-    if any([not isinstance(x, list) for x in lists]):
-        raise TypeError("Only lists can be used in this function.")
+    if any([not isinstance(x, (list, tuple)) for x in lists]):
+        raise TypeError("Only lists and tuples can be used in this function.")
     return [element for sublist in lists for element in sublist]
 
 def flattenlist(listoflists):
@@ -191,71 +193,60 @@ class Position:
     """
 
     def __init__(self, indexorcoordinateorvector):
-        assert (
-            self._isindex(indexorcoordinateorvector) or
-            self._iscoordinate(indexorcoordinateorvector) or
-            self._isvector(indexorcoordinateorvector)
-        ), "The postion on the board is either a index, coordinate or vector."
+        self._position = self._toindex(indexorcoordinateorvector)
+        return None
 
-        self._locked = False
-        self.index = self._toindex(indexorcoordinateorvector)
-        self.coordinate = self._tocoordinate(indexorcoordinateorvector)
-        self.vector = self._tovector(indexorcoordinateorvector)
-        self._locked = True
-
-    def __setattr__(self, name, value):
-        if name in ('index', 'coordinate', 'vector'):
-            if self._locked:
-                raise RuntimeError(
-                "You are not permitted to make this change. Make a new instance"
-                " of this class to change the postiion on the board."
-                )
-            else:
-                pass
+    def _toindex(self, pos):
+        """Comvert the position into an index."""
+        if isinstance(pos, int):  # If index.
+            return pos
+        elif isinstance(pos, (tuple, list)) and len(pos) == 2:  # If coordinate.
+             return pos[0]*8 + pos[1]
+        elif isinstance(pos, Vector):  # If vector
+            return pos.vector[0]*8 + pos.vector[1]
         else:
-            pass
-        self.__dict__[name] = value
+            raise TypeError("The position passed must be either an index, coordinate or vector.")
         return None
 
-    @staticmethod
-    def _isindex(x):
-        return isinstance(x, int)
+    @property
+    def index(self):
+        return self._position
 
-    @staticmethod
-    def _iscoordinate(x):
-        return (isinstance(x, (tuple, list)) and len(x) == 2)
+    @index.setter
+    def index(self, value):
+        if 0 <= value <= 63:
+            self._position = value
+        else:
+            raise IndexError("The index specifed %r is off the board." % value)
 
-    @staticmethod
-    def _isvector(x):
-        return isinstance(x, Vector)
+    @property
+    def coordinate(self):
+        return (self._position/8, self._position%8)
 
-    def _toindex(self, x):
-        if self._isindex(x):
-            return x
-        elif self._isvector(x):
-            x = x.vector
-            return x[0]*8 + x[1]
-        elif self._iscoordinate(x):
-            return x[0]*8 + x[1]
-        return None
+    @coordinate.setter
+    def coordinate(self, value):
+        try:
+            if all([0 <= x <= 7 for x in value]):
+                self._position = self._toindex(value)
+            else:
+                raise IndexError("One or more indices specified is off the board.")
+        except TypeError:
+            raise TypeError(("To specify the position as a coordinate, you need"
+                             " to give a tuple or list of length 2."))
 
-    def _tocoordinate(self, x):
-        if self._isindex(x):
-            return (x/8, x % 8)
-        elif self._isvector(x):
-            return x.vector
-        elif self._iscoordinate(x):
-            return x
-        return None
+    @property
+    def vector(self):
+        return Vector(self._position/8, self._position%8)
 
-    def _tovector(self, x):
-        if self._isindex(x):
-            return Vector(x/8, x % 8)
-        elif self._iscoordinate(x):
-            return Vector(*x)
-        elif self._isvector(x):
-            return x
-        return None
+    @vector.setter
+    def vector(self, value):
+        try:
+            if isinstance(value, Vector):
+                self._position = self._toindex(value)
+            else:
+                raise TypeError
+        except TypeError:
+            raise TypeError("You must pass a vector from the vector class.")
 
 
  #     # #######  #####  ####### ####### ######   #####
