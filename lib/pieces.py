@@ -7,7 +7,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from lib import core
 
-class BasePiece:
+class BasePiece(object):
     """The class all chess pieces inherit from."""
 
     def __init__(self, colour, notationsymbol, moveunitvectors, crawler=False):
@@ -66,9 +66,14 @@ class RookPiece(BasePiece):
     """The class for the Rook."""
 
     def __init__(self, colour):
-        BasePiece.__init__(self, colour, 'R',
+        super(self.__class__, self).__init__(
+            colour=colour, notationsymbol='R',
             moveunitvectors=(
-                core.Vector(1,0), core.Vector(0,1), core.Vector(-1, 0), core.Vector(0, -1))
+                core.Vector(1,0),
+                core.Vector(0,1),
+                core.Vector(-1, 0),
+                core.Vector(0, -1)
+            )
         )
         return None
 
@@ -77,11 +82,14 @@ class KnightPiece(BasePiece):
     """The class for the knight."""
 
     def __init__(self, colour):
-        BasePiece.__init__(self, colour, 'N',
+        super(self.__class__, self).__init__(
+            colour=colour, notationsymbol='N', crawler=True,
             moveunitvectors=(
-                core.Vector(2, 1), core.Vector(1, 2), core.Vector(2, -1), core.Vector (1, -2),
-                core.Vector(-2, -1), core.Vector(-1, -2), core.Vector(-2, 1), core.Vector (-1, 2)),
-            crawler=True
+                core.Vector(2, 1), core.Vector(1, 2),
+                core.Vector(2, -1), core.Vector (1, -2),
+                core.Vector(-2, -1), core.Vector(-1, -2),
+                core.Vector(-2, 1), core.Vector (-1, 2)
+            )
         )
         return None
 
@@ -90,9 +98,14 @@ class BishopPiece(BasePiece):
     """The class for the bishop."""
 
     def __init__(self, colour):
-        BasePiece.__init__(self, colour, 'B',
+        super(self.__class__, self).__init__(
+            colour=colour, notationsymbol='B',
             moveunitvectors=(
-                core.Vector(1, 1), core.Vector(1, -1), core.Vector(-1, -1), core.Vector(-1, 1))
+                core.Vector(1, 1),
+                core.Vector(1, -1),
+                core.Vector(-1, -1),
+                core.Vector(-1, 1)
+            )
         )
         return None
 
@@ -100,10 +113,14 @@ class QueenPiece(BasePiece):
     """The class for the queen."""
 
     def __init__(self, colour):
-        BasePiece.__init__(self, colour, 'Q',
+        super(self.__class__, self).__init__(
+            colour=colour, notationsymbol='Q',
             moveunitvectors=(
-                core.Vector(1, 0), core.Vector(0, 1), core.Vector(1, 1), core.Vector(1, -1),
-                core.Vector(-1, 0), core.Vector(0, -1), core.Vector(-1, -1), core.Vector(-1, 1))
+                core.Vector(1, 0), core.Vector(0, 1),
+                core.Vector(1, 1), core.Vector(1, -1),
+                core.Vector(-1, 0), core.Vector(0, -1),
+                core.Vector(-1, -1), core.Vector(-1, 1)
+            )
         )
         return None
 
@@ -112,11 +129,14 @@ class KingPiece(BasePiece):
     """The class for the King"""
 
     def __init__(self, colour):
-        BasePiece.__init__(self, colour, 'K',
+        super(self.__class__, self).__init__(
+            colour=colour, notationsymbol='K', crawler=True,
             moveunitvectors=(
-                core.Vector(1, 0), core.Vector(0, 1), core.Vector(1, 1), core.Vector(1, -1),
-                core.Vector(-1, 0), core.Vector(0, -1), core.Vector(-1, -1), core.Vector(-1, 1)),
-            crawler=True
+                core.Vector(1, 0), core.Vector(0, 1),
+                core.Vector(1, 1), core.Vector(1, -1),
+                core.Vector(-1, 0), core.Vector(0, -1),
+                core.Vector(-1, -1), core.Vector(-1, 1)
+            )
         )
         return None
 
@@ -125,14 +145,12 @@ class PawnPiece(BasePiece):
     """The very special class for the pawn."""
 
     def __init__(self, colour):
-        if colour == 'white':
-            movevector = core.Vector(1, 0)
-        elif colour == 'black':
-            movevector = core.Vector(-1, 0)
-        else:
-            raise core.ColourError()
+        if colour == 'white': movevector = core.Vector(1, 0)
+        elif colour == 'black': movevector = core.Vector(-1, 0)
+        else: raise core.ColourError()
 
-        BasePiece.__init__(self, colour, "P",
-            moveunitvectors=(movevector,), crawler=True
+        super(self.__class__, self).__init__(
+            colour=colour, notationsymbol="P", crawler=True,
+            moveunitvectors=(movevector,)
         )
         return None
