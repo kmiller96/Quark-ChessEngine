@@ -26,11 +26,9 @@ class BasePiece:
 
         # Assignment of attributes.
         self.colour = colour.lower()
-
-        if colour == 'white':
-            notationsymbol = notationsymbol.upper()
-        else:
-            notationsymbol = notationsymbol.lower()
+        
+        if colour == 'white': notationsymbol = notationsymbol.upper()
+        else: notationsymbol = notationsymbol.lower()
         self.notationsymbol = notationsymbol
 
         for vec in moveunitvectors:
