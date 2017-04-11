@@ -20,10 +20,7 @@ from copy import deepcopy
 
 def xor(x, y):
     """An XOR gate for two condition checks."""
-    if ((x and y) or (not x and not y)):
-        return False
-    else:
-        return True
+    return ((x or y) and (not (x and y)))
 
 def xnor(x, y):
     """An XNOR gate, which is simply a NOT XOR gate."""
