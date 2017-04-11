@@ -20,6 +20,15 @@ from copy import deepcopy
  #        #####  #     #  #####     #    ### ####### #     #  #####
 
 
+def assert_otherisvector(func):
+    """A decorator that confirms that the value(s) passed are vectors."""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except AttributeError:
+            raise TypeError("Other must be a vector.")
+    return wrapper
+
 def xor(x, y):
     """An XOR gate for two condition checks."""
     return ((x or y) and (not (x and y)))
@@ -55,6 +64,8 @@ def flattenlist(listoflists):
     """Flattens a 2D list out."""
     return [x for lst in listoflists for x in lst]
 
+# TODO: Refactor the code so that it doesn't use this function! Force it to use
+# the position class.
 def convert(indexorcoordinateorvector,
             tocoordinate=False, toindex=False, tovector=False):
     """Converts the input into a coordinate, vector or index.
@@ -258,6 +269,7 @@ class Position:
     #    #######  #####     #    ####### #     #  #####
 
 
+# TODO: Make it so that the first value is the file and the second the rank.
 class Vector:
     """Creates a 2D vector for the chess engine.
 
@@ -290,6 +302,7 @@ class Vector:
             raise TypeError("Both initialisation parameters must be integers.")
         else:
             self.vector = (rank, File)
+
     def __str__(self):
         """String representation of vector."""
         return str(self.vector)
@@ -359,77 +372,55 @@ class Vector:
         except AttributeError:
             raise TypeError("Other must be a vector or scalar.")
 
+    @assert_otherisvector
     def __eq__(self, other):
         """Implement equality operations."""
-        try:
-            return self.vector == other.vector
-        except AttributeError:
-            raise TypeError(
-                "Equality can only be determined against another vector.")
+        return self.vector == other.vector
 
+    @assert_otherisvector
     def __ne__(self, other):
         """Implement unequality operations."""
-        try:
-            return self.vector != other.vector
-        except AttributeError:
-            raise TypeError(
-                "Equality can only be determined against another vector.")
+        return self.vector != other.vector
 
+    @assert_otherisvector
     def __add__(self, other):
         """Allows for vector addition with the use of the + character."""
-        try:
-            return Vector(*self._add(other))
-        except AttributeError:
-            raise TypeError("Other must be a vector.")
+        return Vector(*self._add(other))
 
+    @assert_otherisvector
     def __radd__(self, other):
         """Reversed __add__ method."""
-        try:
-            return Vector(*self._add(other))
-        except AttributeError:
-            raise TypeError("Other must be a vector.")
+        return Vector(*self._add(other))
 
+    @assert_otherisvector
     def __iadd__(self, other):
         """ The += operation."""
-        try:
-            return Vector(*self._add(other))
-        except AttributeError:
-            raise TypeError("Other must be a vector.")
+        return Vector(*self._add(other))
 
+    @assert_otherisvector
     def __sub__(self, other):
         """Allows for vector subtraction with the use of the - character."""
-        try:
-            return Vector(*self._add(-1*other))
-        except AttributeError:
-            raise TypeError("Other must be a vector.")
+        return Vector(*self._add(-1*other))
 
+    @assert_otherisvector
     def __rsub__(self, other):
         """Reversed __sub__ method."""
-        try:
-            return Vector(*self._add(-1*other))
-        except AttributeError:
-            raise TypeError("Other must be a vector.")
+        return Vector(*self._add(-1*other))
 
+    @assert_otherisvector
     def __isub__(self, other):
         """The -= operation."""
-        try:
-            return Vector(*self._add(-1*other))
-        except AttributeError:
-            raise TypeError("Other must be a vector.")
+        return Vector(*self._add(-1*other))
 
+    @assert_otherisvector
     def __mul__(self, other):
         """Allows for dot product and scalar multiplication."""
-        try:
-            return self._multiply(other)
-        except AttributeError:
-            raise TypeError("Other must be a vector.")
+        return self._multiply(other)
 
+    @assert_otherisvector
     def __rmul__(self, other):
         """Reversed __mul__ method."""
-        try:
-            return self._multiply(other)
-        except AttributeError:
-            raise TypeError("Other must be a vector.")
+        return self._multiply(other)
 
     def __abs__(self):
         """Magnitude of the vector"""
