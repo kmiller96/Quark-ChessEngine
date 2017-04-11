@@ -32,19 +32,16 @@ def onlyone(iterable):
     for ii in iterable:
         if count > 1:
             return False  # Stop iterating if there is more then one.
-        elif ii:
+        elif ii:  # If true.
             count += 1
             continue
-    return True
+    return True  # If went through loop sucessfully, return True.
 
 def oppositecolour(colour):
     """Gets the opposite colour."""
-    if colour == 'white':
-        return 'black'
-    elif colour == 'black':
-        return 'white'
-    else:
-        raise ColourError()
+    if colour == 'white': return 'black'
+    elif colour == 'black': return 'white'
+    else: raise ColourError()
 
 def combinelists(*lists):
     """Combine lists together into a single list (i.e. unflatten lists)."""
