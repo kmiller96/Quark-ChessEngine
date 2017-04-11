@@ -26,7 +26,7 @@ class BasePiece:
 
         # Assignment of attributes.
         self.colour = colour.lower()
-        
+
         if colour == 'white': notationsymbol = notationsymbol.upper()
         else: notationsymbol = notationsymbol.lower()
         self.notationsymbol = notationsymbol
@@ -43,11 +43,11 @@ class BasePiece:
 
     def __eq__(self, other):
         """Controls equality. Checks to see if the same type."""
-        return other.__class__.__name__ == self.__class__.__name__
+        return str(other) == str(self)
 
     def __ne__(self, other):
         """Controls inequality."""
-        return other.__class__.__name__ != self.__class__.__name__
+        return str(other) != str(self)
 
     @staticmethod
     def _assertisvector(vector):
