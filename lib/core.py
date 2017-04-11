@@ -457,7 +457,7 @@ class UnknownPieceError(TypeError):
 
     def __init__(self, errormsg=None):
         if errormsg == None:
-            errormsg = "I don't know the piece passed."
+            errormsg = "The piece passed isn't a valid type."
         TypeError.__init__(self, errormsg)
 
 

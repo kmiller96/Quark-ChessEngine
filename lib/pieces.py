@@ -4,6 +4,8 @@
 # 737369626c65207461736b20696e746f207365766572616c207665727920736d616c6c20706f73
 # 7369626c65207461736b732e
 
+# TODO: Come back and fix vectors when they are refactored.
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from lib import core
 
