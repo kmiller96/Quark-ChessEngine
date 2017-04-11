@@ -61,11 +61,6 @@ class BasePiece:
         """Returns the class of which this piece inherits from."""
         return eval(self.__class__.__name__)
 
-    def distancefromselfto(self, moveto):
-        # TODO: Move this method into somewhere else, or remove it.
-        """Find the relative vector between board index and current position."""
-        return core.convert(moveto, tovector=True) - self._positionvector
-
 
 class RookPiece(BasePiece):
     """The class for the Rook."""
