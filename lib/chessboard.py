@@ -187,7 +187,7 @@ class ChessBoard(_ChessBoardCore):
         for ii, square in enumerate(self._board):
             if square is None:
                 continue
-            elif ((piecetype is square.type())
+            elif ((piecetype is square.type)
                     and square.colour == colour):
                 piecepositions.append(ii)
         return piecepositions
@@ -217,7 +217,7 @@ class ChessBoard(_ChessBoardCore):
 
         # See if en passant is in play.
         if (
-            (self._board[start.index].type() == pieces.PawnPiece)  # Is pawn and...
+            (self._board[start.index].type == pieces.PawnPiece)  # Is pawn and...
             and (start.coordinate[0] == 1 or start.coordinate[0] == 6)
             and (abs(start.coordinate[0] - end.coordinate[0]) == 2)  # ..is pushing
             ):

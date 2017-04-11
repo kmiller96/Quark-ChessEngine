@@ -81,7 +81,7 @@ class _CoreMoveGenerator:
                         if defendingmoves:
                             allowedmoves.append(movetopos)
                         break
-                    elif piece.type() == pieces.PawnPiece:
+                    elif piece.type == pieces.PawnPiece:
                         break
                     else:  # If opposition piece.
                         allowedmoves.append(movetopos)
@@ -151,7 +151,7 @@ class _CoreMoveGenerator:
             square = self.board[ii]
             if square == None:
                 continue
-            elif square.type() == pieces.PawnPiece and square.colour == colour:
+            elif square.type == pieces.PawnPiece and square.colour == colour:
                 return True  # NOTE: There should only ever be one pawn on backline.
         return False
 
@@ -222,7 +222,7 @@ class MoveGenerator(_CoreMoveGenerator):
             square = self.board[ii]
             if square == None:
                 continue
-            elif square.type() == pieces.PawnPiece:
+            elif square.type == pieces.PawnPiece:
                 # Make sure only pawn is on frontline and up to push.
                 if len(self._piecesbetween(ii, ii + push, inclusive=True)) != 1:
                     continue
@@ -280,7 +280,7 @@ class MoveGenerator(_CoreMoveGenerator):
         def isking(position):
             """Determine if the piece at position is a king."""
             try:
-                result = (self.board[position].type() == pieces.KingPiece)
+                result = (self.board[position].type == pieces.KingPiece)
             except AttributeError:
                 result = False  # If position is empty, return false.
             return result
@@ -288,7 +288,7 @@ class MoveGenerator(_CoreMoveGenerator):
         def isrook(position):
             """Determine if the piece at position is a rook."""
             try:
-                result = (self.board[position].type() == pieces.RookPiece)
+                result = (self.board[position].type == pieces.RookPiece)
             except AttributeError:
                 result = False  # If position is empty, return false.
             return result
@@ -370,7 +370,7 @@ class MoveGenerator(_CoreMoveGenerator):
             square = self.board[pos]
             if square == None:
                 return thelist
-            elif square.type() == pieces.PawnPiece:
+            elif square.type == pieces.PawnPiece:
                 if square.colour == colour:
                     startindex = core.convert(pos, toindex=True)
                     endindex = core.convert((capturerank, file_), toindex=True)
