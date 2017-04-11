@@ -37,6 +37,7 @@ class BasePiece(object):
     """
 
     def __init__(self, colour, notationsymbol, moveunitvectors, crawler=False):
+        """"Initialise the piece. Performs sanity checks on inputs."""
         # Sanity checks.
         try:
             assert isinstance(crawler, bool)
@@ -69,19 +70,26 @@ class BasePiece(object):
 
     def __eq__(self, other):
         """Controls equality. Checks to see if the same type."""
-        return str(other) == str(self)
+        try:
+            return other.type == self.type
+        except AttributeError:
+            return False
 
     def __ne__(self, other):
-        """Controls inequality."""
-        return str(other) != str(self)
+        """Controls inequality. Just not-version of __eq__."""
+        try:
+            return other.type != self.type
+        except AttributeError:
+            return True
+
 
     @staticmethod
     def _assertisvector(vector):
-        """A sanity check to make sure all items in vectorlist are vectors."""
+        """A sanity check to make sure variable is a vectors."""
         try:
             assert isinstance(vector, core.Vector)
         except AssertionError:
-            raise TypeError("The item %r isn't a vector." % vector)
+            raise TypeError("The item %r isn't a vector, instead %r." % (vector, type(vector)))
 
     @property
     def type(self):
