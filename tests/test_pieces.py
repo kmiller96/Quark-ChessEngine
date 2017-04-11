@@ -96,7 +96,7 @@ class BasePieceCalls(unittest.TestCase):
 
     def test_type(self):
         self.assertTrue(
-            self.piece.type() is pieces.BasePiece,
+            self.piece.type is pieces.BasePiece,
             errormessage(
                 "%s is not BasePiece" % str(self.piece),
                 "%s is BasePiece" % str(self.piece)
@@ -120,10 +120,10 @@ class TestKnightPiece(unittest.TestCase):
 
     def test_type(self):
         self.assertTrue(
-            self.piece.type() is pieces.KnightPiece,
+            self.piece.type is pieces.KnightPiece,
             errormessage(
-                "%s is not %s" % (self.piece.type(), "KnightPiece"),
-                "%s is %s" % (self.piece.type(), "KnightPiece")
+                "%s is not %s" % (self.piece.type, "KnightPiece"),
+                "%s is %s" % (self.piece.type, "KnightPiece")
             )
         )
         return None
@@ -153,10 +153,10 @@ class TestBishopPiece(unittest.TestCase):
 
     def test_type(self):
         self.assertTrue(
-            self.piece.type() is pieces.BishopPiece,
+            self.piece.type is pieces.BishopPiece,
             errormessage(
-                "%s is not %s" % (self.piece.type(), "BishopPiece"),
-                "%s is %s" % (self.piece.type(), "BishopPiece")
+                "%s is not %s" % (self.piece.type, "BishopPiece"),
+                "%s is %s" % (self.piece.type, "BishopPiece")
             )
         )
         return None
@@ -186,10 +186,10 @@ class TestQueenPiece(unittest.TestCase):
 
     def test_type(self):
         self.assertTrue(
-            self.piece.type() is pieces.QueenPiece,
+            self.piece.type is pieces.QueenPiece,
             errormessage(
-                "%s is not %s" % (self.piece.type(), "QueenPiece"),
-                "%s is %s" % (self.piece.type(), "QueenPiece")
+                "%s is not %s" % (self.piece.type, "QueenPiece"),
+                "%s is %s" % (self.piece.type, "QueenPiece")
             )
         )
         return None
@@ -219,10 +219,10 @@ class TestKingPiece(unittest.TestCase):
 
     def test_type(self):
         self.assertTrue(
-            self.piece.type() is pieces.KingPiece,
+            self.piece.type is pieces.KingPiece,
             errormessage(
-                "%s is not %s" % (self.piece.type(), "KingPiece"),
-                "%s is %s" % (self.piece.type(), "KingPiece")
+                "%s is not %s" % (self.piece.type, "KingPiece"),
+                "%s is %s" % (self.piece.type, "KingPiece")
             )
         )
         return None
@@ -252,10 +252,10 @@ class TestRookPiece(unittest.TestCase):
 
     def test_type(self):
         self.assertTrue(
-            self.piece.type() is pieces.RookPiece,
+            self.piece.type is pieces.RookPiece,
             errormessage(
-                "%s is not %s" % (self.piece.type(), "RookPiece"),
-                "%s is %s" % (self.piece.type(), "RookPiece")
+                "%s is not %s" % (self.piece.type, "RookPiece"),
+                "%s is %s" % (self.piece.type, "RookPiece")
             )
         )
         return None
@@ -285,10 +285,10 @@ class TestPawnPiece(unittest.TestCase):
 
     def test_type(self):
         self.assertTrue(
-            self.piece.type() is pieces.PawnPiece,
+            self.piece.type is pieces.PawnPiece,
             errormessage(
-                "%s is not %s" % (self.piece.type(), "PawnPiece"),
-                "%s is %s" % (self.piece.type(), "PawnPiece")
+                "%s is not %s" % (self.piece.type, "PawnPiece"),
+                "%s is %s" % (self.piece.type, "PawnPiece")
             )
         )
         return None

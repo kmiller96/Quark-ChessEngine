@@ -8,7 +8,33 @@
 from lib import core
 
 class BasePiece(object):
-    """The class all chess pieces inherit from."""
+    """The class all chess pieces inherit from.
+
+    Since all of the chess pieces behave nearly identically, bar their legal
+    moves, all of the pieces inherit from this class. It controls things like
+    how comparisons between pieces are made and how they are created. For the
+    most part however they are just containers for other classes to use easily.
+
+    PUBLIC ATTRIBUTES
+    ==================
+    :type: Returns the class name.
+
+    PUBLIC METHODS
+    ===============
+    :__init__: Takes in parameters of the piece colour, its notationsymbol,
+               its legal moves and an optional parameter on if it can only move
+               one unit of the legal moves.
+    :__str__:  Prints the name of the piece. If not overwritten in the children
+               it uses the class name.
+    :__eq__:   Determines if the other is the same piece (as defined by class,
+               not by instance).
+    :__ne__:   Same as the __eq__ class.
+
+    PRIVATE METHODS
+    ================
+    :_assertisvector: Asserts that the value passed is a vector. Returns
+                      TypeError if that isn't the case.
+    """
 
     def __init__(self, colour, notationsymbol, moveunitvectors, crawler=False):
         # Sanity checks.
@@ -57,6 +83,7 @@ class BasePiece(object):
         except AssertionError:
             raise TypeError("The item %r isn't a vector." % vector)
 
+    @property
     def type(self):
         """Returns the class of which this piece inherits from."""
         return eval(self.__class__.__name__)
