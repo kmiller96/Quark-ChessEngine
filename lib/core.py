@@ -206,8 +206,21 @@ class Position:
     def __init__(self, indexorcoordinateorvector):
         self._position = None  # Internal storage of position.
         self.position = indexorcoordinateorvector  # Let user pass in whatever type.
-        self.raiseError = lambda: raise RuntimeError("A position hasn't been specified.")
         return None
+
+    def __eq__(self, other):
+        """Test if same position."""
+        try:
+            return self._position == other._position
+        except AttributeError:
+            raise TypeError("Other must also be from Position class")
+
+    def __ne__(self, other):
+        """Test if different positions."""
+        try:
+            return self._position != other._position
+        except AttributeError:
+            raise TypeError("Other must also be from Position class")
 
     @property
     def position(self):
@@ -224,7 +237,6 @@ class Position:
 
     @property
     def index(self):
-        if self._position == None: self.raiseError()
         return self._position
 
     @index.setter
@@ -236,7 +248,6 @@ class Position:
 
     @property
     def coordinate(self):
-        if self._position == None: self.raiseError()
         return (self._position/8, self._position%8)
 
     @coordinate.setter
@@ -252,7 +263,6 @@ class Position:
 
     @property
     def vector(self):
-        if self._position == None: self.raiseError()
         return Vector(self._position/8, self._position%8)
 
     @vector.setter
@@ -474,14 +484,4 @@ class BadVectorError(NotImplementedError):
         if errormsg == None:
             errormsg = "The vector isn't valid."
         NotImplementedError.__init__(self, errormsg)
-
-
-class EmptySquareError(IndexError):
-    """Called if the square is empty when it should be occupied."""
-
-    def __init__(self, position, errormsg=None):
-        if errormsg == None:
-            errormsg = "The square at %i isn't occupied!" % \
-                convert(position, toindex=True)
-        IndexError.__init__(self, errormsg)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.:.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
