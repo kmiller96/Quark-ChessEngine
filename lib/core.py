@@ -204,9 +204,23 @@ class Position:
     """
 
     def __init__(self, indexorcoordinateorvector):
-        self._position = None
+        self._position = None  # Internal storage of position.
+        self.position = indexorcoordinateorvector  # Let user pass in whatever type.
         self.raiseError = lambda: raise RuntimeError("A position hasn't been specified.")
         return None
+
+    @property
+    def position(self):
+        raise RuntimeError("You must get the position from 'index', 'coordinate' or 'vector' attributes.")
+
+    @position.setter
+    def position(self, value):
+        if isinstance(value, int):
+            self.index = value
+        elif isinstance(value, (tuple, list)):
+            self.coordinate = value
+        elif isinstance(value, Vector):
+            self.vector = value
 
     @property
     def index(self):
