@@ -204,23 +204,13 @@ class Position:
     """
 
     def __init__(self, indexorcoordinateorvector):
-        self._position = self._toindex(indexorcoordinateorvector)
-        return None
-
-    def _toindex(self, pos):
-        """Comvert the position into an index."""
-        if isinstance(pos, int):  # If index.
-            return pos
-        elif isinstance(pos, (tuple, list)) and len(pos) == 2:  # If coordinate.
-             return pos[0]*8 + pos[1]
-        elif isinstance(pos, Vector):  # If vector
-            return pos.vector[0]*8 + pos.vector[1]
-        else:
-            raise TypeError("The position passed must be either an index, coordinate or vector.")
+        self._position = None
+        self.raiseError = lambda: raise RuntimeError("A position hasn't been specified.")
         return None
 
     @property
     def index(self):
+        if self._position == None: self.raiseError()
         return self._position
 
     @index.setter
@@ -232,6 +222,7 @@ class Position:
 
     @property
     def coordinate(self):
+        if self._position == None: self.raiseError()
         return (self._position/8, self._position%8)
 
     @coordinate.setter
@@ -247,6 +238,7 @@ class Position:
 
     @property
     def vector(self):
+        if self._position == None: self.raiseError()
         return Vector(self._position/8, self._position%8)
 
     @vector.setter
