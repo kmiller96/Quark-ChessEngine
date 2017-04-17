@@ -10,14 +10,15 @@
 from lib import core, vectors, pieces
 from copy import deepcopy
 
+
 class _ChessBoardCore:
     """Contains the core methods, plus the __init__ method."""
 
     def __init__(self):
         """Initialises the board."""
         self._board = [None] * 64
-        self.playercolour = 'white'
-        self.computercolour = 'black'
+        self._colours = core.COLOURS
+        self.playercolour, self.computercolour = self._colours
 
         # Define initial states
         self.cancastleleft = True
@@ -61,20 +62,18 @@ class _ChessBoardCore:
         for square in self._board:
             yield square
 
-    def _equality(self, other):
-        """Handles the equality of two chessboards."""
-        return self._board == other._board
-
     def __eq__(self, other):
+        # REVIEW: Why do I need this method?
         try:
-            return self._equality(other)
+            return self._board == other._board
         except AttributeError:
             if other == None: return False
             else: raise TypeError("Other must be chessboard.")
 
     def __ne__(self, other):
+        # REVIEW: Why do I need this method?
         try:
-            return not self._equality(other)
+            return self._board != other._board
         except AttributeError:
             if other == None: return True
             else: raise TypeError("Other must be chessboard.")
@@ -83,74 +82,32 @@ class _ChessBoardCore:
         """Creates an instance of the chess board exactly as it is now."""
         return deepcopy(self)
 
+    def findpiece(self, piecetype, colour):
+        """Finds all instances of piece on the board that belong to one side."""
+        piecepositions = list()
+        for ii, square in enumerate(self._board):
+            if square is None:
+                continue
+            elif ((piecetype is square.type)
+                    and square.colour == colour):
+                piecepositions.append(ii)
+        return piecepositions
+
     def setplayercolour(self, colour):
         """Assigns a colour to the player."""
-        errormsg = "Colour of the piece must be 'white' or 'black'"
-        try:
-            assert colour.lower() in ('white', 'black')
-            if colour.lower() == 'white':
-                self.playercolour = 'white'
-                self.computercolour = 'black'
-            elif colour.lower() == 'black':
-                self.playercolour = 'black'
-                self.computercolour = 'white'
-            else:
-                raise RuntimeError("!!!UNKNOWN ERROR!!!")
-        except AssertionError:
-            raise NameError(errormsg)
-        except AttributeError:
-            raise TypeError(errormsg)
-        return None
-
-    def isplayercolour(self, colour):
-        """Determines if the colour passed is the player's colour or not."""
-        errormsg = "The colour of the piece must be 'white' or 'black'"
-        try:
-            assert colour.lower() in ('white', 'black')
-        except AssertionError:
-            raise NameError(errormsg)
-        except AttributeError:
-            raise TypeError(errormsg)
-        else:
-            return (colour.lower() == self.playercolour)
+        if colour.lower() == self._colours[0]:  # If player = white.
+            self.playercolour, self.computercolour = self._colours
+        elif colour.lower() == self._colours[1]:  # If player = black.
+            self.playercolour, self.computercolour = self._colours[::-1]
+        else:  # Not a valid colour specified.
+            raise core.ColourError()
+        return self
 
     def positiononboard(self, position):
         """Returns boolean depending on if the position is on the board."""
-        try:
-            pos = core.convert(position, tocoordinate=True)
-        except TypeError:
-            raise TypeError("Position must be an index, coordinate or vector.")
-        else:
-            return (0 <= pos[0] <= 7 and 0 <= pos[1] <= 7)
+        pos = core.Position()
+        return 0 <= pos.index <= 63
 
-    def assertPositionOnBoard(self, position):
-        """Asserts that the position is valid."""
-        try:
-            index = core.convert(position, toindex=True)
-            self._board[index]
-        except IndexError:  # If off board.
-            raise AssertionError("The position %r is off the board." % position)
-        return None
-
-    def assertIsUnoccupied(self, position):
-        """Asserts that the square is free and unoccupied."""
-        try:
-            index = core.convert(position, toindex=True)
-            assert self._board[index] == None, "The target square is occupied."
-        except IndexError:
-            raise IndexError("The index used is off the board!")
-        return None
-
-    def assertIsOccupied(self, position):
-        """Asserts that the square is occupied."""
-        try:
-            index = core.convert(position, toindex=True)
-            assert self._board[index] != None
-        except IndexError:
-            raise IndexError("The index used is off the board!")
-        except AssertionError:
-            raise core.EmptySquareError(position)
-        return None
 
 class ChessBoard(_ChessBoardCore):
     """The public class that is the chessboard.
@@ -181,61 +138,40 @@ class ChessBoard(_ChessBoardCore):
             self._board[index] = backline[index-56](colour='black')
         return None
 
-    def findpiece(self, piecetype, colour):
-        """Finds all instances of piece on the board that belong to one side."""
-        piecepositions = list()
-        for ii, square in enumerate(self._board):
-            if square is None:
-                continue
-            elif ((piecetype is square.type)
-                    and square.colour == colour):
-                piecepositions.append(ii)
-        return piecepositions
-
-    def setenpassantfor(self, colour, whichfile):
-        """Sets enpassant for a colour"""
-        if colour not in ('white', 'black'):
-            raise core.ColourError()
-
-        if core.xnor(colour == 'white', self.playercolour == 'white'):
-            self.enpassantforplayer = whichfile
-        else:
-            self.enpassantforcomputer = whichfile
-        return None
-
     def move(self, startpos, endpos, force=True):
         """A clean way of moving pieces around on the board."""
-        # Sanity checks and assertions.
-        assert startpos != endpos, \
-            "To move the piece, the start and end points must be different."
-        start = core.Position(startpos)
-        end = core.Position(endpos)
-        self.assertPositionOnBoard(start.index)
-        self.assertPositionOnBoard(end.index)
-        self.assertIsOccupied(start.index)
-        if not force: self.assertIsUnoccupied(end.index)
+        # Get start and end positions.
+        start, end = core.Position(startpos), core.Position(endpos)
+        if start == end:
+            raise IndexError("The start and end points must be different.")
+
+        # Check that start position has a piece on it.
+        if self._board[start.index] == None:
+            raise core.IllegalMoveError("There is no piece at %s" % start.coordinate)
 
         # See if en passant is in play.
-        if (
-            (self._board[start.index].type == pieces.PawnPiece)  # Is pawn and...
-            and (start.coordinate[0] == 1 or start.coordinate[0] == 6)
-            and (abs(start.coordinate[0] - end.coordinate[0]) == 2)  # ..is pushing
-            ):
-            self.setenpassantfor(
-                core.oppositecolour(self._board[start.index].colour),
-                start.coordinate[1])
+        # REVIEW: Should the board handle this or the 'brain'?
+        # if (
+        #     (self._board[start.index].type == pieces.PawnPiece)  # Is pawn and...
+        #     and (start.coordinate[0] == 1 or start.coordinate[0] == 6)
+        #     and (abs(start.coordinate[0] - end.coordinate[0]) == 2)  # ..is pushing
+        #     ):
+        #     self.setenpassantfor(
+        #         core.oppositecolour(self._board[start.index].colour),
+        #         start.coordinate[1])
 
-        # Movement code.
-        if start.index == end.index:
-            return None  # HACK: Prevents deleting the piece from the board.
+        # Finally alter the board state.
         self._board[end.index] = self._board[start.index]
         self._board[start.index] = None
         return None
 
-    def promotepawn(self, position, promoteto):
+    def promotepawn(self, pos, promoteto):
         """Promotes a pawn at position specified."""
-        position = core.convert(position, toindex=True)
-        pawnpiece = self._board[position]
-        colour = pawnpiece.colour
-        self._board[position] = promoteto(colour)
+        position = core.Position(pos)
+        pawnpiece = self._board[position.index]
+        if pawnpiece == None:
+            raise IndexError("There is no piece at %i" % pos.index)
+        else:
+            colour = pawnpiece.colour
+            self._board[position] = promoteto(colour)
         return None
