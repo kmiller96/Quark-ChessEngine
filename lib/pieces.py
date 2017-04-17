@@ -41,24 +41,22 @@ class BasePiece(object):
     def __init__(self, colour, notationsymbol, moveunitvectors, crawler=False):
         """"Initialise the piece. Performs sanity checks on inputs."""
         # Sanity checks.
-        try:
-            assert isinstance(crawler, bool)
-        except AssertionError:
+        if not isinstance(crawler, bool):
             raise TypeError("'crawler' parameter must be true or false.")
 
         try:
-            assert colour.lower() in ('white', 'black')
-        except AssertionError:
-            raise TypeError("The colour of the piece must be 'white' or 'black'")
+            if colour.lower() not in core.COLOURS:
+                raise TypeError("The colour must be 'white' or 'black'")
         except AttributeError:
             raise TypeError("The colour must be a string of either 'white' or 'black'")
 
         # Assignment of attributes.
         self.colour = colour.lower()
 
-        if colour == 'white': notationsymbol = notationsymbol.upper()
-        else: notationsymbol = notationsymbol.lower()
-        self.notationsymbol = notationsymbol
+        if colour == core.COLOURS[0]:  # colour == 'white'
+            self.notationsymbol = notationsymbol.upper()
+        else:  # colour == 'black'
+            self.notationsymbol = notationsymbol.lower()
 
         for vec in moveunitvectors:
             self._assertisvector(vec)
