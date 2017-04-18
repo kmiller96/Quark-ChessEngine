@@ -95,12 +95,15 @@ class _ChessBoardCore:
 
     def setplayercolour(self, colour):
         """Assigns a colour to the player."""
-        if colour.lower() == self._colours[0]:  # If player = white.
-            self.playercolour, self.computercolour = self._colours
-        elif colour.lower() == self._colours[1]:  # If player = black.
-            self.playercolour, self.computercolour = self._colours[::-1]
-        else:  # Not a valid colour specified.
-            raise core.ColourError()
+        try:
+            if colour.lower() == self._colours[0]:  # If player = white.
+                self.playercolour, self.computercolour = self._colours
+            elif colour.lower() == self._colours[1]:  # If player = black.
+                self.playercolour, self.computercolour = self._colours[::-1]
+            else:  # Not a valid colour specified.
+                raise core.ColourError()
+        except AttributeError:
+            raise TypeError("To set player colour you must pass a string.")
         return self
 
     def positiononboard(self, position):
