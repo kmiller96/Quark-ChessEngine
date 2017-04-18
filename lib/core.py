@@ -233,24 +233,24 @@ class Position:
 
     @property
     def index(self):
-        return self._position
+        return self._position[0]*8 + self._position[1]
 
     @index.setter
     def index(self, value):
         if 0 <= value <= 63:
-            self._position = value
+            self._position = self._position[0]*8 + self._position[1]
         else:
             raise IndexError("The index specifed %r is off the board." % value)
 
     @property
     def coordinate(self):
-        return (self._position/8, self._position%8)
+        return self._position
 
     @coordinate.setter
     def coordinate(self, value):
         try:
             if all([0 <= x <= 7 for x in value]):
-                self._position = self._toindex(value)
+                self._position = value
             else:
                 raise IndexError("One or more indices specified is off the board.")
         except TypeError:
@@ -259,26 +259,26 @@ class Position:
 
     @property
     def vector(self):
-        return Vector(self._position/8, self._position%8)
+        return Vector(*self._position)
 
     @vector.setter
     def vector(self, value):
         try:
             if isinstance(value, Vector):
-                self._position = self._toindex(value)
+                self._position = value.vector
             else:
                 raise TypeError
         except TypeError:
             raise TypeError("You must pass a vector from the vector class.")
 
-    def _convert(self, positon):
+    def _convert(self, position):
         """Converts a random input into an index for storage."""
-        if isinstance(positon, int):
-            return positon
-        elif isinstance(positon, (tuple, list)):
-            return positon[0]*8 + positon[1]
-        elif isinstance(positon, Vector):
-            return positon.vector[0]*8 + positon.vector[1]
+        if isinstance(position, int):
+            return (position/8, position%8)
+        elif isinstance(position, (tuple, list)):
+            return position
+        elif isinstance(position, Vector):
+            return position.vector
         else:
             raise TypeError("Position must be either 'index', 'coordinate' or 'vector'.")
 
