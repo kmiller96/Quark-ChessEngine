@@ -99,6 +99,7 @@ class CoreMethods(unittest.TestCase):
             self.board[91] = piece
         return None
 
+    @unittest.skip("Test not written yet.")
     def test_iter(self):
         # TODO: How do I test this?
         return None
@@ -149,21 +150,14 @@ class CoreMethods(unittest.TestCase):
             self.board.setplayercolour([22, 14])
         return None
 
-    def test_isplayercolour(self):
+    def test_playercolour(self):
         self.board.setplayercolour('white')
-        self.assertTrue(self.board.isplayercolour('white'))
-        self.assertFalse(self.board.isplayercolour('black'))
+        self.assertEqual(self.board.playercolour, 'white')
+        self.assertEqual(self.board.computercolour, 'black')
 
         self.board.setplayercolour('black')
-        self.assertTrue(self.board.isplayercolour('black'))
-        self.assertFalse(self.board.isplayercolour('white'))
-
-    def test_isplayercolour_badinput(self):
-        with self.assertRaises(NameError):
-            self.board.isplayercolour('happy')
-        with self.assertRaises(TypeError):
-            self.board.isplayercolour(1)
-        return None
+        self.assertEqual(self.board.playercolour, 'black')
+        self.assertEqual(self.board.computercolour, 'white')
 
     def test_positiononboard(self):
         pos = core.Position(11)
@@ -184,35 +178,6 @@ class CoreMethods(unittest.TestCase):
     def test_positiononboard_float(self):
         with self.assertRaises(TypeError):
             self.board.positiononboard(12.1)
-        return None
-
-    def test_assertPositionOnBoard(self):
-        indexonboard = 15
-        indexoffboard = 69
-
-        self.board.assertPositionOnBoard(indexonboard)
-        with self.assertRaises(AssertionError):
-            self.board.assertPositionOnBoard(indexoffboard)
-        return None
-
-    def test_assertIsUnoccupied(self):
-        indexoccupied = 15
-        indexunoccupied = 16
-        self.board[indexoccupied] = pieces.QueenPiece('white')
-
-        self.board.assertIsUnoccupied(indexunoccupied)
-        with self.assertRaises(AssertionError):
-            self.board.assertIsUnoccupied(indexoccupied)
-        return None
-
-    def test_assertIsOccupied(self):
-        indexoccupied = 15
-        indexunoccupied = 16
-        self.board[indexoccupied] = pieces.QueenPiece('white')
-
-        self.board.assertIsOccupied(indexoccupied)
-        with self.assertRaises(AssertionError):
-            self.board.assertIsOccupied(indexunoccupied)
         return None
 
 class TestChessBoard(unittest.TestCase):
@@ -246,6 +211,7 @@ class TestChessBoard(unittest.TestCase):
         self.assertFalse(self.board.findpiece(pieces.KnightPiece, 'white'))
         return None
 
+    @unittest.skip("Currently under refactoring.")
     def test_enpassant(self):
         self.board[51] = pieces.PawnPiece('black')
         self.board.move(51, 35)
