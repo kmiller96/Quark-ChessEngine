@@ -10,7 +10,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from copy import deepcopy
 
-COLOURS = ('white', 'black') 
+COLOURS = ('white', 'black')
 
 
  ####### #     # #     #  #####  ####### ### ####### #     #  #####
@@ -206,8 +206,7 @@ class Position:
     """
 
     def __init__(self, indexorcoordinateorvector):
-        self._position = None  # Internal storage of position.
-        self.position = indexorcoordinateorvector  # Let user pass in whatever type.
+        self._position = self._convert(indexorcoordinateorvector)
         return None
 
     def __eq__(self, other):
@@ -230,12 +229,7 @@ class Position:
 
     @position.setter
     def position(self, value):
-        if isinstance(value, int):
-            self.index = value
-        elif isinstance(value, (tuple, list)):
-            self.coordinate = value
-        elif isinstance(value, Vector):
-            self.vector = value
+        self._position = self._convert(value)
 
     @property
     def index(self):
@@ -276,6 +270,15 @@ class Position:
                 raise TypeError
         except TypeError:
             raise TypeError("You must pass a vector from the vector class.")
+
+    def _convert(self, positon):
+        """Converts a random input into an index for storage."""
+        if isinstance(positon, int):
+            return positon
+        elif isinstance(positon, (tuple, list)):
+            return positon[0]*8 + positon[1]
+        elif isinstance(positon, Vector):
+            return positon.vector[0]*8 + positon.vector[1]
 
 
  #     # #######  #####  ####### ####### ######   #####
