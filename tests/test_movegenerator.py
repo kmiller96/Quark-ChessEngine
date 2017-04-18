@@ -252,7 +252,6 @@ class EnPassantMovesTest(unittest.TestCase):
         self.generator = movegenerator.MoveGenerator(self.board)
         return None
 
-    @unittest.skip("Currently fails while refactoring")
     def test_enpassantright_white(self):
         self.generator.board.move(53, 37)
         movelist = self.generator.generatemovelist('white')
@@ -260,7 +259,6 @@ class EnPassantMovesTest(unittest.TestCase):
         self.assertIn((36, 45), movelist)
         return None
 
-    @unittest.skip("Currently fails while refactoring")
     def test_enpassantleft_white(self):
         self.generator.board.move(49, 33)
         movelist = self.generator.generatemovelist('white')
@@ -268,7 +266,6 @@ class EnPassantMovesTest(unittest.TestCase):
         self.assertIn((34, 41), movelist)
         return None
 
-    @unittest.skip("Currently fails while refactoring")
     def test_enpassantboth_white(self):
         self.generator.board.move(51, 35)
         movelist = self.generator.generatemovelist('white')

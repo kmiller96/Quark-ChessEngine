@@ -385,7 +385,7 @@ class MoveGenerator(_CoreMoveGenerator):
             return thelist
 
         # Determine if there are any en passant moves present.
-        if self.board.isplayercolour(colour):
+        if self.board.playercolour == colour:
             enpassant = self.board.enpassantforplayer
         else:
             enpassant = self.board.enpassantforcomputer
@@ -398,9 +398,9 @@ class MoveGenerator(_CoreMoveGenerator):
         else: rank_ = 3
         enpassantleft = (rank_, file_-1); enpassantright = (rank_, file_+1)
         movelist = list()
-        if self.board.positiononboard(enpassantleft):
+        if self._positiononboard(enpassantleft):
             movelist = addtomovesifcanenpassant(enpassantleft, movelist)
-        if self.board.positiononboard(enpassantright):
+        if self._positiononboard(enpassantright):
             movelist = addtomovesifcanenpassant(enpassantright, movelist)
         return movelist
 
@@ -410,13 +410,13 @@ class MoveGenerator(_CoreMoveGenerator):
         pawnpushmoves = self.pawnpushmoves(colour)
         pawncapturemoves = self.pawncapturemoves(colour)
         castlemoves = self.castlemoves(colour)
-        # enpassantmoves = self.enpassantmoves(colour)
+        enpassantmoves = self.enpassantmoves(colour)
         allmoves = core.combinelists(
             basicmoves,
             pawnpushmoves,
             pawncapturemoves,
-            castlemoves#,
-            # enpassantmoves
+            castlemoves,
+            enpassantmoves
         )
 
         allmoves = self.onlylegalmoves(colour, allmoves)

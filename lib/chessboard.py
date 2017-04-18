@@ -143,6 +143,17 @@ class ChessBoard(_ChessBoardCore):
             self._board[index] = backline[index-56](colour='black')
         return None
 
+    def setenpassantfor(self, colour, whichfile):
+        """Sets enpassant for a colour"""
+        if colour not in core.COLOURS:
+            raise core.ColourError()
+
+        if core.xnor(colour == 'white', self.playercolour == 'white'):
+            self.enpassantforplayer = whichfile
+        else:
+            self.enpassantforcomputer = whichfile
+        return None
+
     def move(self, startpos, endpos, force=True):
         """A clean way of moving pieces around on the board."""
         # Get start and end positions.
@@ -156,14 +167,14 @@ class ChessBoard(_ChessBoardCore):
 
         # See if en passant is in play.
         # REVIEW: Should the board handle this or the 'brain'?
-        # if (
-        #     (self._board[start.index].type == pieces.PawnPiece)  # Is pawn and...
-        #     and (start.coordinate[0] == 1 or start.coordinate[0] == 6)
-        #     and (abs(start.coordinate[0] - end.coordinate[0]) == 2)  # ..is pushing
-        #     ):
-        #     self.setenpassantfor(
-        #         core.oppositecolour(self._board[start.index].colour),
-        #         start.coordinate[1])
+        if (
+            (self._board[start.index].type == pieces.PawnPiece)  # Is pawn and...
+            and (start.coordinate[0] == 1 or start.coordinate[0] == 6)
+            and (abs(start.coordinate[0] - end.coordinate[0]) == 2)  # ..is pushing
+            ):
+            self.setenpassantfor(
+                core.oppositecolour(self._board[start.index].colour),
+                start.coordinate[1])
 
         # Finally alter the board state.
         self._board[end.index] = self._board[start.index]
