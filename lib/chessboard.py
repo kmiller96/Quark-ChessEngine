@@ -105,7 +105,7 @@ class _ChessBoardCore:
 
     def positiononboard(self, position):
         """Returns boolean depending on if the position is on the board."""
-        pos = core.Position()
+        pos = core.Position(position)
         return 0 <= pos.index <= 63
 
 
