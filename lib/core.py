@@ -279,6 +279,8 @@ class Position:
             return positon[0]*8 + positon[1]
         elif isinstance(positon, Vector):
             return positon.vector[0]*8 + positon.vector[1]
+        else:
+            raise TypeError("Position must be either 'index', 'coordinate' or 'vector'.")
 
 
  #     # #######  #####  ####### ####### ######   #####
