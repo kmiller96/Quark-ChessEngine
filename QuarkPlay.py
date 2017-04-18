@@ -21,12 +21,18 @@ a set of coordinates.
 - ???
 - Profit.
 """
-import time
+import time, sys
 from lib import core, chessboard, engine, movegenerator, pieces, usercontrol
 
 # Define globals.
+if len(sys.argv) > 1:
+    script, debug = sys.argv
+else:
+    debug = False
+
 VERSION = 'alpha 1.00.00'
-SLEEP_TIME = 0.1
+if debug: SLEEP_TIME = 0.01
+else: SLEEP_TIME = 1
 USER_OPTIONS = ['hist', 'move', 'quit']
 HELPMESSAGE_NOTATION = """
 Each move is written in the following format:
@@ -88,11 +94,11 @@ def letuserpickgametype():
 def initialisethisboard(boardtype):
     """Creates the board to play on. Just calls the class to initalise it."""
     board = boardtype()
-    board[53] = pieces.PawnPiece('white')
-
-    board[56] = pieces.KingPiece('black')
-    board[45] = pieces.KingPiece('white')
-    # board.setupnormalboard()
+    # board[53] = pieces.PawnPiece('white')
+    #
+    # board[56] = pieces.KingPiece('black')
+    # board[45] = pieces.KingPiece('white')
+    board.setupnormalboard()
     return board
 
 
