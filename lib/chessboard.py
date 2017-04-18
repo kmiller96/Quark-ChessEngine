@@ -5,6 +5,8 @@
 # 737369626c65207461736b20696e746f207365766572616c207665727920736d616c6c20706f73
 # 7369626c65207461736b732e
 
+# IDEA: Make a method that iterates over occupied squares only.
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~MAIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from lib import core, vectors, pieces
