@@ -32,28 +32,32 @@ class _CoreMoveGenerator:
         self.board = deepcopy(currentboardstate)
         return
 
+    def _positiononboard(self, positon):
+        """Checks that the position is on the board."""
+        return all([0 <= x <= 7 for x in core.Position(positon).coordinate])
+
     @staticmethod
     def _piecesareonsameside(*pieces):
         """Checks to see if the passed pieces are all on the same side."""
         try:
             side = None
             for piece in pieces:
-                if side is None:
+                if side == None:
                     side = piece.colour  # Use the first piece's colour as comparison.
                     continue
-
-                if piece.colour == side:  # Same side is ok.
-                    continue
-                else:  # Different sides are not.
+                elif piece.colour != side:  # If pieces are on different sides.
                     return False
-            return True
+                else:
+                    continue
+            return True  # If it makes it all the way through the loop, then good.
         except AttributeError:
-            raise TypeError("You must pass pieces from the pieces script.")
+            raise TypeError("You must pass pieces from the pieces module.")
 
     def _piecesbetween(self, start, end, inclusive=False):
         """Find the pieces between the start and end positions, not inclusive."""
-        startvec = core.convert(start, tovector=True)
-        endvec = core.convert(end, tovector=True)
+        # Start by defining direction of unitvector and starting position.
+        startvec = core.Position(start).vector
+        endvec = core.Position(end).vector
         unitrelvec = (endvec - startvec).unitvector()
         if inclusive:
             currentposvec = startvec
@@ -61,6 +65,7 @@ class _CoreMoveGenerator:
         else:
             currentposvec = startvec + unitrelvec
 
+        # Iterate over the squares between start and end.
         pieceslist = list()
         while currentposvec != endvec:
             if self.board[currentposvec] != None:
@@ -69,19 +74,21 @@ class _CoreMoveGenerator:
         return pieceslist
 
     def _movesforpiece(self, piece, pos, defendingmoves=False):
-        """Get the moves for the piece at position 'pos'."""
+        """Get the moves for the piece at position 'pos'. The optional parameter
+        'defendingmoves' adds the move even if it captures its "own piece" in
+        order to look at exchanges in the brains of the engine.
+        """
         allowedmoves = list()
         for unitvector in piece.moveunitvectors:
-            movetopos = core.convert(pos, tovector=True) + unitvector
+            movetopos = core.Position(pos).vector + unitvector
 
-            while self.board.positiononboard(movetopos):
+            while self._positiononboard(movetopos):
                 endsquare = self.board[movetopos]
                 if endsquare != None:
                     if self._piecesareonsameside(piece, endsquare):
-                        if defendingmoves:
-                            allowedmoves.append(movetopos)
+                        if defendingmoves: allowedmoves.append(movetopos)
                         break
-                    elif piece.type == pieces.PawnPiece:
+                    elif piece.type == pieces.PawnPiece:  # Pawns can't capture forward
                         break
                     else:  # If opposition piece.
                         allowedmoves.append(movetopos)
@@ -92,13 +99,13 @@ class _CoreMoveGenerator:
                 if piece.crawler: break
                 else: movetopos += unitvector
 
-            continue
+            continue  # Just to show where while loop ends.
         return allowedmoves
 
     def basicmoves(self, colour, defendingmoves=False):
         """Get the most basic moves, such as simple captures and movement."""
         # Sanity checks.
-        if colour not in ('white', 'black'):
+        if colour not in core.COLOURS:
             raise core.ColourError()
 
         # Now apply that method to each piece on the board.
@@ -109,8 +116,9 @@ class _CoreMoveGenerator:
             elif square.colour != colour:
                 continue  # Skip over piece if it is different colour.
             startpos = index
-            endposlist = core.convertlist(
-                self._movesforpiece(square, startpos, defendingmoves), toindex=True
+            endposlist = map(
+                lambda x: core.Position(x).index,
+                self._movesforpiece(square, startpos, defendingmoves)
             )
             movepairs = map(lambda x: (startpos, x), endposlist)
             movelist.append(movepairs)
@@ -140,9 +148,9 @@ class _CoreMoveGenerator:
 
     def pawnonendline(self, colour):
         """Determine if a pawn has reached the backline."""
-        if colour == 'white':
+        if colour.lower() == 'white':
             backline = range(56, 64)
-        elif colour == 'black':
+        elif colour.lower() == 'black':
             backline = range(0, 8)
         else:
             raise core.ColourError()
@@ -180,13 +188,11 @@ class MoveGenerator(_CoreMoveGenerator):
 
     def illegalmove(self, movepair, kingcolour):
         """Checks to see if the supplied move if illegal."""
-        # Make the move and see if the king is in check.
-        if isinstance(movepair[0],tuple) and isinstance(movepair[1],tuple):
-            for move in movepair:
-                self.board.move(move[0], move[1])
+        # Make the move and see if the king is in check, then restore board state.
+        if isinstance(movepair[0],tuple) and isinstance(movepair[1],tuple):  # NOTE: This is a castling move.
+            for move in movepair: self.board.move(move[0], move[1])
             result = self.kingincheck(kingcolour)
-            for move in movepair:
-                self.board.move(move[1], move[0])
+            for move in movepair: self.board.move(move[1], move[0])
         else:
             self.board.move(movepair[0], movepair[1])
             result = self.kingincheck(kingcolour)
@@ -195,9 +201,7 @@ class MoveGenerator(_CoreMoveGenerator):
 
     def onlylegalmoves(self, colour, movepairlist):
         """Filter a list, keeping only legal moves."""
-        if colour.lower() == 'white': oppositioncolour = 'black'
-        elif colour.lower() == 'black': oppositioncolour = 'white'
-        else: raise core.ColourError()
+        oppositioncolour = core.oppositecolour(colour.lower())
 
         ii = 0
         while ii < len(movepairlist):
@@ -211,12 +215,13 @@ class MoveGenerator(_CoreMoveGenerator):
         """Gets the moves allowed for pawn pushing."""
         # Determine where the frontline is.
         if colour == 'white':
-            frontline = range(8, 15+1); push = 16
+            frontline = range(8, 16); push = 16
         elif colour == 'black':
-            frontline = range(48, 55+1); push = -16
+            frontline = range(48, 56); push = -16
         else:
             raise core.ColourError()
 
+        # Add the push moves if required.
         movelist = list()
         for ii in frontline:  # Iterate over frontline.
             square = self.board[ii]
@@ -234,6 +239,7 @@ class MoveGenerator(_CoreMoveGenerator):
 
     def pawncapturemoves(self, colour):
         """Finds where pawns are able to capture normally."""
+        # ---------------------------------------------------------------------
         def capturemoveat(endvec):
             """Determines if there is a capture move at endvec."""
             try:
@@ -247,6 +253,7 @@ class MoveGenerator(_CoreMoveGenerator):
             except IndexError:
                 return False  # Position isn't on the board.
             return -1
+        # ---------------------------------------------------------------------
 
         if colour == 'white':
             captureleft = core.Vector(1, -1)
@@ -260,17 +267,17 @@ class MoveGenerator(_CoreMoveGenerator):
         pawnsonboard = self.board.findpiece(pieces.PawnPiece, colour)
         capturelist = list()
         for pawnindex in pawnsonboard:
-            pawnvec = core.convert(pawnindex, tovector=True)
+            pawnvec = core.Position(pawnindex).vector
             vecleft = pawnvec + captureleft
             vecright = pawnvec + captureright
 
             if capturemoveat(vecleft):
                 capturelist.append(
-                    (pawnindex, core.convert(vecleft, toindex=True))
+                    (pawnindex, core.Position(vecleft).index)
                 )
             if capturemoveat(vecright):
                 capturelist.append(
-                    (pawnindex, core.convert(vecright, toindex=True))
+                    (pawnindex, core.Position(vecright).index)
                 )
         return capturelist
 
@@ -298,7 +305,6 @@ class MoveGenerator(_CoreMoveGenerator):
         # See if allowed to castle at all.
         if not self.board.cancastleleft: castleleft = False
         if not self.board.cancastleright: castleright = False
-
         if not castleleft and not castleright:
             return castlemoves  # Early exit to reduce overhead.
 
@@ -348,7 +354,7 @@ class MoveGenerator(_CoreMoveGenerator):
                 else:
                     continue
 
-        # Then see what if castle moves can be added.
+        # Then see what castle moves can be added and add them.
         if castleleft:
             castlemoves.append(
                 ((kingpos, kingpos-2), (rookleftpos, rookleftpos+3))
@@ -360,6 +366,7 @@ class MoveGenerator(_CoreMoveGenerator):
         return castlemoves
 
 
+    # TODO: Fix this up now the chessboard doesn't store the information.
     def enpassantmoves(self, colour):
         """Get the en passant moves."""
         def addtomovesifcanenpassant(pos, thelist):
@@ -403,13 +410,13 @@ class MoveGenerator(_CoreMoveGenerator):
         pawnpushmoves = self.pawnpushmoves(colour)
         pawncapturemoves = self.pawncapturemoves(colour)
         castlemoves = self.castlemoves(colour)
-        enpassantmoves = self.enpassantmoves(colour)
+        # enpassantmoves = self.enpassantmoves(colour)
         allmoves = core.combinelists(
             basicmoves,
             pawnpushmoves,
             pawncapturemoves,
-            castlemoves,
-            enpassantmoves
+            castlemoves#,
+            # enpassantmoves
         )
 
         allmoves = self.onlylegalmoves(colour, allmoves)
