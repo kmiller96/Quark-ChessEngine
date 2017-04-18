@@ -249,15 +249,6 @@ class TestPositionClass(unittest.TestCase):
         )
         return None
 
-    def test_alterprotectedattributes(self):
-        pos = core.Position(self.indexpos)
-        with self.assertRaises(RuntimeError):
-            pos.index = 10
-        with self.assertRaises(RuntimeError):
-            pos.coordinate = (1, 4)
-        with self.assertRaises(RuntimeError):
-            pos.index = core.Vector(1, 4)
-
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
