@@ -8,6 +8,23 @@
 from copy import copy, deepcopy
 from lib import chessboard, core, movegenerator, pieces
 
+
+class Node(object):
+    """A node in the tree search. Stores the moves."""
+
+    def __init__(self, movepair, parent=None):
+        """Stores information about the node."""
+        if parent != None: self.moves = parent.moves
+        else: self.moves = list()
+
+        self.moves += [movepair]
+        return None
+
+    def __str__(self):
+        """Prints the move instructions."""
+        return self.moves
+
+
 class Evaluator:
     """Evaluate a board as a "chess score" in order to pick the best moves."""
 
@@ -124,6 +141,9 @@ class ChessEngine:
         self.movegenerator = movegenerator.MoveGenerator
         self.evaluate = Evaluator.evaluate
         return None
+
+    def search(self, depth, colour):
+        """Generates the moves up to depth for colour."""
 
     def netattackers(self, board, position):
         """Looks at the position on the board and sees the number of attackers
