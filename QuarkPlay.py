@@ -21,7 +21,7 @@ a set of coordinates.
 - ???
 - Profit.
 """
-import time, sys
+import time, sys, random
 from lib import core, chessboard, engine, movegenerator, pieces, usercontrol
 
 # Define globals.
@@ -33,7 +33,7 @@ else:
 VERSION = 'alpha 1.00.00'
 if debug: SLEEP_TIME = 0.01
 else: SLEEP_TIME = 1
-USER_OPTIONS = ['hist', 'move', 'quit']
+USER_OPTIONS = ['hist', 'move', 'exit']
 HELPMESSAGE_NOTATION = """
 Each move is written in the following format:
     Symbol + position + movetype + position
@@ -83,7 +83,7 @@ def startprogram():
 
 def letuserpickgametype():
     """Lets the user pick what board/gametype they want to play on."""
-    print "While we are debugging, you can only play on a normal chess board."
+    print "During this alpha you can only play on a normal chess board."
     rest()
     print "Initalising the chessboard..."
     board = chessboard.ChessBoard
@@ -223,7 +223,11 @@ def printhistory(historylist):
 
 def makebestmove(board):
     """Makes the best move on board."""
-    pass
+    print "\nThe computer is thinking...\n"
+    time.sleep(SLEEP_TIME)
+    movelist = movegenerator.MoveGenerator(board).generatemovelist(board.computercolour)
+    makemove(random.choice(movelist), board)
+    return board
 
 
 def switchcolours(board):
@@ -267,8 +271,8 @@ def main():
 
     rest(); rest()
 
-    print "\nDuring debugging, you will be playing as both white and black."
-    debug = True
+    if debug:
+        print "\nDuring debugging, you will be playing as both white and black."
     print "PRESS ENTER TO START THE GAME."
     raw_input()
     print ""
@@ -345,7 +349,7 @@ def main():
         else:
             if not debug:
                 makebestmove(board=chessboard); firstloop = True
-                chessboard.enpassantforcomputer = None
+                chessboard.enpassantforcomputer = None; userturn = True
                 continue
             else:
                 switchcolours(chessboard)
