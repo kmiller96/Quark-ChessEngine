@@ -14,7 +14,7 @@ class Node(object):
 
     def __init__(self, movepair, parent=None):
         """Stores information about the node."""
-        if parent != None: self.moves = parent.moves
+        if parent != None: self.moves = copy(parent.moves)
         else: self.moves = list()
 
         self.moves += [movepair]
@@ -22,7 +22,11 @@ class Node(object):
 
     def __str__(self):
         """Prints the move instructions."""
-        return self.moves
+        return str(self.moves)
+
+    def __eq__(self, other):
+        """Compares nodes."""
+        return self.moves == other.moves
 
 
 class Evaluator:
@@ -142,8 +146,52 @@ class ChessEngine:
         self.evaluate = Evaluator.evaluate
         return None
 
-    def search(self, depth, colour):
+    def search_single(self, board, maxdepth, startcolour):
+        """Looks only one move deep (used as placeholder until proper search
+        function is complete)."""
+        results = list()
+
+        generator = self.movegenerator(board)
+        moves = generator.generatemovelist(startcolour)
+        for move in moves:
+            newboard = board.duplicateboard()
+            newboard.move(*move)
+            parentnode = Node(move)
+
+            newgenerator = self.movegenerator(newboard)
+            newmoves = generator.generatemovelist(core.oppositecolour(startcolour))
+            print move, newmoves
+
+            for newmove in newmoves:
+                results.append(Node(newmove, parentnode))
+        return results
+
+    def search(self, board, maxdepth, startcolour, _depth=0, _parent=None, nodes=list()):
         """Generates the moves up to depth for colour."""
+        while _depth < maxdepth:
+            # Find moves for board state.
+            generator = self.movegenerator(board)
+            moves = generator.generatemovelist(startcolour)
+            print moves
+
+            # Make move recursively
+            for move in moves:
+                newboard = board.duplicateboard()
+                newboard.move(*move)
+                parentnode = Node(move, parent=_parent)
+                print parentnode
+
+                if _depth == maxdepth:
+                    nodes.append(parentnode)
+                    continue
+                else:
+                    return self.search(
+                        newboard,
+                        maxdepth, core.oppositecolour(startcolour),
+                        _depth+0.5,  # HACK: Half step so we measure both black's and white's moves.
+                        parentnode, nodes
+                    )
+        return nodes
 
     def netattackers(self, board, position):
         """Looks at the position on the board and sees the number of attackers

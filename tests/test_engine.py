@@ -14,7 +14,25 @@ class TestSearch(unittest.TestCase):
 
     def setUp(self):
         self.board = chessboard.ChessBoard()
-        self.search = engine.ChessEngine()
+        self.engine = engine.ChessEngine()
+        return None
+
+    def test_search_single_twokings(self):
+        # Set up board with kings.
+        self.board[21] = pieces.KingPiece('white')
+        self.board[35] = pieces.KingPiece('black')
+
+        # Search the moves.
+        nodes = self.engine.search_single(self.board, 1, 'white')
+        print [x.moves for x in nodes]
+        self.assertIn(
+            engine.Node((35, 44), engine.Node((21, 29))),
+            nodes
+        )
+        self.assertNotIn(
+            engine.Node((35, 36), engine.Node((21, 29))),
+            nodes
+        )
         return None
 
 
