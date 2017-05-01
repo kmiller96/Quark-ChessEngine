@@ -283,6 +283,25 @@ class Position:
             raise TypeError("Position must be either 'index', 'coordinate' or 'vector'.")
 
 
+ #     # ####### #     # #######     #####  #          #     #####   #####
+ ##   ## #     # #     # #          #     # #         # #   #     # #     #
+ # # # # #     # #     # #          #       #        #   #  #       #
+ #  #  # #     # #     # #####      #       #       #     #  #####   #####
+ #     # #     #  #   #  #          #       #       #######       #       #
+ #     # #     #   # #   #          #     # #       #     # #     # #     #
+ #     # #######    #    #######     #####  ####### #     #  #####   #####
+                                                                            
+
+
+class Move(object):
+    """Stores information about a piece's move."""
+
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+        return None
+
+
  #     # #######  #####  ####### ####### ######   #####
  #     # #       #     #    #    #     # #     # #     #
  #     # #       #          #    #     # #     # #
